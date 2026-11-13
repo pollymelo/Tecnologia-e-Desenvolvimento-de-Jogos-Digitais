@@ -1,7 +1,8 @@
 # Rota Fantasma
 
-Jogo de investigação e geografia desenvolvido para a NP2 de Jogos Digitais.
-Como agente da Agência Bússola, siga as pistas da ladra Vesper pelo mundo e prenda o suspeito certo antes que o prazo acabe.
+Jogo educativo de **educação fiscal** desenvolvido para a NP2 de Jogos Digitais.
+Como auditor(a) da Força-Tarefa Bússola, siga pelas capitais brasileiras a quadrilha de Vesper, que sonega tributos com empresas fantasmas e notas frias.
+Reúna provas, responda a desafios sobre tributos e emita o mandado antes que o prejuízo à sociedade cresça.
 
 - Documento de design: [docs/GDD.md](docs/GDD.md)
 
