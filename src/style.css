@@ -26,12 +26,10 @@ h1 {
   opacity: 0.8;
 }
 
-.hud {
-  display: flex;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin: 1.5rem 0;
+.briefing {
+  max-width: 36rem;
+  margin: 1.5rem auto;
+  line-height: 1.5;
 }
 
 button {
