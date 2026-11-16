@@ -13,3 +13,5 @@ npm run dev
 ```
 
 Build de produção: `npm run build`
+
+Testes das regras: `npm test`

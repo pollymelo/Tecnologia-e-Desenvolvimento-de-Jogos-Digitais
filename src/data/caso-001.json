@@ -1,0 +1,131 @@
+{
+  "id": "caso-001",
+  "titulo": "A verba do hospital",
+  "briefing": "O hospital municipal perdeu verba porque a arrecadação caiu. Uma denúncia anônima diz que um comerciante da cidade está sonegando. Você tem 4 dias para investigar e emitir o auto de infração.",
+  "diasIniciais": 4,
+  "custoVisitaDias": 1,
+  "provasExigidas": 2,
+  "culpadoId": "ricardo",
+  "indicios": [
+    { "id": "cartao_sem_nota", "nome": "Vendas no cartão sem nota" },
+    { "id": "patrimonio_incompativel", "nome": "Patrimônio incompatível com a renda" },
+    { "id": "sem_carteira", "nome": "Funcionários sem carteira (indício de informalidade)" }
+  ],
+  "suspeitos": [
+    {
+      "id": "aurelio",
+      "nome": "Aurélio",
+      "empresa": "Mercadinho Bom Preço",
+      "indicios": ["patrimonio_incompativel"]
+    },
+    {
+      "id": "celia",
+      "nome": "Célia",
+      "empresa": "Oficina Turbo",
+      "indicios": ["sem_carteira"]
+    },
+    {
+      "id": "ricardo",
+      "nome": "Ricardo",
+      "empresa": "Eletrônicos TecMais",
+      "indicios": ["cartao_sem_nota", "patrimonio_incompativel", "sem_carteira"]
+    },
+    {
+      "id": "marta",
+      "nome": "Marta",
+      "empresa": "Restaurante Sabor do Mar",
+      "indicios": ["cartao_sem_nota", "sem_carteira"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "operadora_cartao",
+      "nome": "Operadora de cartão",
+      "pista": "As vendas no cartão do suspeito são muito maiores que as notas fiscais emitidas.",
+      "indicio": "cartao_sem_nota",
+      "forca": "forte"
+    },
+    {
+      "id": "cartorio_detran",
+      "nome": "Cartório de imóveis e Detran",
+      "pista": "Compras à vista de imóvel e carro incompatíveis com a renda declarada.",
+      "indicio": "patrimonio_incompativel",
+      "forca": "forte"
+    },
+    {
+      "id": "ex_funcionario",
+      "nome": "Conversa com ex-funcionário",
+      "pista": "Trabalhou anos sem carteira assinada e sem FGTS.",
+      "indicio": "sem_carteira",
+      "forca": "forte"
+    },
+    {
+      "id": "praca",
+      "nome": "Consumidores na praça",
+      "pista": "\"Pedi nota e me disseram que sairia mais caro.\"",
+      "indicio": "cartao_sem_nota",
+      "forca": "fraca"
+    },
+    {
+      "id": "junta_comercial",
+      "nome": "Junta Comercial",
+      "pista": "Todas as empresas estão com o registro em dia. Estar registrado não prova que a empresa está regular com os tributos.",
+      "indicio": null
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "O hospital municipal deixou de receber R$ 180.000 neste ano (valor fictício). É dinheiro de tributo que não foi arrecadado.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 180000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O valor recuperado volta ao orçamento do município e ajuda a recompor a verba do hospital.",
+    "detalhes": [
+      "R$ 90.000 para a compra de medicamentos da farmácia do hospital.",
+      "R$ 60.000 para manter a ala de pediatria aberta por mais meses.",
+      "R$ 30.000 para a manutenção da ambulância municipal."
+    ]
+  },
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "O auto de infração foi bem fundamentado e o sonegador foi autuado. O valor recuperado volta ao orçamento.",
+      "ensina": "O tributo pago financia serviços públicos, como o hospital da cidade.",
+      "perguntasDebate": [
+        "Quais serviços públicos da sua cidade são pagos com tributos?",
+        "Por que pedir nota fiscal ajuda a evitar a sonegação?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a pessoa certa, mas as provas escolhidas não a diferenciam dos outros suspeitos. O auto foi anulado por falta de fundamentação.",
+      "ensina": "A fiscalização precisa de provas, não de suspeita.",
+      "perguntasDebate": [
+        "Que dupla de provas teria fundamentado a acusação?",
+        "Por que uma suspeita, mesmo correta, não basta para punir alguém?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Um comerciante honesto foi prejudicado, e o sonegador segue impune.",
+      "ensina": "A fiscalização tem responsabilidade: errar também causa dano.",
+      "perguntasDebate": [
+        "Que consequências uma acusação injusta pode trazer para um comerciante?",
+        "Que indício faltava para descartar o suspeito que você acusou?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem que um auto de infração fosse emitido.",
+      "ensina": "A fiscalização tem custo e prazo: é preciso priorizar.",
+      "perguntasDebate": [
+        "Quais locais trouxeram informação útil e quais não?",
+        "Como você escolheria os locais se jogasse de novo?"
+      ]
+    }
+  }
+}

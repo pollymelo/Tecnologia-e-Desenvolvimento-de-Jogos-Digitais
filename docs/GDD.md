@@ -93,6 +93,15 @@ As duas provas escolhidas são **válidas** se:
 1. as duas forem indícios que o culpado tem; **e**
 2. juntas, descartarem todos os outros suspeitos.
 
+### Esclarecimentos de regra (definidos na implementação)
+
+- **Acusar não gasta dia.** Mesmo com 0 dias restantes, o jogador ainda pode emitir o auto.
+- **Prazo encerrado** acontece quando os dias acabam e o jogador encerra sem acusar.
+- Para acusar, é preciso ter visitado pelo menos **2 locais**. As provas são escolhidas entre os locais visitados.
+- O **testemunho da praça** vale como prova de "cartão sem nota", igual à operadora. Escolher os dois juntos não diferencia ninguém, então o auto é anulado.
+- Escolher um local **só de contexto** (Junta Comercial ou Portal) como prova anula o auto.
+- Se o suspeito acusado é o errado, o resultado é **acusação injusta**, mesmo que as provas sejam boas.
+
 ### Desfechos
 
 | Situação | Resultado | O que ensina |
