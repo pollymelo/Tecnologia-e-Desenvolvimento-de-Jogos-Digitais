@@ -16,24 +16,28 @@
       "id": "aurelio",
       "nome": "Aurélio",
       "empresa": "Mercadinho Bom Preço",
+      "perfil": "Dono do mercadinho do bairro há mais de 20 anos. Conhece os clientes pelo nome e ainda anota compras fiado num caderno.",
       "indicios": ["patrimonio_incompativel"]
     },
     {
       "id": "celia",
       "nome": "Célia",
       "empresa": "Oficina Turbo",
+      "perfil": "Mecânica conhecida na cidade pelo serviço rápido. A oficina vive cheia e ela costuma chamar ajudantes nos dias de maior movimento.",
       "indicios": ["sem_carteira"]
     },
     {
       "id": "ricardo",
       "nome": "Ricardo",
       "empresa": "Eletrônicos TecMais",
+      "perfil": "Abriu a loja há 5 anos e cresceu rápido. Vende celulares e acessórios e anuncia promoções nas redes sociais toda semana.",
       "indicios": ["cartao_sem_nota", "patrimonio_incompativel", "sem_carteira"]
     },
     {
       "id": "marta",
       "nome": "Marta",
       "empresa": "Restaurante Sabor do Mar",
+      "perfil": "Comanda o restaurante de frutos do mar da orla, sempre lotado nos fins de semana. A maior parte dos clientes paga no cartão.",
       "indicios": ["cartao_sem_nota", "sem_carteira"]
     }
   ],

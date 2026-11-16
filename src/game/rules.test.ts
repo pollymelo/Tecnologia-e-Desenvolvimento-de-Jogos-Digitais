@@ -110,6 +110,21 @@ describe('validação das provas', () => {
     expect(provasValidas(caso, ['operadora_cartao', 'praca'])).toBe(false)
   })
 
+  it('das 15 duplas possíveis, só 3 resolvem o caso (ficha de solução)', () => {
+    const ids = caso.locais.map((l) => l.id)
+    const validas: string[] = []
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        if (provasValidas(caso, [ids[i], ids[j]])) validas.push([ids[i], ids[j]].sort().join('+'))
+      }
+    }
+    expect(validas.sort()).toEqual([
+      'cartorio_detran+ex_funcionario',
+      'cartorio_detran+operadora_cartao',
+      'cartorio_detran+praca',
+    ])
+  })
+
   it('local só de contexto não serve como prova', () => {
     expect(provasValidas(caso, ['cartorio_detran', 'junta_comercial'])).toBe(false)
     expect(provasValidas(caso, ['operadora_cartao', 'portal_transparencia'])).toBe(false)

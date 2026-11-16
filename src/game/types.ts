@@ -13,6 +13,8 @@ export interface Suspeito {
   id: SuspeitoId
   nome: string
   empresa: string
+  /** Descrição curta exibida no caderno. Não deve citar os indícios. */
+  perfil: string
   indicios: IndicioId[]
 }
 
