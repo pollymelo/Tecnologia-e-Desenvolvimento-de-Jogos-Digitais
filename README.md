@@ -4,6 +4,7 @@ Jogo educativo de **educação fiscal** para o Ensino Médio, desenvolvido para 
 Como auditor(a) fiscal, você tem 4 dias para descobrir qual comerciante está sonegando: visite locais, colete indícios, descarte suspeitos no caderno e emita um auto de infração fundamentado em provas.
 
 - Documento de design: [docs/GDD.md](docs/GDD.md)
+- [Lore: Vila Aurora e os fantasmas da Aurora](docs/lore.md)
 - Caso 001: [perfis dos suspeitos](docs/caso-001-suspeitos.md) · [ficha de solução para o mediador](docs/caso-001-ficha-solucao.md)
 - [Roteiro de teste com jogador de fora](docs/roteiro-teste-jogador.md)
 

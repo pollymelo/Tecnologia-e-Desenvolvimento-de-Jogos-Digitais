@@ -163,6 +163,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
       <section class="tela briefing">
         <p class="rotulo">Auditoria Fiscal · ${esc(caso.titulo)}</p>
         <h1 tabindex="-1">Rota Fantasma</h1>
+        ${caso.abertura ? `<p class="abertura">${esc(caso.abertura)}</p>` : ''}
         <div class="cena cena-briefing">
           ${predio('hospital', 'cena-predio')}
           <div class="cena-personagem">
@@ -476,6 +477,11 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
           <h2>Para debater</h2>
           <ol>${perguntas}</ol>
         </div>
+        ${
+          sucesso && caso.gancho
+            ? `<div class="gancho"><span class="rotulo">Continua…</span><p>${esc(caso.gancho)}</p></div>`
+            : ''
+        }
         <p class="nota">${esc(impacto.aviso)}</p>
         <button type="button" data-acao="jogar-novamente">Jogar novamente</button>
       </section>`

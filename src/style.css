@@ -859,3 +859,25 @@ tr.riscado .avatar .boneco,
 .opcao-suspeito.escolhido {
   border-color: var(--destaque);
 }
+
+/* ---------- Lore ---------- */
+
+.abertura {
+  max-width: 38rem;
+  margin: 0 auto 1rem;
+  font-style: italic;
+  color: var(--suave);
+}
+
+.gancho {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: var(--raio);
+  border: 2px dashed var(--destaque);
+  background: rgba(232, 176, 75, 0.08);
+}
+
+.gancho p {
+  margin: 0.4rem 0 0;
+  font-style: italic;
+}

@@ -44,7 +44,7 @@ beforeEach(() => {
 describe('fluxo das 6 telas', () => {
   it('briefing → mapa → pista → caderno → acusação → resultado (caso resolvido)', () => {
     expect(titulo()).toBe('Rota Fantasma')
-    expect(texto()).toContain('hospital municipal')
+    expect(texto()).toContain('Hospital Municipal de Vila Aurora')
 
     clicar('comecar')
     expect(titulo()).toBe('Para onde investigar?')
@@ -241,5 +241,26 @@ describe('peão animado', () => {
     vi.advanceTimersByTime(1000)
     expect(titulo()).toBe('Consumidores na praça')
     expect(texto()).toContain('3 dias restantes')
+  })
+})
+
+describe('lore', () => {
+  it('o briefing abre com a lore de Vila Aurora', () => {
+    expect(raiz.querySelector('.abertura')?.textContent).toContain('Vila Aurora')
+  })
+
+  it('o gancho do próximo caso aparece só quando o caso é resolvido', () => {
+    clicar('comecar')
+    visitar('operadora_cartao')
+    visitar('cartorio_detran')
+    acusarCom('ricardo', ['operadora_cartao', 'cartorio_detran'])
+    expect(raiz.querySelector('.gancho')?.textContent).toContain('Distribuidora Horizonte')
+
+    clicar('jogar-novamente')
+    clicar('comecar')
+    visitar('operadora_cartao')
+    visitar('ex_funcionario')
+    acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
+    expect(raiz.querySelector('.gancho')).toBeNull()
   })
 })

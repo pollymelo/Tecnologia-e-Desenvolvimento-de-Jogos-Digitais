@@ -23,6 +23,21 @@ Para isso, visita locais, coleta indícios, descarta suspeitos no caderno e emit
 4. **Responsabilidade:** acusar a pessoa errada prejudica um comerciante honesto.
 5. **Priorização:** a fiscalização tem prazo e custo, e nem todo local ajuda a resolver o caso.
 
+## 2.1 Lore (resumo)
+
+O jogo se passa em **Vila Aurora**, uma cidade fictícia que cresceu em volta do comércio. Há três
+anos, a arrecadação cai sem explicação e o Hospital Municipal perde verba. Na cidade, esse dinheiro
+que some é chamado de **"os fantasmas da Aurora"**.
+
+**O título:** todo tributo percorre uma **rota**, do caixa da loja ao hospital. O dinheiro sonegado
+sai dessa rota e vira um **fantasma**: existiu, mas nunca chega ao destino. O(a) jogador(a) é um(a)
+auditor(a) novato(a), nascido(a) no próprio hospital, em seu **primeiro caso**.
+
+O caso termina com um **gancho**: Ricardo comprava de uma **empresa fantasma** (a Distribuidora
+Horizonte), o que abre caminho para novos casos.
+
+Lore completa, com motivações dos personagens e ideias de casos futuros: [lore.md](lore.md).
+
 ## 3. Mecânicas
 
 | Mecânica | Descrição |

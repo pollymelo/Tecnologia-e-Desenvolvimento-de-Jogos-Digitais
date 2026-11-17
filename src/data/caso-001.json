@@ -1,7 +1,8 @@
 {
   "id": "caso-001",
   "titulo": "A verba do hospital",
-  "briefing": "O hospital municipal perdeu verba porque a arrecadação caiu. Uma denúncia anônima diz que um destes quatro comerciantes está sonegando tributos, mas não diz qual. Você tem 4 dias para investigar e emitir o auto de infração.",
+  "abertura": "Vila Aurora cresceu em volta do comércio, mas há três anos a arrecadação cai sem explicação. O dinheiro que deveria chegar ao hospital some no caminho, e a cidade chama isso de \"os fantasmas da Aurora\". Você acaba de entrar na Auditoria Fiscal, e este é o seu primeiro caso.",
+  "briefing": "O Hospital Municipal de Vila Aurora perdeu verba porque a arrecadação caiu. Uma denúncia anônima diz que um destes quatro comerciantes está sonegando tributos, mas não diz qual. Você tem 4 dias para investigar e emitir o auto de infração.",
   "diasIniciais": 4,
   "custoVisitaDias": 1,
   "provasExigidas": 2,
@@ -222,6 +223,7 @@
       "R$ 30.000 para a manutenção da ambulância municipal."
     ]
   },
+  "gancho": "Ao revisar as notas de compra da TecMais, você encontra um fornecedor chamado Distribuidora Horizonte. No endereço dela há só um terreno baldio. Ricardo não agia sozinho: os fantasmas da Aurora têm uma rota, e ela está só começando.",
   "resultados": {
     "resolvido": {
       "titulo": "Caso resolvido",

@@ -75,6 +75,8 @@ export interface Impacto {
 export interface Caso {
   id: string
   titulo: string
+  /** Abertura com a lore, exibida no briefing antes da denúncia. */
+  abertura?: string
   briefing: string
   diasIniciais: number
   custoVisitaDias: number
@@ -84,6 +86,8 @@ export interface Caso {
   suspeitos: Suspeito[]
   locais: Local[]
   impacto: Impacto
+  /** Gancho para o próximo caso, exibido quando o caso é resolvido. */
+  gancho?: string
   resultados: Record<TipoResultado, TextoResultado>
 }
 
