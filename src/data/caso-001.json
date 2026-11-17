@@ -1,7 +1,7 @@
 {
   "id": "caso-001",
   "titulo": "A verba do hospital",
-  "briefing": "O hospital municipal perdeu verba porque a arrecadação caiu. Uma denúncia anônima diz que um comerciante da cidade está sonegando. Você tem 4 dias para investigar e emitir o auto de infração.",
+  "briefing": "O hospital municipal perdeu verba porque a arrecadação caiu. Uma denúncia anônima diz que um destes quatro comerciantes está sonegando tributos, mas não diz qual. Você tem 4 dias para investigar e emitir o auto de infração.",
   "diasIniciais": 4,
   "custoVisitaDias": 1,
   "provasExigidas": 2,
@@ -45,28 +45,28 @@
     {
       "id": "operadora_cartao",
       "nome": "Operadora de cartão",
-      "pista": "As vendas no cartão do suspeito são muito maiores que as notas fiscais emitidas.",
+      "pista": "Os dados da operadora mostram que o comerciante denunciado recebe no cartão muito mais do que declara em notas fiscais emitidas.",
       "indicio": "cartao_sem_nota",
       "forca": "forte"
     },
     {
       "id": "cartorio_detran",
       "nome": "Cartório de imóveis e Detran",
-      "pista": "Compras à vista de imóvel e carro incompatíveis com a renda declarada.",
+      "pista": "O comerciante denunciado comprou à vista uma casa e um carro novo, valores muito acima da renda que ele declara.",
       "indicio": "patrimonio_incompativel",
       "forca": "forte"
     },
     {
       "id": "ex_funcionario",
       "nome": "Conversa com ex-funcionário",
-      "pista": "Trabalhou anos sem carteira assinada e sem FGTS.",
+      "pista": "Um ex-funcionário do comerciante denunciado conta: \"Trabalhei anos lá sem carteira assinada e sem FGTS.\"",
       "indicio": "sem_carteira",
       "forca": "forte"
     },
     {
       "id": "praca",
       "nome": "Consumidores na praça",
-      "pista": "\"Pedi nota e me disseram que sairia mais caro.\"",
+      "pista": "Uma cliente do comerciante denunciado conta: \"Pedi nota e me disseram que sairia mais caro.\"",
       "indicio": "cartao_sem_nota",
       "forca": "fraca"
     },

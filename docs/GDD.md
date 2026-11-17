@@ -70,6 +70,9 @@ Quem investiga bem resolve o caso em 2 ou 3 dias. Quem investiga mal desperdiça
 | Junta Comercial | Todas as empresas estão com o registro em dia | Nenhum. Ensina que estar registrado não prova regularidade |
 | Portal da Transparência | Mostra quanto o hospital deixou de receber | Nenhum. Dá contexto e liga o caso à função social do tributo |
 
+A tabela traz o resumo de cada pista. Os textos finais, ajustados para deixar claro que a pista fala
+do comerciante denunciado, estão em `src/data/caso-001.json`.
+
 Os dois últimos locais são escolhas legítimas, mas não ajudam a resolver o caso: ensinam a priorizar
 e trazem conteúdo educativo. **Se o jogador visitou o Portal da Transparência, o resultado final é mais detalhado**, como recompensa.
 
@@ -101,6 +104,22 @@ As duas provas escolhidas são **válidas** se:
 - O **testemunho da praça** vale como prova de "cartão sem nota", igual à operadora. Escolher os dois juntos não diferencia ninguém, então o auto é anulado.
 - Escolher um local **só de contexto** (Junta Comercial ou Portal) como prova anula o auto.
 - Se o suspeito acusado é o errado, o resultado é **acusação injusta**, mesmo que as provas sejam boas.
+- **As pistas falam sempre do comerciante denunciado**, cujo nome a denúncia não revela. O caderno mostra a
+  tabela suspeitos × indícios, mas **cada coluna começa oculta ("?")** e só é revelada quando o jogador
+  coleta uma pista daquele indício. Se a tabela inteira aparecesse no início, o culpado ficaria óbvio
+  (é o único com três ✔). Assim, a pista diz o que o denunciado tem, o caderno mostra quem mais tem
+  isso, e o jogador risca quem não tem.
+
+### Feedback visual
+
+| Elemento | Feedback |
+|---|---|
+| Dias restantes | Bolinhas no topo de todas as telas. A bolinha gasta "apaga" com animação; o contador fica amarelo com 1 dia e vermelho com 0 |
+| Pistas novas | Selo "N nova(s)" pulsando no botão do caderno até ele ser aberto; destaque verde "Nova pista" na tela do local |
+| Local sem indício | Caixa tracejada "Sem indício novo", explicando que a informação serve de contexto |
+| Suspeitos riscados | Nome e empresa tachados em vermelho e linha esmaecida; contador "Riscados: N/4" no topo |
+| Locais visitados | Marcados como "Visitado" e desabilitados no mapa |
+| Resultado | Verde com o valor recuperado (vitória) ou vermelho com o valor que continua faltando ao hospital (derrota) |
 
 ### Desfechos
 

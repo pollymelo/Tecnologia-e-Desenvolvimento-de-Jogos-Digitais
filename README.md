@@ -5,6 +5,7 @@ Como auditor(a) fiscal, você tem 4 dias para descobrir qual comerciante está s
 
 - Documento de design: [docs/GDD.md](docs/GDD.md)
 - Caso 001: [perfis dos suspeitos](docs/caso-001-suspeitos.md) · [ficha de solução para o mediador](docs/caso-001-ficha-solucao.md)
+- [Roteiro de teste com jogador de fora](docs/roteiro-teste-jogador.md)
 
 ## Como rodar
 
@@ -15,4 +16,4 @@ npm run dev
 
 Build de produção: `npm run build`
 
-Testes das regras: `npm test`
+Testes (regras e telas): `npm test`
