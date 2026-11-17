@@ -10,7 +10,8 @@ import {
   podeVisitar,
   visitarLocal,
 } from '../game/rules.ts'
-import type { Caso, IndicioId, Local } from '../game/types.ts'
+import type { Caso, IndicioId, Local, LocalId, TipoResultado } from '../game/types.ts'
+import { angulosDasCasas, AUDITOR, boneco, fundoTabuleiro, pontoNaEstrada, predio, TABULEIRO } from './arte.ts'
 
 type Tela = 'briefing' | 'mapa' | 'pista' | 'caderno' | 'acusacao' | 'resultado'
 
@@ -27,7 +28,18 @@ interface Ui {
   voltarDoCaderno: Tela
   acusado: string | null
   provas: string[]
+  /** Onde está o peão do auditor no tabuleiro (null = casa de partida). */
+  posicaoPeao: LocalId | null
+  /** true enquanto o peão anda (bloqueia novos cliques). */
+  andando: boolean
 }
+
+export interface OpcoesApp {
+  /** false desliga as animações (usado nos testes). */
+  animacoes?: boolean
+}
+
+const DURACAO_PASSEIO_MS = 800
 
 const reais = (valor: number) =>
   valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
@@ -41,7 +53,7 @@ function esc(texto: string): string {
     .replaceAll('"', '&quot;')
 }
 
-export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
+export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}): void {
   let ui: Ui = estadoUiInicial()
 
   function estadoUiInicial(): Ui {
@@ -54,7 +66,17 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
       voltarDoCaderno: 'mapa',
       acusado: null,
       provas: [],
+      posicaoPeao: null,
+      andando: false,
     }
+  }
+
+  function animar(): boolean {
+    if (opcoes.animacoes === false) return false
+    const reduzir =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    return !reduzir
   }
 
   const nomeIndicio = (id: IndicioId) => caso.indicios.find((i) => i.id === id)?.nome ?? id
@@ -65,6 +87,26 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
       if (local.indicio) revelados.add(local.indicio)
     }
     return revelados
+  }
+
+  // ---------- Posições no tabuleiro ----------
+
+  const angulos = angulosDasCasas(caso.locais.length)
+
+  /** Posição em % do tabuleiro (para posicionar elementos HTML sobre o desenho). */
+  function posicaoPct(localId: LocalId | null): { left: string; top: string } {
+    const indice = localId === null ? -1 : caso.locais.findIndex((l) => l.id === localId)
+    const angulo = indice < 0 ? angulos.partida : angulos.locais[indice]
+    const { x, y } = pontoNaEstrada(angulo)
+    return {
+      left: `${((x / TABULEIRO.largura) * 100).toFixed(2)}%`,
+      top: `${((y / TABULEIRO.altura) * 100).toFixed(2)}%`,
+    }
+  }
+
+  const estiloPos = (localId: LocalId | null) => {
+    const { left, top } = posicaoPct(localId)
+    return `left:${left};top:${top}`
   }
 
   // ---------- Componentes ----------
@@ -96,18 +138,45 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
       </header>`
   }
 
+  function balao(texto: string, classe = ''): string {
+    return `<div class="balao ${classe}">${texto}</div>`
+  }
+
+  function carimbo(texto: string, tipo: 'ok' | 'falha'): string {
+    return `<span class="carimbo carimbo-${tipo}">${esc(texto)}</span>`
+  }
+
   // ---------- Telas ----------
 
   function telaBriefing(): string {
+    const suspeitos = caso.suspeitos
+      .map(
+        (s) => `
+        <figure class="ficha-suspeito">
+          ${boneco(s.aparencia, { classe: 'medio' })}
+          <figcaption><strong>${esc(s.nome)}</strong><span>${esc(s.empresa)}</span></figcaption>
+        </figure>`,
+      )
+      .join('')
+
     return `
       <section class="tela briefing">
         <p class="rotulo">Auditoria Fiscal · ${esc(caso.titulo)}</p>
         <h1 tabindex="-1">Rota Fantasma</h1>
-        <p class="texto-briefing">${esc(caso.briefing)}</p>
+        <div class="cena cena-briefing">
+          ${predio('hospital', 'cena-predio')}
+          <div class="cena-personagem">
+            ${boneco(AUDITOR, { expressao: 'feliz', classe: 'grande', rotulo: 'Você, auditor(a) fiscal' })}
+            <span class="nome-personagem">Você, auditor(a) fiscal</span>
+          </div>
+          ${balao(`<strong>Denúncia anônima!</strong> ${esc(caso.briefing)}`)}
+        </div>
+        <h2>Os suspeitos</h2>
+        <div class="fila-suspeitos">${suspeitos}</div>
         <div class="cartao">
           <h2>Como jogar</h2>
           <ol>
-            <li>Cada local visitado custa <strong>1 dia</strong> e revela uma pista.</li>
+            <li>No tabuleiro, escolha um local: seu peão anda até lá. Cada visita custa <strong>1 dia</strong> e revela uma pista.</li>
             <li>No <strong>caderno</strong>, veja quais comerciantes têm cada indício e <strong>risque</strong> quem você descartou.</li>
             <li>Emita o <strong>auto de infração</strong>: escolha o suspeito e <strong>2 provas</strong> que o diferenciem dos outros.</li>
           </ol>
@@ -118,18 +187,20 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
 
   function telaMapa(): string {
     const semDias = ui.estado.diasRestantes === 0
-    const locais = caso.locais
+    const casas = caso.locais
       .map((local) => {
         const visitado = ui.estado.locaisVisitados.includes(local.id)
         const disponivel = podeVisitar(caso, ui.estado, local.id)
-        const estado = visitado ? '<span class="tag">Visitado</span>' : '<span class="tag tag-custo">1 dia</span>'
+        const tag = visitado
+          ? '<span class="tag tag-visitado">✔ Visitado</span>'
+          : '<span class="tag tag-custo">1 dia</span>'
         return `
-          <li>
-            <button type="button" class="local ${visitado ? 'visitado' : ''}" data-acao="visitar" data-id="${esc(local.id)}" ${disponivel ? '' : 'disabled'}>
-              <span class="local-nome">${esc(local.nome)}</span>
-              ${estado}
-            </button>
-          </li>`
+          <button type="button" class="casa ${visitado ? 'visitado' : ''}" style="${estiloPos(local.id)}"
+            data-acao="visitar" data-id="${esc(local.id)}" ${disponivel ? '' : 'disabled'}>
+            ${predio(local.icone)}
+            <span class="casa-nome">${esc(local.nome)}</span>
+            ${tag}
+          </button>`
       })
       .join('')
 
@@ -146,7 +217,24 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
         <h1 tabindex="-1">Para onde investigar?</h1>
         <p class="dica">Escolha bem: são ${caso.locais.length} locais, mas só há tempo para ${caso.diasIniciais}.</p>
         ${aviso}
-        <ul class="locais">${locais}</ul>
+        <div class="tabuleiro-rolagem">
+          <div class="tabuleiro ${ui.andando ? 'andando' : ''}">
+            ${fundoTabuleiro(caso.locais.length)}
+            <div class="casa-centro">
+              ${predio('hospital')}
+              <span class="casa-nome">Hospital Municipal</span>
+              <span class="tag tag-falta">Verba em falta</span>
+            </div>
+            <div class="casa partida" style="${estiloPos(null)}">
+              ${predio('auditoria')}
+              <span class="casa-nome">Auditoria (partida)</span>
+            </div>
+            ${casas}
+            <div class="peao" style="${estiloPos(ui.posicaoPeao)}">
+              ${boneco(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}
+            </div>
+          </div>
+        </div>
         <div class="acoes">
           <button type="button" data-acao="ir-acusacao" ${podeAcusar(caso, ui.estado) ? '' : 'disabled'}>Emitir auto de infração</button>
           ${semDias ? '<button type="button" class="perigo" data-acao="encerrar-prazo">Encerrar sem acusar</button>' : ''}
@@ -157,6 +245,12 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
 
   function telaPista(): string {
     const local = ui.ultimaPista!
+    const testemunha = local.testemunha
+    const quemFala = testemunha
+      ? boneco(testemunha.aparencia, { classe: 'grande', rotulo: testemunha.nome })
+      : boneco(AUDITOR, { classe: 'grande', rotulo: 'Você' })
+    const nomeQuemFala = testemunha ? esc(testemunha.nome) : 'Você descobre'
+
     const destaque = local.indicio
       ? `<div class="nova-pista" role="status">
            <span class="rotulo">Nova pista</span>
@@ -174,11 +268,19 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
       <section class="tela">
         <p class="rotulo">Você visitou</p>
         <h1 tabindex="-1">${esc(local.nome)}</h1>
-        <blockquote class="pista">${esc(local.pista)}</blockquote>
+        <div class="cena">
+          ${predio(local.icone, 'cena-predio')}
+          ${testemunha ? `<div class="cena-ouvinte">${boneco(AUDITOR, { classe: 'pequeno' })}</div>` : ''}
+          <div class="cena-personagem">
+            ${quemFala}
+            <span class="nome-personagem">${nomeQuemFala}</span>
+          </div>
+          ${balao(`<blockquote class="pista">${esc(local.pista)}</blockquote>`)}
+        </div>
         ${destaque}
         <div class="acoes">
           <button type="button" data-acao="abrir-caderno">Abrir caderno</button>
-          <button type="button" class="secundario" data-acao="voltar-mapa">Voltar ao mapa</button>
+          <button type="button" class="secundario" data-acao="voltar-mapa">Voltar ao tabuleiro</button>
         </div>
       </section>`
   }
@@ -207,9 +309,14 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
         return `
           <tr class="${riscado ? 'riscado' : ''}">
             <th scope="row">
-              <span class="suspeito-nome">${esc(s.nome)}</span>
-              <span class="suspeito-empresa">${esc(s.empresa)}</span>
-              <span class="suspeito-perfil">${esc(s.perfil)}</span>
+              <div class="suspeito">
+                <span class="avatar">${boneco(s.aparencia, { expressao: riscado ? 'feliz' : 'neutro' })}</span>
+                <span>
+                  <span class="suspeito-nome">${esc(s.nome)}</span>
+                  <span class="suspeito-empresa">${esc(s.empresa)}</span>
+                  <span class="suspeito-perfil">${esc(s.perfil)}</span>
+                </span>
+              </div>
             </th>
             ${celulas}
             <td>
@@ -229,7 +336,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
               `<li><strong>${esc(l.nome)}:</strong> ${l.indicio ? esc(nomeIndicio(l.indicio)) : '<em>sem indício (contexto)</em>'}</li>`,
           )
           .join('')
-      : '<li><em>Nenhuma pista ainda. Visite um local no mapa.</em></li>'
+      : '<li><em>Nenhuma pista ainda. Visite um local no tabuleiro.</em></li>'
 
     return `
       ${hud()}
@@ -256,9 +363,10 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
       .map((s) => {
         const riscado = ui.estado.descartados.includes(s.id)
         return `
-          <label class="opcao ${riscado ? 'riscado' : ''}">
+          <label class="opcao opcao-suspeito ${riscado ? 'riscado' : ''} ${ui.acusado === s.id ? 'escolhido' : ''}">
             <input type="radio" name="acusado" value="${esc(s.id)}" ${ui.acusado === s.id ? 'checked' : ''}>
-            <span><strong>${esc(s.nome)}</strong> · ${esc(s.empresa)}${riscado ? ' <em>(riscado no caderno)</em>' : ''}</span>
+            <span class="avatar">${boneco(s.aparencia)}</span>
+            <span><strong>${esc(s.nome)}</strong><br>${esc(s.empresa)}${riscado ? '<br><em>(riscado no caderno)</em>' : ''}</span>
           </label>`
       })
       .join('')
@@ -284,7 +392,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
         <p class="dica">Acusar não gasta dia, mas encerra o caso. Escolha com cuidado.</p>
         <fieldset>
           <legend>1. Quem está sonegando?</legend>
-          ${suspeitos}
+          <div class="grade-suspeitos">${suspeitos}</div>
         </fieldset>
         <fieldset>
           <legend>2. Escolha ${caso.provasExigidas} provas (${ui.provas.length}/${caso.provasExigidas})</legend>
@@ -292,10 +400,33 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
           ${provas}
         </fieldset>
         <div class="acoes">
-          <button type="button" class="secundario" data-acao="voltar-mapa">Voltar ao mapa</button>
+          <button type="button" class="secundario" data-acao="voltar-mapa">Voltar ao tabuleiro</button>
           <button type="button" data-acao="emitir-auto" ${pronto ? '' : 'disabled'}>Emitir auto</button>
         </div>
       </section>`
+  }
+
+  function cenaResultado(tipo: TipoResultado, acusadoId: string | null): string {
+    const acusado = acusadoId ? buscarSuspeito(caso, acusadoId) : null
+    const bonecoAcusado = (expressao: 'feliz' | 'neutro' | 'triste') =>
+      acusado ? boneco(acusado.aparencia, { expressao, classe: 'grande', rotulo: acusado.nome }) : ''
+
+    const cenas: Record<TipoResultado, string> = {
+      resolvido: `
+        <div class="cena-personagem">${boneco(AUDITOR, { expressao: 'feliz', classe: 'grande' })}</div>
+        <div class="cena-personagem com-carimbo">${bonecoAcusado('triste')}${carimbo('Autuado', 'ok')}</div>
+        ${predio('hospital', 'cena-predio')}`,
+      auto_anulado: `
+        <div class="cena-personagem">${boneco(AUDITOR, { expressao: 'triste', classe: 'grande' })}</div>
+        <div class="cena-personagem com-carimbo">${bonecoAcusado('feliz')}${carimbo('Anulado', 'falha')}</div>`,
+      acusacao_injusta: `
+        <div class="cena-personagem">${boneco(AUDITOR, { expressao: 'triste', classe: 'grande' })}</div>
+        <div class="cena-personagem com-carimbo">${bonecoAcusado('triste')}${carimbo('Inocente', 'falha')}</div>`,
+      prazo_encerrado: `
+        <div class="cena-personagem com-carimbo">${boneco(AUDITOR, { expressao: 'triste', classe: 'grande' })}${carimbo('Prazo encerrado', 'falha')}</div>
+        ${predio('hospital', 'cena-predio')}`,
+    }
+    return `<div class="cena cena-resultado">${cenas[tipo]}</div>`
   }
 
   function telaResultado(): string {
@@ -333,6 +464,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
       <section class="tela resultado ${sucesso ? 'ok' : 'falha'}">
         <p class="rotulo">Resultado</p>
         <h1 tabindex="-1">${esc(texto.titulo)}</h1>
+        ${cenaResultado(resultado.tipo, resultado.suspeitoAcusadoId)}
         <p class="mensagem">${esc(texto.mensagem)}</p>
         ${acusacao}
         ${valor}
@@ -371,27 +503,49 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso): void {
     render()
   }
 
+  function concluirVisita(localId: LocalId): void {
+    const { estado, pista } = visitarLocal(caso, ui.estado, localId)
+    ui = {
+      ...ui,
+      estado,
+      ultimaPista: pista,
+      pistasNovas: ui.pistasNovas + 1,
+      diaAcabouDeGastar: true,
+      posicaoPeao: localId,
+      andando: false,
+    }
+    irPara('pista')
+  }
+
+  /** Anda com o peão até o local e só então mostra a pista. */
+  function visitarComPasseio(localId: LocalId): void {
+    if (ui.andando || !podeVisitar(caso, ui.estado, localId)) return
+    const peao = raiz.querySelector<HTMLElement>('.peao')
+    if (!animar() || !peao) {
+      concluirVisita(localId)
+      return
+    }
+    ui.andando = true
+    raiz.querySelector('.tabuleiro')?.classList.add('andando')
+    const { left, top } = posicaoPct(localId)
+    peao.classList.add('em-movimento')
+    peao.style.left = left
+    peao.style.top = top
+    window.setTimeout(() => concluirVisita(localId), DURACAO_PASSEIO_MS)
+  }
+
   raiz.addEventListener('click', (evento) => {
     const alvo = (evento.target as HTMLElement).closest<HTMLElement>('[data-acao]')
-    if (!alvo || (alvo as HTMLButtonElement).disabled) return
+    if (!alvo || (alvo as HTMLButtonElement).disabled || ui.andando) return
     const id = alvo.dataset.id ?? ''
 
     switch (alvo.dataset.acao) {
       case 'comecar':
         irPara('mapa')
         break
-      case 'visitar': {
-        const { estado, pista } = visitarLocal(caso, ui.estado, id)
-        ui = {
-          ...ui,
-          estado,
-          ultimaPista: pista,
-          pistasNovas: ui.pistasNovas + 1,
-          diaAcabouDeGastar: true,
-        }
-        irPara('pista')
+      case 'visitar':
+        visitarComPasseio(id)
         break
-      }
       case 'abrir-caderno':
         ui = { ...ui, pistasNovas: 0, voltarDoCaderno: ui.tela === 'caderno' ? ui.voltarDoCaderno : ui.tela }
         irPara('caderno')

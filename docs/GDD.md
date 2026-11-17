@@ -110,6 +110,22 @@ As duas provas escolhidas são **válidas** se:
   (é o único com três ✔). Assim, a pista diz o que o denunciado tem, o caderno mostra quem mais tem
   isso, e o jogador risca quem não tem.
 
+### Direção de arte
+
+- **Público:** jovens do Ensino Médio. A estética usa **bonecos de blocos** (cabeça quadrada, corpo
+  de peças), um visual de brinquedo de montar que lembra os avatares de jogos populares entre eles.
+  **Todos os personagens são originais**; o jogo não usa marca, logotipo nem personagem de outro jogo.
+- **Mapa em estilo tabuleiro:** cidade com estrada oval e casinhas coloridas, o hospital no centro
+  ("verba em falta") e a Auditoria como casa de partida. Os 6 locais são prédios desenhados. O
+  **peão do auditor anda** até o local escolhido antes de a pista aparecer.
+- **Personagens:** auditor(a) (jogador), os 4 suspeitos e uma **testemunha por local**, que conta a
+  pista num balão de fala (Bia da operadora, Seu Jorge do cartório, Tião, Dona Lúcia e Rafa da Junta).
+  No Portal da Transparência, quem lê a informação é o próprio auditor.
+- **Resultado:** cena com um carimbo sobre o acusado: "Autuado", "Anulado", "Inocente" ou "Prazo encerrado".
+- Toda a arte é SVG feito em código (`src/ui/arte.ts`), sem imagens externas. A aparência dos
+  personagens e o ícone de cada local ficam no JSON do caso, então novos casos podem ter novos personagens.
+- As animações respeitam a preferência do sistema por **movimento reduzido**.
+
 ### Feedback visual
 
 | Elemento | Feedback |
@@ -118,7 +134,7 @@ As duas provas escolhidas são **válidas** se:
 | Pistas novas | Selo "N nova(s)" pulsando no botão do caderno até ele ser aberto; destaque verde "Nova pista" na tela do local |
 | Local sem indício | Caixa tracejada "Sem indício novo", explicando que a informação serve de contexto |
 | Suspeitos riscados | Nome e empresa tachados em vermelho e linha esmaecida; contador "Riscados: N/4" no topo |
-| Locais visitados | Marcados como "Visitado" e desabilitados no mapa |
+| Locais visitados | Marcados como "✔ Visitado" no tabuleiro; o peão fica parado ao lado do último local |
 | Resultado | Verde com o valor recuperado (vitória) ou vermelho com o valor que continua faltando ao hospital (derrota) |
 
 ### Desfechos

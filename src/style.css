@@ -248,40 +248,6 @@ button.pequeno {
 
 /* ---------- Mapa ---------- */
 
-.locais {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-  gap: 0.75rem;
-}
-
-.local {
-  width: 100%;
-  min-height: 5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.5rem;
-  text-align: left;
-  background: var(--painel-2);
-  color: var(--texto);
-  border-color: var(--painel-2);
-}
-
-.local:hover:not(:disabled) {
-  border-color: var(--destaque);
-}
-
-.local.visitado {
-  opacity: 0.6;
-}
-
-.local:disabled {
-  opacity: 0.45;
-}
-
 .tag {
   font-size: 0.8rem;
   font-weight: 500;
@@ -368,6 +334,10 @@ button.pequeno {
 .caderno thead th {
   font-size: 0.9rem;
   color: var(--suave);
+}
+
+.caderno th.oculto {
+  white-space: nowrap;
 }
 
 .caderno th.oculto,
@@ -523,4 +493,369 @@ legend {
   *::after {
     animation: none !important;
   }
+}
+
+/* ---------- Personagens (bonecos de blocos) ---------- */
+
+.boneco {
+  display: block;
+  width: 3rem;
+  height: auto;
+  overflow: visible;
+}
+
+.boneco.pequeno {
+  width: 3.2rem;
+}
+
+.boneco.medio {
+  width: 4.5rem;
+}
+
+.boneco.grande {
+  width: clamp(5rem, 14vw, 7.5rem);
+}
+
+.avatar {
+  flex: none;
+  display: inline-grid;
+  place-items: end center;
+  width: 3.4rem;
+  height: 3.6rem;
+  padding-top: 0.3rem;
+  background: var(--painel-2);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.avatar .boneco {
+  width: 2.6rem;
+  margin-bottom: -1.4rem;
+}
+
+.fila-suspeitos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.ficha-suspeito {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.8rem 0.6rem 0.6rem;
+  width: 8.5rem;
+  background: var(--painel);
+  border-radius: var(--raio);
+}
+
+.ficha-suspeito figcaption {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.ficha-suspeito figcaption span {
+  color: var(--destaque);
+}
+
+/* ---------- Cenas com balão de fala ---------- */
+
+.cena {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 1rem 0;
+  padding: 1.25rem 1rem 0;
+  background: linear-gradient(#2d3b50 0 72%, #3e8e41 72% 100%);
+  border-radius: 16px;
+  border: 3px solid #121a24;
+}
+
+.cena-predio {
+  width: clamp(6rem, 22vw, 10rem);
+  height: auto;
+}
+
+.cena-personagem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cena-ouvinte {
+  align-self: flex-end;
+}
+
+.nome-personagem {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.1rem 0.6rem;
+  margin: 0.3rem 0 0.5rem;
+  border-radius: 999px;
+  background: var(--fundo);
+  white-space: nowrap;
+}
+
+.balao {
+  position: relative;
+  flex: 1 1 16rem;
+  align-self: center;
+  max-width: 26rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1.1rem;
+  background: #fffdf7;
+  color: #1b2430;
+  border: 3px solid #121a24;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 #121a24;
+  text-align: left;
+}
+
+.balao::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  bottom: 18px;
+  border: 8px solid transparent;
+  border-right: 10px solid #121a24;
+}
+
+.balao .pista {
+  margin: 0;
+  padding: 0;
+  font-size: 1.1rem;
+  border: none;
+  background: none;
+}
+
+.cena-briefing .balao {
+  font-size: 1.05rem;
+}
+
+.cena-resultado {
+  min-height: 9rem;
+}
+
+.com-carimbo {
+  position: relative;
+}
+
+.carimbo {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  padding: 0.2rem 0.6rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border: 4px solid currentColor;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  animation: carimbar 0.45s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+  animation-delay: 0.3s;
+}
+
+.carimbo-ok {
+  color: #1f7a4d;
+}
+
+.carimbo-falha {
+  color: #b3261e;
+}
+
+@keyframes carimbar {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-14deg) scale(2.2);
+  }
+}
+
+/* ---------- Tabuleiro ---------- */
+
+.tabuleiro-rolagem {
+  overflow-x: auto;
+  margin: 1rem 0;
+  padding-bottom: 0.5rem;
+}
+
+.tabuleiro {
+  position: relative;
+  min-width: 36rem;
+  aspect-ratio: 400 / 320;
+  border-radius: 18px;
+  border: 4px solid #121a24;
+  box-shadow: 6px 6px 0 #121a24;
+}
+
+.tabuleiro.andando .casa {
+  pointer-events: none;
+}
+
+.tabuleiro-fundo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.casa,
+.casa-centro {
+  position: absolute;
+  transform: translate(-50%, -62%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  width: 19%;
+  padding: 0.3rem 0.3rem 0.4rem;
+  background: rgba(255, 253, 247, 0.92);
+  color: #1b2430;
+  border: 3px solid #121a24;
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 #121a24;
+  font-weight: 600;
+  text-align: center;
+}
+
+button.casa {
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+button.casa:hover:not(:disabled) {
+  filter: none;
+  transform: translate(-50%, -66%);
+  background: #fff;
+  border-color: var(--destaque);
+}
+
+button.casa:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+button.casa:disabled:not(.visitado) .predio {
+  filter: grayscale(0.8);
+}
+
+.casa.visitado {
+  background: #dff3e6;
+}
+
+.casa.partida {
+  background: #fff3d6;
+}
+
+.casa-centro {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 22%;
+}
+
+.casa .predio,
+.casa-centro .predio {
+  width: 70%;
+  height: auto;
+}
+
+.casa-nome {
+  font-size: clamp(0.6rem, 1.4vw, 0.8rem);
+  line-height: 1.15;
+}
+
+.casa .tag,
+.casa-centro .tag {
+  font-size: 0.65rem;
+}
+
+.tag-visitado {
+  background: var(--ok);
+  color: #10301f;
+}
+
+.tag-falta {
+  background: var(--perigo);
+  color: #fff;
+}
+
+.peao {
+  position: absolute;
+  z-index: 2;
+  width: 6%;
+  /* fica ao lado esquerdo da casa, sem cobrir o nome do local */
+  transform: translate(-200%, -20%);
+  pointer-events: none;
+  filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.45));
+}
+
+.peao .boneco {
+  width: 100%;
+}
+
+.peao.em-movimento {
+  transition:
+    left 0.8s ease-in-out,
+    top 0.8s ease-in-out;
+}
+
+.peao.em-movimento .boneco {
+  animation: pular 0.2s ease-in-out infinite alternate;
+}
+
+@keyframes pular {
+  to {
+    transform: translateY(-12%);
+  }
+}
+
+/* ---------- Avatares no caderno e na acusação ---------- */
+
+.suspeito {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+tr.riscado .avatar::after,
+.opcao.riscado .avatar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(45deg, transparent 45%, var(--perigo) 45% 55%, transparent 55%),
+    linear-gradient(-45deg, transparent 45%, var(--perigo) 45% 55%, transparent 55%);
+}
+
+tr.riscado .avatar .boneco,
+.opcao.riscado .avatar .boneco {
+  filter: grayscale(1);
+}
+
+.grade-suspeitos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.5rem;
+}
+
+.opcao-suspeito {
+  border: 2px solid transparent;
+  background: var(--painel);
+}
+
+.opcao-suspeito.escolhido {
+  border-color: var(--destaque);
 }

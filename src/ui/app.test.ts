@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { caso001 as caso } from '../game/caso.ts'
 import { iniciarApp } from './app.ts'
 
@@ -38,7 +38,7 @@ function acusarCom(suspeito: string, provas: [string, string]): void {
 beforeEach(() => {
   document.body.innerHTML = '<div id="app"></div>'
   raiz = document.querySelector<HTMLElement>('#app')!
-  iniciarApp(raiz, caso)
+  iniciarApp(raiz, caso, { animacoes: false })
 })
 
 describe('fluxo das 6 telas', () => {
@@ -172,5 +172,74 @@ describe('os 4 resultados na tela', () => {
     expect(titulo()).toBe('Rota Fantasma')
     clicar('comecar')
     expect(texto()).toContain('4 dias restantes')
+  })
+})
+
+describe('tabuleiro e personagens', () => {
+  beforeEach(() => clicar('comecar'))
+
+  it('mostra os 6 locais como casas do tabuleiro, o hospital e o peão na partida', () => {
+    expect(raiz.querySelectorAll('button.casa')).toHaveLength(6)
+    expect(raiz.querySelector('.casa-centro')?.textContent).toContain('Hospital Municipal')
+    expect(raiz.querySelector('.casa.partida')).not.toBeNull()
+    expect(raiz.querySelector('.peao .boneco')).not.toBeNull()
+  })
+
+  it('o peão fica no último local visitado', () => {
+    const partida = raiz.querySelector<HTMLElement>('.peao')!.style.left
+    visitar('cartorio_detran')
+    const casa = raiz.querySelector<HTMLElement>('[data-id="cartorio_detran"]')!
+    const peao = raiz.querySelector<HTMLElement>('.peao')!
+    expect(peao.style.left).not.toBe(partida)
+    expect(peao.style.left).toBe(casa.style.left)
+    expect(peao.style.top).toBe(casa.style.top)
+  })
+
+  it('a testemunha do local aparece com o balão da pista', () => {
+    clicar('visitar', 'ex_funcionario')
+    expect(texto()).toContain('Tião, ex-funcionário')
+    expect(raiz.querySelector('.balao .pista')?.textContent).toContain('sem carteira assinada')
+  })
+
+  it('sem testemunha, quem descobre a pista é o próprio auditor', () => {
+    clicar('visitar', 'portal_transparencia')
+    expect(texto()).toContain('Você descobre')
+  })
+
+  it('suspeito riscado ganha avatar com X no caderno', () => {
+    clicar('abrir-caderno')
+    expect(raiz.querySelectorAll('.caderno .avatar .boneco')).toHaveLength(4)
+    clicar('riscar', 'celia')
+    expect(raiz.querySelector('tr.riscado .avatar')).not.toBeNull()
+  })
+
+  it('resultado mostra o carimbo sobre o acusado', () => {
+    visitar('operadora_cartao')
+    visitar('cartorio_detran')
+    acusarCom('ricardo', ['operadora_cartao', 'cartorio_detran'])
+    expect(raiz.querySelector('.carimbo')?.textContent).toBe('Autuado')
+  })
+})
+
+describe('peão animado', () => {
+  afterEach(() => vi.useRealTimers())
+
+  it('anda até o local e só depois mostra a pista', () => {
+    vi.useFakeTimers()
+    document.body.innerHTML = '<div id="app2"></div>'
+    raiz = document.querySelector<HTMLElement>('#app2')!
+    iniciarApp(raiz, caso, { animacoes: true })
+    clicar('comecar')
+
+    clicar('visitar', 'praca')
+    expect(titulo()).toBe('Para onde investigar?') // ainda andando
+    expect(raiz.querySelector('.peao.em-movimento')).not.toBeNull()
+
+    // cliques durante o passeio são ignorados
+    raiz.querySelector<HTMLButtonElement>('[data-id="junta_comercial"]')!.click()
+
+    vi.advanceTimersByTime(1000)
+    expect(titulo()).toBe('Consumidores na praça')
+    expect(texto()).toContain('3 dias restantes')
   })
 })

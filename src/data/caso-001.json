@@ -7,9 +7,18 @@
   "provasExigidas": 2,
   "culpadoId": "ricardo",
   "indicios": [
-    { "id": "cartao_sem_nota", "nome": "Vendas no cartão sem nota" },
-    { "id": "patrimonio_incompativel", "nome": "Patrimônio incompatível com a renda" },
-    { "id": "sem_carteira", "nome": "Funcionários sem carteira (indício de informalidade)" }
+    {
+      "id": "cartao_sem_nota",
+      "nome": "Vendas no cartão sem nota"
+    },
+    {
+      "id": "patrimonio_incompativel",
+      "nome": "Patrimônio incompatível com a renda"
+    },
+    {
+      "id": "sem_carteira",
+      "nome": "Funcionários sem carteira (indício de informalidade)"
+    }
   ],
   "suspeitos": [
     {
@@ -17,28 +26,77 @@
       "nome": "Aurélio",
       "empresa": "Mercadinho Bom Preço",
       "perfil": "Dono do mercadinho do bairro há mais de 20 anos. Conhece os clientes pelo nome e ainda anota compras fiado num caderno.",
-      "indicios": ["patrimonio_incompativel"]
+      "aparencia": {
+        "pele": "#f1c27d",
+        "cabelo": "#c9c9c9",
+        "estiloCabelo": "careca",
+        "camisa": "#3e8e41",
+        "calca": "#6b4f2f",
+        "acessorios": [
+          "avental",
+          "oculos"
+        ]
+      },
+      "indicios": [
+        "patrimonio_incompativel"
+      ]
     },
     {
       "id": "celia",
       "nome": "Célia",
       "empresa": "Oficina Turbo",
       "perfil": "Mecânica conhecida na cidade pelo serviço rápido. A oficina vive cheia e ela costuma chamar ajudantes nos dias de maior movimento.",
-      "indicios": ["sem_carteira"]
+      "aparencia": {
+        "pele": "#8d5524",
+        "cabelo": "#1f1a17",
+        "estiloCabelo": "coque",
+        "camisa": "#e07b39",
+        "calca": "#e07b39",
+        "acessorios": []
+      },
+      "indicios": [
+        "sem_carteira"
+      ]
     },
     {
       "id": "ricardo",
       "nome": "Ricardo",
       "empresa": "Eletrônicos TecMais",
       "perfil": "Abriu a loja há 5 anos e cresceu rápido. Vende celulares e acessórios e anuncia promoções nas redes sociais toda semana.",
-      "indicios": ["cartao_sem_nota", "patrimonio_incompativel", "sem_carteira"]
+      "aparencia": {
+        "pele": "#e0ac69",
+        "cabelo": "#5a3825",
+        "estiloCabelo": "curto",
+        "camisa": "#7b4bb7",
+        "calca": "#2c5aa0",
+        "acessorios": []
+      },
+      "indicios": [
+        "cartao_sem_nota",
+        "patrimonio_incompativel",
+        "sem_carteira"
+      ]
     },
     {
       "id": "marta",
       "nome": "Marta",
       "empresa": "Restaurante Sabor do Mar",
       "perfil": "Comanda o restaurante de frutos do mar da orla, sempre lotado nos fins de semana. A maior parte dos clientes paga no cartão.",
-      "indicios": ["cartao_sem_nota", "sem_carteira"]
+      "aparencia": {
+        "pele": "#ffdbac",
+        "cabelo": "#b5462f",
+        "estiloCabelo": "longo",
+        "camisa": "#2a9d8f",
+        "calca": "#2b2b2b",
+        "acessorios": [
+          "chef",
+          "avental"
+        ]
+      },
+      "indicios": [
+        "cartao_sem_nota",
+        "sem_carteira"
+      ]
     }
   ],
   "locais": [
@@ -47,41 +105,111 @@
       "nome": "Operadora de cartão",
       "pista": "Os dados da operadora mostram que o comerciante denunciado recebe no cartão muito mais do que declara em notas fiscais emitidas.",
       "indicio": "cartao_sem_nota",
-      "forca": "forte"
+      "forca": "forte",
+      "icone": "operadora",
+      "testemunha": {
+        "nome": "Bia, analista da operadora de cartão",
+        "aparencia": {
+          "pele": "#c68642",
+          "cabelo": "#2b1b12",
+          "estiloCabelo": "coque",
+          "camisa": "#d64545",
+          "calca": "#2b2b2b",
+          "acessorios": [
+            "cracha"
+          ]
+        }
+      }
     },
     {
       "id": "cartorio_detran",
       "nome": "Cartório de imóveis e Detran",
       "pista": "O comerciante denunciado comprou à vista uma casa e um carro novo, valores muito acima da renda que ele declara.",
       "indicio": "patrimonio_incompativel",
-      "forca": "forte"
+      "forca": "forte",
+      "icone": "cartorio",
+      "testemunha": {
+        "nome": "Seu Jorge, escrevente do cartório",
+        "aparencia": {
+          "pele": "#f1c27d",
+          "cabelo": "#e8e8e8",
+          "estiloCabelo": "careca",
+          "camisa": "#f2f2f2",
+          "calca": "#3a3a3a",
+          "acessorios": [
+            "gravata",
+            "oculos"
+          ]
+        }
+      }
     },
     {
       "id": "ex_funcionario",
       "nome": "Conversa com ex-funcionário",
       "pista": "Um ex-funcionário do comerciante denunciado conta: \"Trabalhei anos lá sem carteira assinada e sem FGTS.\"",
       "indicio": "sem_carteira",
-      "forca": "forte"
+      "forca": "forte",
+      "icone": "casa",
+      "testemunha": {
+        "nome": "Tião, ex-funcionário",
+        "aparencia": {
+          "pele": "#8d5524",
+          "cabelo": "#3d5a80",
+          "estiloCabelo": "bone",
+          "camisa": "#8a8f98",
+          "calca": "#2c5aa0",
+          "acessorios": []
+        }
+      }
     },
     {
       "id": "praca",
       "nome": "Consumidores na praça",
       "pista": "Uma cliente do comerciante denunciado conta: \"Pedi nota e me disseram que sairia mais caro.\"",
       "indicio": "cartao_sem_nota",
-      "forca": "fraca"
+      "forca": "fraca",
+      "icone": "praca",
+      "testemunha": {
+        "nome": "Dona Lúcia, cliente",
+        "aparencia": {
+          "pele": "#e0ac69",
+          "cabelo": "#7a7a7a",
+          "estiloCabelo": "coque",
+          "camisa": "#e76f9a",
+          "calca": "#4b3f72",
+          "acessorios": [
+            "oculos"
+          ]
+        }
+      }
     },
     {
       "id": "junta_comercial",
       "nome": "Junta Comercial",
       "pista": "Todas as empresas estão com o registro em dia. Estar registrado não prova que a empresa está regular com os tributos.",
-      "indicio": null
+      "indicio": null,
+      "icone": "junta",
+      "testemunha": {
+        "nome": "Rafa, atendente da Junta Comercial",
+        "aparencia": {
+          "pele": "#ffdbac",
+          "cabelo": "#1f1a17",
+          "estiloCabelo": "curto",
+          "camisa": "#3d5a80",
+          "calca": "#2b2b2b",
+          "acessorios": [
+            "cracha"
+          ]
+        }
+      }
     },
     {
       "id": "portal_transparencia",
       "nome": "Portal da Transparência",
       "pista": "O hospital municipal deixou de receber R$ 180.000 neste ano (valor fictício). É dinheiro de tributo que não foi arrecadado.",
       "indicio": null,
-      "liberaRelatorioDetalhado": true
+      "liberaRelatorioDetalhado": true,
+      "icone": "portal"
     }
   ],
   "impacto": {

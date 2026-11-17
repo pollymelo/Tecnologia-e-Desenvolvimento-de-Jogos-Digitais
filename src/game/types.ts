@@ -9,12 +9,29 @@ export interface Indicio {
   nome: string
 }
 
+/** Visual de um boneco de blocos. Cores em hexadecimal (#rrggbb). Tudo opcional. */
+export interface Aparencia {
+  pele?: string
+  cabelo?: string
+  estiloCabelo?: 'curto' | 'longo' | 'coque' | 'careca' | 'bone'
+  camisa?: string
+  calca?: string
+  acessorios?: ('cracha' | 'avental' | 'oculos' | 'gravata' | 'chef')[]
+}
+
+/** Personagem que conta a pista no local. */
+export interface Testemunha {
+  nome: string
+  aparencia?: Aparencia
+}
+
 export interface Suspeito {
   id: SuspeitoId
   nome: string
   empresa: string
   /** Descrição curta exibida no caderno. Não deve citar os indícios. */
   perfil: string
+  aparencia?: Aparencia
   indicios: IndicioId[]
 }
 
@@ -28,6 +45,10 @@ export interface Local {
   forca?: 'forte' | 'fraca'
   /** Visitar este local libera o relatório detalhado no resultado (ex.: Portal da Transparência). */
   liberaRelatorioDetalhado?: boolean
+  /** Desenho do prédio no tabuleiro (ver src/ui/arte.ts). Sem ele, usa um prédio genérico. */
+  icone?: string
+  /** Quem conta a pista. Sem testemunha, o próprio auditor lê a informação. */
+  testemunha?: Testemunha
 }
 
 export type TipoResultado =
