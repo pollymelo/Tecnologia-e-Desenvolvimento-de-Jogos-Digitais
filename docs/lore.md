@@ -41,7 +41,7 @@ um conselho que resume o jogo:
 > "Suspeita não autua ninguém. Prova autua. E lembre: do outro lado de cada caso tem um comerciante,
 > e do outro lado de cada tributo tem um hospital."
 
-Você tem **4 dias** porque o prazo para incluir o valor recuperado no orçamento do próximo trimestre
+Você tem **3 dias** porque o prazo para incluir o valor recuperado no orçamento do próximo trimestre
 está acabando. Se perder esse prazo, o hospital fica mais três meses sem a verba.
 
 ## O caso 001: "A verba do hospital"

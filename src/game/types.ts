@@ -7,6 +7,15 @@ export type LocalId = string
 export interface Indicio {
   id: IndicioId
   nome: string
+  /** Termo do glossário que explica este indício. */
+  termo?: string
+}
+
+/** Verbete do glossário, aberto ao clicar num termo destacado. */
+export interface Termo {
+  id: string
+  termo: string
+  definicao: string
 }
 
 /** Visual de um boneco de blocos. Cores em hexadecimal (#rrggbb). Tudo opcional. */
@@ -45,6 +54,8 @@ export interface Local {
   forca?: 'forte' | 'fraca'
   /** Visitar este local libera o relatório detalhado no resultado (ex.: Portal da Transparência). */
   liberaRelatorioDetalhado?: boolean
+  /** Dias que a visita custa. Sem isto, vale custoVisitaDias do caso. 0 = não gasta dia. */
+  custoDias?: number
   /** Desenho do prédio no tabuleiro (ver src/ui/arte.ts). Sem ele, usa um prédio genérico. */
   icone?: string
   /** Quem conta a pista. Sem testemunha, o próprio auditor lê a informação. */
@@ -88,6 +99,7 @@ export interface Caso {
   impacto: Impacto
   /** Gancho para o próximo caso, exibido quando o caso é resolvido. */
   gancho?: string
+  glossario?: Termo[]
   resultados: Record<TipoResultado, TextoResultado>
 }
 

@@ -37,12 +37,18 @@ export function pistasColetadas(caso: Caso, estado: EstadoJogo): Local[] {
   return estado.locaisVisitados.map((id) => buscarLocal(caso, id))
 }
 
+/** Dias que a visita a um local custa (o local pode sobrescrever o custo padrão do caso). */
+export function custoDoLocal(caso: Caso, local: Local): number {
+  return local.custoDias ?? caso.custoVisitaDias
+}
+
 export function podeVisitar(caso: Caso, estado: EstadoJogo, localId: LocalId): boolean {
+  const local = caso.locais.find((l) => l.id === localId)
   return (
+    local !== undefined &&
     estado.resultado === null &&
-    estado.diasRestantes >= caso.custoVisitaDias &&
-    !estado.locaisVisitados.includes(localId) &&
-    caso.locais.some((l) => l.id === localId)
+    estado.diasRestantes >= custoDoLocal(caso, local) &&
+    !estado.locaisVisitados.includes(localId)
   )
 }
 
@@ -67,14 +73,15 @@ export function visitarLocal(
   if (estado.locaisVisitados.includes(localId)) {
     throw new RegraError(`Local já visitado: ${local.nome}`)
   }
-  if (estado.diasRestantes < caso.custoVisitaDias) {
+  const custo = custoDoLocal(caso, local)
+  if (estado.diasRestantes < custo) {
     throw new RegraError('Não há dias suficientes para visitar outro local.')
   }
 
   return {
     estado: {
       ...estado,
-      diasRestantes: estado.diasRestantes - caso.custoVisitaDias,
+      diasRestantes: estado.diasRestantes - custo,
       locaisVisitados: [...estado.locaisVisitados, localId],
     },
     pista: local,
@@ -200,6 +207,7 @@ export function validarCaso(caso: Caso): string[] {
     }
   }
   for (const l of caso.locais) {
+    if (l.custoDias !== undefined && l.custoDias < 0) erros.push(`Local "${l.id}" tem custoDias negativo.`)
     if (l.indicio !== null && !indicios.has(l.indicio)) {
       erros.push(`Local "${l.id}" revela indício desconhecido "${l.indicio}".`)
     }
@@ -225,4 +233,69 @@ function existeSolucao(caso: Caso): boolean {
     return false
   }
   return combinar(0, [])
+}
+
+// ---------- Modo desafio: culpado sorteado ----------
+
+/** Gerador de números aleatórios entre 0 e 1 (injetável para testes). */
+export type Aleatorio = () => number
+
+/**
+ * Sorteia quem é quem: as combinações de indícios dos suspeitos são embaralhadas entre eles.
+ * A estrutura do caso (culpado com todos os indícios, armadilha, iscas) continua a mesma,
+ * então ele sempre tem solução. Só muda quem ocupa cada papel.
+ */
+export function sortearCaso(caso: Caso, aleatorio: Aleatorio = Math.random): Caso {
+  const conjuntos = caso.suspeitos.map((s) => [...s.indicios])
+  const indiceCulpado = caso.suspeitos.findIndex((s) => s.id === caso.culpadoId)
+
+  // Fisher-Yates
+  const ordem = conjuntos.map((_, i) => i)
+  for (let i = ordem.length - 1; i > 0; i--) {
+    const j = Math.floor(aleatorio() * (i + 1))
+    ;[ordem[i], ordem[j]] = [ordem[j], ordem[i]]
+  }
+
+  const suspeitos = caso.suspeitos.map((s, i) => ({ ...s, indicios: conjuntos[ordem[i]] }))
+  const novoCulpado = caso.suspeitos[ordem.indexOf(indiceCulpado)].id
+  return { ...caso, suspeitos, culpadoId: novoCulpado }
+}
+
+/** Troca {culpado} e {empresa} pelo nome e pela empresa do culpado do caso. */
+export function preencherTexto(caso: Caso, texto: string): string {
+  const culpado = buscarSuspeito(caso, caso.culpadoId)
+  return texto.replaceAll('{culpado}', culpado.nome).replaceAll('{empresa}', culpado.empresa)
+}
+
+// ---------- Desempenho (estrelas) ----------
+
+export interface Criterio {
+  texto: string
+  cumprido: boolean
+}
+
+export interface Desempenho {
+  estrelas: number
+  criterios: Criterio[]
+}
+
+/**
+ * Até 3 estrelas, uma por critério. Só um caso resolvido pontua.
+ * - Resolver o caso com provas válidas.
+ * - Terminar com pelo menos 1 dia sobrando (investigar com eficiência).
+ * - Caderno em ordem: todos os inocentes riscados e o culpado não riscado.
+ */
+export function avaliarDesempenho(caso: Caso, estado: EstadoJogo): Desempenho {
+  const resolvido = estado.resultado?.tipo === 'resolvido'
+  const inocentes = caso.suspeitos.filter((s) => s.id !== caso.culpadoId).map((s) => s.id)
+  const cadernoEmOrdem =
+    inocentes.every((id) => estado.descartados.includes(id)) &&
+    !estado.descartados.includes(caso.culpadoId)
+
+  const criterios: Criterio[] = [
+    { texto: 'Caso resolvido com provas válidas', cumprido: resolvido },
+    { texto: 'Sobrou pelo menos 1 dia', cumprido: resolvido && estado.diasRestantes >= 1 },
+    { texto: 'Caderno em ordem: só os inocentes riscados', cumprido: resolvido && cadernoEmOrdem },
+  ]
+  return { estrelas: criterios.filter((c) => c.cumprido).length, criterios }
 }

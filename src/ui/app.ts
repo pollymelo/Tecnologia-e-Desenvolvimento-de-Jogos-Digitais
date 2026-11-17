@@ -9,6 +9,10 @@ import {
   podeAcusar,
   podeVisitar,
   visitarLocal,
+  custoDoLocal,
+  sortearCaso,
+  preencherTexto,
+  avaliarDesempenho,
 } from '../game/rules.ts'
 import type { Caso, IndicioId, Local, LocalId, TipoResultado } from '../game/types.ts'
 import { angulosDasCasas, AUDITOR, boneco, fundoTabuleiro, pontoNaEstrada, predio, TABULEIRO } from './arte.ts'
@@ -32,7 +36,13 @@ interface Ui {
   posicaoPeao: LocalId | null
   /** true enquanto o peão anda (bloqueia novos cliques). */
   andando: boolean
+  /** Verbete do glossário aberto ("todos" = lista completa; null = fechado). */
+  termoAberto: string | null
+  /** Elemento que abriu o glossário, para devolver o foco ao fechar. */
+  focoAntesDoGlossario: string | null
 }
+
+type Modo = 'historia' | 'desafio'
 
 export interface OpcoesApp {
   /** false desliga as animações (usado nos testes). */
@@ -53,7 +63,10 @@ function esc(texto: string): string {
     .replaceAll('"', '&quot;')
 }
 
-export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}): void {
+export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp = {}): void {
+  /** Caso em jogo: o da história ou uma versão sorteada (modo desafio). */
+  let caso: Caso = casoBase
+  let modo: Modo = 'historia'
   let ui: Ui = estadoUiInicial()
 
   function estadoUiInicial(): Ui {
@@ -68,6 +81,8 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
       provas: [],
       posicaoPeao: null,
       andando: false,
+      termoAberto: null,
+      focoAntesDoGlossario: null,
     }
   }
 
@@ -80,6 +95,14 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
   }
 
   const nomeIndicio = (id: IndicioId) => caso.indicios.find((i) => i.id === id)?.nome ?? id
+
+  /** Texto clicável que abre o verbete do glossário (ou texto simples, se o termo não existir). */
+  function termo(id: string | undefined, texto: string): string {
+    if (!id || !caso.glossario?.some((t) => t.id === id)) return texto
+    return `<button type="button" class="termo" data-acao="termo" data-id="${esc(id)}" aria-haspopup="dialog">${texto}</button>`
+  }
+
+  const temLocalGratis = () => caso.locais.some((l) => custoDoLocal(caso, l) === 0)
 
   function indiciosRevelados(): Set<IndicioId> {
     const revelados = new Set<IndicioId>()
@@ -134,7 +157,11 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
         </div>
         <div class="hud-info">Pistas: <strong>${ui.estado.locaisVisitados.length}</strong></div>
         <div class="hud-info">Riscados: <strong>${riscados}/${caso.suspeitos.length}</strong></div>
-        <button type="button" class="secundario" data-acao="abrir-caderno">Caderno ${badge}</button>
+        ${modo === 'desafio' ? '<span class="tag tag-desafio">Modo desafio</span>' : ''}
+        <div class="hud-botoes">
+          <button type="button" class="secundario" data-acao="termo" data-id="todos" aria-haspopup="dialog">Glossário</button>
+          <button type="button" class="secundario" data-acao="abrir-caderno">Caderno ${badge}</button>
+        </div>
       </header>`
   }
 
@@ -177,12 +204,17 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
         <div class="cartao">
           <h2>Como jogar</h2>
           <ol>
-            <li>No tabuleiro, escolha um local: seu peão anda até lá. Cada visita custa <strong>1 dia</strong> e revela uma pista.</li>
-            <li>No <strong>caderno</strong>, veja quais comerciantes têm cada indício e <strong>risque</strong> quem você descartou.</li>
-            <li>Emita o <strong>auto de infração</strong>: escolha o suspeito e <strong>2 provas</strong> que o diferenciem dos outros.</li>
+            <li>No tabuleiro, escolha um local: seu peão anda até lá. Cada visita custa <strong>1 dia</strong> e revela uma pista.${temLocalGratis() ? ' Locais marcados como <strong>grátis</strong> não gastam dia.' : ''}</li>
+            <li>No <strong>caderno</strong>, veja quais comerciantes têm cada ${termo('indicio', 'indício')} e <strong>risque</strong> quem você descartou.</li>
+            <li>Emita o ${termo('auto', '<strong>auto de infração</strong>')}: escolha o suspeito e <strong>${caso.provasExigidas} ${termo('prova', 'provas')}</strong> que o diferenciem dos outros.</li>
+            <li>Ganhe até <strong>3 estrelas</strong>: resolva o caso, termine com tempo sobrando e deixe o caderno certo.</li>
           </ol>
         </div>
-        <button type="button" data-acao="comecar">Começar investigação</button>
+        <div class="acoes acoes-centro">
+          <button type="button" data-acao="comecar" data-id="historia">Começar investigação</button>
+          <button type="button" class="secundario" data-acao="comecar" data-id="desafio">Modo desafio: culpado sorteado</button>
+        </div>
+        <p class="nota">Palavras sublinhadas abrem o glossário. No modo desafio, o culpado muda a cada partida.</p>
       </section>`
   }
 
@@ -192,9 +224,12 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
       .map((local) => {
         const visitado = ui.estado.locaisVisitados.includes(local.id)
         const disponivel = podeVisitar(caso, ui.estado, local.id)
+        const custo = custoDoLocal(caso, local)
         const tag = visitado
           ? '<span class="tag tag-visitado">✔ Visitado</span>'
-          : '<span class="tag tag-custo">1 dia</span>'
+          : custo === 0
+            ? '<span class="tag tag-gratis">Grátis (online)</span>'
+            : `<span class="tag tag-custo">${custo} ${custo === 1 ? 'dia' : 'dias'}</span>`
         return `
           <button type="button" class="casa ${visitado ? 'visitado' : ''}" style="${estiloPos(local.id)}"
             data-acao="visitar" data-id="${esc(local.id)}" ${disponivel ? '' : 'disabled'}>
@@ -216,7 +251,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
       ${hud()}
       <section class="tela">
         <h1 tabindex="-1">Para onde investigar?</h1>
-        <p class="dica">Escolha bem: são ${caso.locais.length} locais, mas só há tempo para ${caso.diasIniciais}.</p>
+        <p class="dica">Escolha bem: são ${caso.locais.length} locais e só ${caso.diasIniciais} dias.${temLocalGratis() ? ' Locais grátis não gastam dia.' : ''}</p>
         ${aviso}
         <div class="tabuleiro-rolagem">
           <div class="tabuleiro ${ui.andando ? 'andando' : ''}">
@@ -255,7 +290,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
     const destaque = local.indicio
       ? `<div class="nova-pista" role="status">
            <span class="rotulo">Nova pista</span>
-           <strong>${esc(nomeIndicio(local.indicio))}</strong>
+           <strong>${termo(caso.indicios.find((i) => i.id === local.indicio)?.termo, esc(nomeIndicio(local.indicio)))}</strong>
            ${local.forca === 'fraca' ? '<span class="nota">É um testemunho: indica o mesmo que um documento, mas vem de uma conversa.</span>' : ''}
            <span class="nota">Abra o caderno para ver quais comerciantes apresentam esse indício.</span>
          </div>`
@@ -343,7 +378,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
       ${hud()}
       <section class="tela">
         <h1 tabindex="-1">Caderno de suspeitos</h1>
-        <p class="dica">A pessoa denunciada tem <strong>todos</strong> os indícios encontrados. Risque quem não tem algum deles. Quem decide é você: o caderno não risca ninguém sozinho.</p>
+        <p class="dica">A pessoa denunciada tem <strong>todos</strong> os ${termo('indicio', 'indícios')} encontrados. Risque quem não tem algum deles. Quem decide é você: o caderno não risca ninguém sozinho.</p>
         <div class="tabela-rolagem">
           <table class="caderno">
             <thead><tr><th scope="col">Suspeito</th>${cabecalho}<th scope="col"><span class="sr">Ação</span></th></tr></thead>
@@ -390,7 +425,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
       ${hud()}
       <section class="tela">
         <h1 tabindex="-1">Auto de infração</h1>
-        <p class="dica">Acusar não gasta dia, mas encerra o caso. Escolha com cuidado.</p>
+        <p class="dica">O ${termo('auto', 'auto de infração')} não gasta dia, mas encerra o caso. Escolha com cuidado.</p>
         <fieldset>
           <legend>1. Quem está sonegando?</legend>
           <div class="grade-suspeitos">${suspeitos}</div>
@@ -461,11 +496,21 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
 
     const perguntas = texto.perguntasDebate.map((p) => `<li>${esc(p)}</li>`).join('')
 
+    const desempenho = avaliarDesempenho(caso, ui.estado)
+    const estrelas = `
+      <div class="estrelas" role="img" aria-label="${desempenho.estrelas} de 3 estrelas">
+        ${[0, 1, 2].map((i) => `<span class="estrela ${i < desempenho.estrelas ? 'ganha' : ''}" style="animation-delay:${0.5 + i * 0.25}s" aria-hidden="true">★</span>`).join('')}
+      </div>
+      <ul class="criterios">
+        ${desempenho.criterios.map((c) => `<li class="${c.cumprido ? 'ok' : ''}"><span aria-hidden="true">${c.cumprido ? '★' : '☆'}</span> ${esc(c.texto)}</li>`).join('')}
+      </ul>`
+
     return `
       <section class="tela resultado ${sucesso ? 'ok' : 'falha'}">
         <p class="rotulo">Resultado</p>
         <h1 tabindex="-1">${esc(texto.titulo)}</h1>
         ${cenaResultado(resultado.tipo, resultado.suspeitoAcusadoId)}
+        ${estrelas}
         <p class="mensagem">${esc(texto.mensagem)}</p>
         ${acusacao}
         ${valor}
@@ -479,7 +524,7 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
         </div>
         ${
           sucesso && caso.gancho
-            ? `<div class="gancho"><span class="rotulo">Continua…</span><p>${esc(caso.gancho)}</p></div>`
+            ? `<div class="gancho"><span class="rotulo">Continua…</span><p>${esc(preencherTexto(caso, caso.gancho))}</p></div>`
             : ''
         }
         <p class="nota">${esc(impacto.aviso)}</p>
@@ -498,8 +543,44 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
     resultado: telaResultado,
   }
 
+  function glossario(): string {
+    if (ui.termoAberto === null) return ''
+    const verbetes = caso.glossario ?? []
+    const lista = ui.termoAberto === 'todos' ? verbetes : verbetes.filter((t) => t.id === ui.termoAberto)
+    const titulo = ui.termoAberto === 'todos' ? 'Glossário' : (lista[0]?.termo ?? 'Glossário')
+    const corpo = lista
+      .map((t) =>
+        ui.termoAberto === 'todos'
+          ? `<dt>${esc(t.termo)}</dt><dd>${esc(t.definicao)}</dd>`
+          : `<p>${esc(t.definicao)}</p>`,
+      )
+      .join('')
+    return `
+      <div class="sobreposicao" data-acao="fechar-termo">
+        <div class="janela" role="dialog" aria-modal="true" aria-labelledby="titulo-glossario" tabindex="-1">
+          <h2 id="titulo-glossario">${esc(titulo)}</h2>
+          ${ui.termoAberto === 'todos' ? `<dl class="verbetes">${corpo}</dl>` : corpo}
+          <button type="button" data-acao="fechar-termo" class="fechar">Entendi</button>
+        </div>
+      </div>`
+  }
+
+  function abrirTermo(id: string, origem: HTMLElement): void {
+    const seletor = origem.dataset.id ? `[data-acao="termo"][data-id="${CSS.escape(origem.dataset.id)}"]` : null
+    ui = { ...ui, termoAberto: id, focoAntesDoGlossario: seletor }
+    render(false)
+    raiz.querySelector<HTMLElement>(".janela")?.focus()
+  }
+
+  function fecharTermo(): void {
+    const seletor = ui.focoAntesDoGlossario
+    ui = { ...ui, termoAberto: null, focoAntesDoGlossario: null }
+    render(false)
+    if (seletor) raiz.querySelector<HTMLElement>(seletor)?.focus()
+  }
+
   function render(focar = true): void {
-    raiz.innerHTML = `<main class="app tela-${ui.tela}">${telas[ui.tela]()}</main>`
+    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${ui.termoAberto ? 'inert' : ''}>${telas[ui.tela]()}</main>${glossario()}`
     ui.diaAcabouDeGastar = false
     if (focar) raiz.querySelector<HTMLElement>('h1')?.focus()
   }
@@ -545,9 +626,21 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
     if (!alvo || (alvo as HTMLButtonElement).disabled || ui.andando) return
     const id = alvo.dataset.id ?? ''
 
+    // Clique no fundo escuro fecha o glossário; clique dentro da janela, não.
+    if (alvo.dataset.acao === 'fechar-termo' && alvo.classList.contains('sobreposicao') && alvo !== evento.target) return
+
     switch (alvo.dataset.acao) {
+      case 'termo':
+        abrirTermo(id, alvo)
+        break
+      case 'fechar-termo':
+        fecharTermo()
+        break
       case 'comecar':
-        irPara('mapa')
+        modo = id === 'desafio' ? 'desafio' : 'historia'
+        caso = modo === 'desafio' ? sortearCaso(casoBase) : casoBase
+        ui = { ...estadoUiInicial(), tela: 'mapa' }
+        render()
         break
       case 'visitar':
         visitarComPasseio(id)
@@ -579,6 +672,8 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
         irPara('resultado')
         break
       case 'jogar-novamente':
+        caso = casoBase
+        modo = 'historia'
         ui = estadoUiInicial()
         render()
         break
@@ -599,6 +694,10 @@ export function iniciarApp(raiz: HTMLElement, caso: Caso, opcoes: OpcoesApp = {}
     }
     render(false)
     raiz.querySelector<HTMLInputElement>(`input[name="${input.name}"][value="${CSS.escape(input.value)}"]`)?.focus()
+  })
+
+  raiz.addEventListener('keydown', (evento) => {
+    if (evento.key === 'Escape' && ui.termoAberto !== null) fecharTermo()
   })
 
   render(false)

@@ -12,7 +12,7 @@ de **provas**, e não de suspeitas.
 
 ## 2. Objetivo
 
-**Do jogador:** como auditor(a) fiscal, descobrir em **4 dias** qual comerciante está sonegando.
+**Do jogador:** como auditor(a) fiscal, descobrir em **3 dias** qual comerciante está sonegando.
 Para isso, visita locais, coleta indícios, descarta suspeitos no caderno e emite um
 **auto de infração** fundamentado em provas.
 
@@ -56,7 +56,7 @@ Briefing → Mapa dos locais (dias restantes + caderno) → Pista do local → C
 ## 4. O caso 001
 
 **Briefing:** o hospital municipal perdeu verba porque a arrecadação caiu. Uma denúncia anônima
-diz que um comerciante da cidade está sonegando. O jogador tem **4 dias** para investigar.
+diz que um comerciante da cidade está sonegando. O jogador tem **3 dias** para investigar.
 
 ### Suspeitos
 
@@ -88,22 +88,48 @@ Quem investiga bem resolve o caso em 2 ou 3 dias. Quem investiga mal desperdiça
 A tabela traz o resumo de cada pista. Os textos finais, ajustados para deixar claro que a pista fala
 do comerciante denunciado, estão em `src/data/caso-001.json`.
 
-Os dois últimos locais são escolhas legítimas, mas não ajudam a resolver o caso: ensinam a priorizar
-e trazem conteúdo educativo. **Se o jogador visitou o Portal da Transparência, o resultado final é mais detalhado**, como recompensa.
+Os dois últimos locais não servem como prova, mas trazem conteúdo educativo:
+- A **Junta Comercial** custa 1 dia e ensina a priorizar: estar registrado não prova regularidade.
+- O **Portal da Transparência não gasta dia**, porque é um site público. Assim, o conteúdo mais
+  educativo, o impacto no hospital, não vira um "local a evitar". Visitá-lo também deixa o
+  **resultado final mais detalhado**.
 
 ## 5. Regras numéricas
 
 | Regra | Valor |
 |---|---|
-| Prazo do caso | **4 dias** |
-| Custo de visitar um local | **1 dia** |
+| Prazo do caso | **3 dias** (reduzido de 4 para criar pressão: o caso se resolve com 2) |
+| Custo de visitar um local | **1 dia**; o Portal da Transparência é **grátis** (0 dia) |
 | Locais disponíveis | **6** (4 com indício, 2 sem indício) |
-| Máximo de locais visitados por caso | **4** (6 locais disponíveis, só dá tempo de ver 4) |
+| Máximo de locais visitados por caso | **3 pagos + o Portal** (dos 6 disponíveis) |
 | Suspeitos | **4** |
 | Tipos de indício | **3** |
 | Provas exigidas na acusação | **2** |
 | Mínimo de visitas para resolver | **2** (com o par de locais certo) |
 | Valores monetários do resultado | **ilustrativos e fictícios**, sinalizados na tela |
+
+### Estrelas (desempenho)
+
+Só um caso **resolvido** pontua. Cada critério vale 1 estrela:
+
+| Estrela | Critério | O que reforça |
+|:-:|---|---|
+| ★ | Caso resolvido com provas válidas | Fundamentação |
+| ★ | Sobrou pelo menos 1 dia | Priorização (fiscalização tem prazo) |
+| ★ | Caderno em ordem: todos os inocentes riscados e o culpado não | Raciocínio por eliminação |
+
+### Modos de jogo
+
+| Modo | Como funciona | Para quê |
+|---|---|---|
+| **História** (padrão) | Culpado fixo: Ricardo. Segue a lore e a ficha de solução do mediador | Primeira partida e aplicação em sala |
+| **Desafio** | As combinações de indícios são **sorteadas entre os suspeitos** a cada partida. A estrutura (culpado com 3 indícios, armadilha com 2, duas iscas com 1) se mantém, então sempre há solução | Rejogar sem que a resposta "vaze" entre colegas |
+
+### Glossário
+
+Termos destacados nas telas (indício, prova, auto de infração e os indícios do caso) abrem uma
+explicação curta. Um botão **Glossário** no topo lista todos os 12 termos. Os verbetes ficam no JSON do
+caso (`glossario`), então novos casos podem incluir novos termos.
 
 ### Validação da acusação
 

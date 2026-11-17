@@ -48,12 +48,12 @@ describe('fluxo das 6 telas', () => {
 
     clicar('comecar')
     expect(titulo()).toBe('Para onde investigar?')
-    expect(texto()).toContain('4 dias restantes')
+    expect(texto()).toContain('3 dias restantes')
 
     clicar('visitar', 'operadora_cartao')
     expect(titulo()).toBe('Operadora de cartão')
     expect(texto()).toContain('Nova pista')
-    expect(texto()).toContain('3 dias restantes')
+    expect(texto()).toContain('2 dias restantes')
     expect(raiz.querySelector('.pip.recem-gasto')).not.toBeNull()
 
     clicar('abrir-caderno')
@@ -171,7 +171,7 @@ describe('os 4 resultados na tela', () => {
     clicar('jogar-novamente')
     expect(titulo()).toBe('Rota Fantasma')
     clicar('comecar')
-    expect(texto()).toContain('4 dias restantes')
+    expect(texto()).toContain('3 dias restantes')
   })
 })
 
@@ -240,7 +240,7 @@ describe('peão animado', () => {
 
     vi.advanceTimersByTime(1000)
     expect(titulo()).toBe('Consumidores na praça')
-    expect(texto()).toContain('3 dias restantes')
+    expect(texto()).toContain('2 dias restantes')
   })
 })
 
@@ -262,5 +262,61 @@ describe('lore', () => {
     visitar('ex_funcionario')
     acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
     expect(raiz.querySelector('.gancho')).toBeNull()
+  })
+})
+
+describe('glossário', () => {
+  it('termo destacado abre o verbete, e "Entendi" fecha', () => {
+    clicar('termo', 'auto')
+    expect(raiz.querySelector('[role="dialog"]')?.textContent).toContain('Auto de infração')
+    expect(raiz.querySelector('main')?.hasAttribute('inert')).toBe(true)
+    raiz.querySelector<HTMLButtonElement>('.janela .fechar')!.click()
+    expect(raiz.querySelector('[role="dialog"]')).toBeNull()
+  })
+
+  it('botão Glossário do topo lista todos os termos', () => {
+    clicar('comecar')
+    clicar('termo', 'todos')
+    expect(raiz.querySelectorAll('.verbetes dt').length).toBe(caso.glossario!.length)
+  })
+
+  it('Esc fecha o glossário', () => {
+    clicar('termo', 'indicio')
+    raiz.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(raiz.querySelector('[role="dialog"]')).toBeNull()
+  })
+
+  it('a pista nova liga o indício ao glossário', () => {
+    clicar('comecar')
+    clicar('visitar', 'cartorio_detran')
+    clicar('termo', 'patrimonio')
+    expect(raiz.querySelector('[role="dialog"]')?.textContent).toContain('renda declarada')
+  })
+})
+
+describe('novidades: Portal grátis, estrelas e modo desafio', () => {
+  it('o Portal aparece como grátis e não gasta dia', () => {
+    clicar('comecar')
+    expect(raiz.querySelector('[data-id="portal_transparencia"]')?.textContent).toContain('Grátis')
+    clicar('visitar', 'portal_transparencia')
+    expect(texto()).toContain('3 dias restantes')
+  })
+
+  it('o resultado mostra as estrelas conquistadas', () => {
+    clicar('comecar')
+    visitar('operadora_cartao')
+    visitar('cartorio_detran')
+    acusarCom('ricardo', ['operadora_cartao', 'cartorio_detran'])
+    expect(raiz.querySelector('.estrelas')?.getAttribute('aria-label')).toBe('2 de 3 estrelas')
+  })
+
+  it('o modo desafio mostra a etiqueta e volta ao modo história ao jogar de novo', () => {
+    clicar('comecar', 'desafio')
+    expect(raiz.querySelector('.tag-desafio')).not.toBeNull()
+    for (const id of ['junta_comercial', 'praca', 'operadora_cartao']) visitar(id)
+    clicar('encerrar-prazo')
+    clicar('jogar-novamente')
+    clicar('comecar', 'historia')
+    expect(raiz.querySelector('.tag-desafio')).toBeNull()
   })
 })

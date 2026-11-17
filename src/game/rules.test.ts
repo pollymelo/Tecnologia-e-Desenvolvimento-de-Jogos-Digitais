@@ -12,6 +12,10 @@ import {
   provasValidas,
   RegraError,
   validarCaso,
+  sortearCaso,
+  preencherTexto,
+  avaliarDesempenho,
+  custoDoLocal,
   visitarLocal,
 } from './rules.ts'
 import type { Caso } from './types.ts'
@@ -21,9 +25,9 @@ function visitar(estado: EstadoJogo, ...locais: string[]): EstadoJogo {
 }
 
 describe('estado inicial', () => {
-  it('começa com 4 dias, sem pistas, sem descartes e sem resultado', () => {
+  it('começa com 3 dias, sem pistas, sem descartes e sem resultado', () => {
     const estado = criarEstadoInicial(caso)
-    expect(estado.diasRestantes).toBe(4)
+    expect(estado.diasRestantes).toBe(3)
     expect(estado.locaisVisitados).toEqual([])
     expect(estado.descartados).toEqual([])
     expect(estado.resultado).toBeNull()
@@ -38,7 +42,7 @@ describe('visitar local', () => {
   it('gasta 1 dia e revela a pista do local', () => {
     const inicial = criarEstadoInicial(caso)
     const { estado, pista } = visitarLocal(caso, inicial, 'operadora_cartao')
-    expect(estado.diasRestantes).toBe(3)
+    expect(estado.diasRestantes).toBe(2)
     expect(pista.indicio).toBe('cartao_sem_nota')
     expect(pistasColetadas(caso, estado).map((l) => l.id)).toEqual(['operadora_cartao'])
   })
@@ -46,7 +50,7 @@ describe('visitar local', () => {
   it('não altera o estado anterior (imutável)', () => {
     const inicial = criarEstadoInicial(caso)
     visitarLocal(caso, inicial, 'praca')
-    expect(inicial.diasRestantes).toBe(4)
+    expect(inicial.diasRestantes).toBe(3)
     expect(inicial.locaisVisitados).toEqual([])
   })
 
@@ -56,7 +60,7 @@ describe('visitar local', () => {
     expect(() => visitarLocal(caso, estado, 'praca')).toThrow(RegraError)
   })
 
-  it('só dá tempo de visitar 4 dos 6 locais', () => {
+  it('com 3 dias, dá para visitar 3 locais pagos e o Portal (grátis)', () => {
     const estado = visitar(
       criarEstadoInicial(caso),
       'praca',
@@ -218,5 +222,92 @@ describe('validação de um caso novo (JSON editado)', () => {
 
     const semSolucao: Caso = { ...caso, locais: caso.locais.filter((l) => l.indicio !== 'patrimonio_incompativel') }
     expect(validarCaso(semSolucao)).toContain('Nenhuma combinação de locais fundamenta a acusação do culpado.')
+  })
+})
+
+describe('Portal da Transparência grátis', () => {
+  it('visitar o Portal não gasta dia, e ele pode ser visitado com 0 dias', () => {
+    const portal = caso.locais.find((l) => l.id === 'portal_transparencia')!
+    expect(custoDoLocal(caso, portal)).toBe(0)
+    const semDias = visitar(criarEstadoInicial(caso), 'praca', 'junta_comercial', 'operadora_cartao')
+    expect(semDias.diasRestantes).toBe(0)
+    expect(podeVisitar(caso, semDias, 'portal_transparencia')).toBe(true)
+    expect(visitar(semDias, 'portal_transparencia').diasRestantes).toBe(0)
+  })
+})
+
+describe('modo desafio (culpado sorteado)', () => {
+  /** Gera todas as 24 permutações forçando a sequência de sorteios. */
+  function todasAsVersoes(): Caso[] {
+    const versoes: Caso[] = []
+    const n = caso.suspeitos.length
+    const escolhas = (k: number): number[][] =>
+      k === 1 ? [[]] : escolhas(k - 1).flatMap((r) => Array.from({ length: k }, (_, j) => [...r, j]))
+    for (const seq of escolhas(n)) {
+      // Fisher-Yates consome n-1 sorteios: i = n-1 ... 1, cada um entre 0 e i
+      const valores = [...seq].reverse().map((j, idx) => j / (n - idx) + 0.0001)
+      let k = 0
+      versoes.push(sortearCaso(caso, () => valores[k++]))
+    }
+    return versoes
+  }
+
+  it('toda versão sorteada continua válida e com solução', () => {
+    for (const versao of todasAsVersoes()) {
+      expect(validarCaso(versao)).toEqual([])
+      const culpado = versao.suspeitos.find((s) => s.id === versao.culpadoId)!
+      expect(culpado.indicios).toHaveLength(3)
+    }
+  })
+
+  it('o sorteio troca o culpado entre os suspeitos', () => {
+    const culpados = new Set(todasAsVersoes().map((v) => v.culpadoId))
+    expect(culpados).toEqual(new Set(['aurelio', 'celia', 'ricardo', 'marta']))
+  })
+
+  it('não altera o caso original', () => {
+    sortearCaso(caso, () => 0)
+    expect(caso.culpadoId).toBe('ricardo')
+  })
+
+  it('o gancho usa o nome e a empresa do culpado sorteado', () => {
+    expect(preencherTexto(caso, caso.gancho!)).toContain('Eletrônicos TecMais')
+    const versao = { ...caso, culpadoId: 'marta' }
+    expect(preencherTexto(versao, '{culpado} / {empresa}')).toBe('Marta / Restaurante Sabor do Mar')
+  })
+})
+
+describe('estrelas', () => {
+  const resolverCom = (estado: EstadoJogo) =>
+    acusar(caso, estado, 'ricardo', ['operadora_cartao', 'cartorio_detran'])
+
+  it('3 estrelas: resolveu, sobrou dia e riscou só os inocentes', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'cartorio_detran')
+    for (const id of ['aurelio', 'celia', 'marta']) estado = alternarDescarte(caso, estado, id)
+    expect(avaliarDesempenho(caso, resolverCom(estado)).estrelas).toBe(3)
+  })
+
+  it('2 estrelas: resolveu com tempo, mas sem usar o caderno', () => {
+    const estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'cartorio_detran')
+    expect(avaliarDesempenho(caso, resolverCom(estado)).estrelas).toBe(2)
+  })
+
+  it('riscar o culpado tira a estrela do caderno', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'cartorio_detran')
+    for (const id of ['aurelio', 'celia', 'marta', 'ricardo']) estado = alternarDescarte(caso, estado, id)
+    const { criterios } = avaliarDesempenho(caso, resolverCom(estado))
+    expect(criterios[2].cumprido).toBe(false)
+  })
+
+  it('1 estrela: resolveu gastando todos os dias', () => {
+    const estado = visitar(criarEstadoInicial(caso), 'junta_comercial', 'operadora_cartao', 'cartorio_detran')
+    expect(avaliarDesempenho(caso, resolverCom(estado)).estrelas).toBe(1)
+  })
+
+  it('0 estrelas em qualquer resultado que não seja "resolvido"', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario')
+    for (const id of ['aurelio', 'celia', 'marta']) estado = alternarDescarte(caso, estado, id)
+    const final = acusar(caso, estado, 'ricardo', ['operadora_cartao', 'ex_funcionario'])
+    expect(avaliarDesempenho(caso, final).estrelas).toBe(0)
   })
 })

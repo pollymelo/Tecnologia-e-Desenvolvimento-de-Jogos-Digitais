@@ -43,14 +43,18 @@ Acusar **qualquer outro suspeito** resulta em **acusação injusta**, sejam quai
 - Operadora e praça revelam o **mesmo indício**. Visitar as duas gasta um dia sem informação nova.
 - Junta Comercial e Portal **nunca** servem como prova, mas o Portal enriquece o resultado final.
 
-## Caminhos típicos (4 dias)
+## Caminhos típicos (3 dias; o Portal não gasta dia)
 
 | Caminho | Dias usados | Desfecho provável |
 |---|:-:|---|
-| Cartório → Operadora → acusar | 2 | Resolvido, o caminho mais eficiente |
-| Portal → Cartório → Ex-funcionário → acusar | 3 | Resolvido, com relatório detalhado |
-| Operadora → Ex-funcionário → Praça → Junta | 4 | Sem como diferenciar Ricardo de Marta: auto anulado, acusação injusta ou prazo encerrado |
-| Junta → Portal → Praça → Operadora | 4 | Nenhuma dupla válida: o auto é anulado se acusar Ricardo, e o prazo encerra se não acusar |
+| Portal → Cartório → Operadora → acusar | 2 | Resolvido com relatório detalhado. Com o caderno certo, **3 estrelas** |
+| Cartório → Ex-funcionário → acusar | 2 | Resolvido, até 3 estrelas |
+| Operadora → Ex-funcionário → Cartório → acusar | 3 | Resolvido no limite (sem a estrela do tempo). A dúvida com Marta só se desfaz no último dia |
+| Operadora → Ex-funcionário → Praça | 3 | Sem como diferenciar Ricardo de Marta: auto anulado, acusação injusta ou prazo encerrado |
+| Junta → Praça → Operadora | 3 | Nenhuma dupla válida: o auto é anulado se acusar Ricardo, e o prazo encerra se não acusar |
+
+> No **modo desafio**, o culpado é sorteado e esta ficha não vale. A lógica, porém, é a mesma: quem
+> tem os 3 indícios é o culpado, e o indício que só ele e uma das "iscas" têm é o decisivo.
 
 ## Perguntas para o debate
 - Por que o Cartório/Detran foi decisivo neste caso?
