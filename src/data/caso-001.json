@@ -111,6 +111,10 @@
       "indicio": "cartao_sem_nota",
       "forca": "forte",
       "icone": "operadora",
+      "variacoes": [
+        "\"No último mês, a empresa denunciada recebeu R$ 95 mil no cartão, mas só emitiu R$ 30 mil em notas fiscais. A conta não fecha.\" (valores fictícios)",
+        "\"Cruzei os dados: para cada três vendas no cartão da empresa denunciada, só uma tem nota fiscal.\""
+      ],
       "testemunha": {
         "nome": "Bia, analista da operadora de cartão",
         "aparencia": {
@@ -132,6 +136,10 @@
       "indicio": "patrimonio_incompativel",
       "forca": "forte",
       "icone": "cartorio",
+      "variacoes": [
+        "\"O dono ou a dona da empresa denunciada registrou um apartamento comprado à vista neste ano. Com a renda declarada, levaria mais de 40 anos para juntar esse dinheiro.\"",
+        "\"No Detran consta uma caminhonete zero-quilômetro, paga à vista, em nome do dono ou da dona da empresa denunciada. A renda declarada não chega nem perto.\""
+      ],
       "testemunha": {
         "nome": "Seu Jorge, escrevente do cartório",
         "aparencia": {
@@ -154,6 +162,10 @@
       "indicio": "sem_carteira",
       "forca": "forte",
       "icone": "casa",
+      "variacoes": [
+        "\"Fiquei quatro anos na empresa denunciada e nunca assinaram minha carteira. Quando saí, não tinha FGTS nenhum.\"",
+        "\"Lá na empresa denunciada quase ninguém tem carteira assinada. A chefia dizia que registrar sai caro.\""
+      ],
       "testemunha": {
         "nome": "Tião, ex-funcionário",
         "aparencia": {
@@ -173,6 +185,10 @@
       "indicio": "cartao_sem_nota",
       "forca": "fraca",
       "icone": "praca",
+      "variacoes": [
+        "\"Na empresa denunciada perguntam se a gente quer nota. Quem diz que não ganha desconto.\"",
+        "\"Paguei no cartão na empresa denunciada e saí sem nota. Nem me ofereceram.\""
+      ],
       "testemunha": {
         "nome": "Dona Lúcia, cliente",
         "aparencia": {
@@ -193,6 +209,10 @@
       "pista": "Todas as empresas estão com o registro em dia. Estar registrado não prova que a empresa está regular com os tributos.",
       "indicio": null,
       "icone": "junta",
+      "variacoes": [
+        "\"As quatro empresas estão com o CNPJ ativo e o registro em dia. Mas registro em dia não quer dizer tributo em dia.\"",
+        "\"Aqui a gente só cuida do registro, e as quatro empresas estão regulares. Se pagam os tributos, isso é outra história.\""
+      ],
       "testemunha": {
         "nome": "Rafa, atendente da Junta Comercial",
         "aparencia": {
@@ -214,7 +234,11 @@
       "indicio": null,
       "liberaRelatorioDetalhado": true,
       "icone": "portal",
-      "custoDias": 0
+      "custoDias": 0,
+      "variacoes": [
+        "No portal, você vê que a verba do hospital caiu R$ 180.000 neste ano (valor fictício). É o tamanho do \"fantasma\". O portal é um site público: consultar não gastou nenhum dia.",
+        "O portal mostra que, neste ano, faltaram R$ 180.000 (valor fictício) para a farmácia e a pediatria do hospital. Consultar o site não gastou nenhum dia."
+      ]
     }
   ],
   "impacto": {

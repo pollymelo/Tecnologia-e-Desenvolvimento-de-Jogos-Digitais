@@ -16,6 +16,8 @@ import {
   preencherTexto,
   avaliarDesempenho,
   custoDoLocal,
+  sortearPistas,
+  versoesDaPista,
   visitarLocal,
 } from './rules.ts'
 import type { Caso } from './types.ts'
@@ -309,5 +311,31 @@ describe('estrelas', () => {
     for (const id of ['aurelio', 'celia', 'marta']) estado = alternarDescarte(caso, estado, id)
     const final = acusar(caso, estado, 'ricardo', ['operadora_cartao', 'ex_funcionario'])
     expect(avaliarDesempenho(caso, final).estrelas).toBe(0)
+  })
+})
+
+describe('textos das pistas variam a cada partida', () => {
+  it('cada local tem pelo menos 3 versões de texto', () => {
+    for (const local of caso.locais) expect(versoesDaPista(local).length).toBeGreaterThanOrEqual(3)
+  })
+
+  it('o sorteio escolhe uma das versões e não muda o indício', () => {
+    for (const r of [0, 0.5, 0.99]) {
+      const sorteado = sortearPistas(caso, () => r)
+      sorteado.locais.forEach((local, i) => {
+        expect(versoesDaPista(caso.locais[i])).toContain(local.pista)
+        expect(local.indicio).toBe(caso.locais[i].indicio)
+      })
+    }
+    expect(sortearPistas(caso, () => 0).locais[0].pista).not.toBe(sortearPistas(caso, () => 0.99).locais[0].pista)
+  })
+
+  it('nenhuma versão entrega o culpado: não cita nome nem empresa de suspeito', () => {
+    const proibidos = caso.suspeitos.flatMap((s) => [s.nome, s.empresa])
+    for (const local of caso.locais) {
+      for (const texto of versoesDaPista(local)) {
+        for (const p of proibidos) expect(texto).not.toContain(p)
+      }
+    }
   })
 })

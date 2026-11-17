@@ -48,6 +48,11 @@ export interface Local {
   id: LocalId
   nome: string
   pista: string
+  /**
+   * Outras versões do texto da pista. A cada partida o jogo sorteia uma entre `pista` e estas.
+   * Todas precisam revelar o mesmo indício e não podem entregar quem é o culpado.
+   */
+  variacoes?: string[]
   /** Indício revelado pela pista; null = local só de contexto (não serve como prova). */
   indicio: IndicioId | null
   /** "fraca" = testemunho; vale como prova, mas o texto da tela pode destacar a diferença. */

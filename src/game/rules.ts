@@ -207,6 +207,7 @@ export function validarCaso(caso: Caso): string[] {
     }
   }
   for (const l of caso.locais) {
+    if (l.variacoes?.some((v) => v.trim() === '')) erros.push(`Local "${l.id}" tem variação de pista vazia.`)
     if (l.custoDias !== undefined && l.custoDias < 0) erros.push(`Local "${l.id}" tem custoDias negativo.`)
     if (l.indicio !== null && !indicios.has(l.indicio)) {
       erros.push(`Local "${l.id}" revela indício desconhecido "${l.indicio}".`)
@@ -298,4 +299,25 @@ export function avaliarDesempenho(caso: Caso, estado: EstadoJogo): Desempenho {
     { texto: 'Caderno em ordem: só os inocentes riscados', cumprido: resolvido && cadernoEmOrdem },
   ]
   return { estrelas: criterios.filter((c) => c.cumprido).length, criterios }
+}
+
+// ---------- Textos variados a cada partida ----------
+
+/** Todas as versões possíveis do texto da pista de um local. */
+export function versoesDaPista(local: Local): string[] {
+  return [local.pista, ...(local.variacoes ?? [])]
+}
+
+/**
+ * Sorteia uma versão do texto de cada pista. O indício revelado não muda:
+ * só a forma como a testemunha conta.
+ */
+export function sortearPistas(caso: Caso, aleatorio: Aleatorio = Math.random): Caso {
+  return {
+    ...caso,
+    locais: caso.locais.map((local) => {
+      const versoes = versoesDaPista(local)
+      return { ...local, pista: versoes[Math.floor(aleatorio() * versoes.length)] }
+    }),
+  }
 }

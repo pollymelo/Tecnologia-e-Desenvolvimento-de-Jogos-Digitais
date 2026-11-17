@@ -125,6 +125,13 @@ Só um caso **resolvido** pontua. Cada critério vale 1 estrela:
 | **História** (padrão) | Culpado fixo: Ricardo. Segue a lore e a ficha de solução do mediador | Primeira partida e aplicação em sala |
 | **Desafio** | As combinações de indícios são **sorteadas entre os suspeitos** a cada partida. A estrutura (culpado com 3 indícios, armadilha com 2, duas iscas com 1) se mantém, então sempre há solução | Rejogar sem que a resposta "vaze" entre colegas |
 
+### Textos variados das pistas
+
+Cada local tem **3 versões** do texto da pista (campo `variacoes` no JSON), e o jogo sorteia uma a cada
+partida, nos dois modos. Todas as versões revelam o **mesmo indício**, só muda a forma como a
+testemunha conta, e **nenhuma cita nome ou empresa de suspeito**, o que um teste automático confere.
+Assim, quem joga de novo não lê sempre as mesmas falas, e a solução do caso não muda.
+
 ### Glossário
 
 Termos destacados nas telas (indício, prova, auto de infração e os indícios do caso) abrem uma

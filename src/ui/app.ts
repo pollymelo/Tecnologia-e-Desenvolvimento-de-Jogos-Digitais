@@ -13,6 +13,8 @@ import {
   sortearCaso,
   preencherTexto,
   avaliarDesempenho,
+  sortearPistas,
+  type Aleatorio,
 } from '../game/rules.ts'
 import type { Caso, IndicioId, Local, LocalId, TipoResultado } from '../game/types.ts'
 import { angulosDasCasas, AUDITOR, boneco, fundoTabuleiro, pontoNaEstrada, predio, TABULEIRO } from './arte.ts'
@@ -47,6 +49,8 @@ type Modo = 'historia' | 'desafio'
 export interface OpcoesApp {
   /** false desliga as animações (usado nos testes). */
   animacoes?: boolean
+  /** Sorteios (culpado no modo desafio e textos das pistas). Injetável para testes. */
+  aleatorio?: Aleatorio
 }
 
 const DURACAO_PASSEIO_MS = 800
@@ -67,6 +71,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   /** Caso em jogo: o da história ou uma versão sorteada (modo desafio). */
   let caso: Caso = casoBase
   let modo: Modo = 'historia'
+  const aleatorio: Aleatorio = opcoes.aleatorio ?? Math.random
   let ui: Ui = estadoUiInicial()
 
   function estadoUiInicial(): Ui {
@@ -638,7 +643,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         break
       case 'comecar':
         modo = id === 'desafio' ? 'desafio' : 'historia'
-        caso = modo === 'desafio' ? sortearCaso(casoBase) : casoBase
+        caso = sortearPistas(modo === 'desafio' ? sortearCaso(casoBase, aleatorio) : casoBase, aleatorio)
         ui = { ...estadoUiInicial(), tela: 'mapa' }
         render()
         break

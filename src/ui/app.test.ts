@@ -38,7 +38,7 @@ function acusarCom(suspeito: string, provas: [string, string]): void {
 beforeEach(() => {
   document.body.innerHTML = '<div id="app"></div>'
   raiz = document.querySelector<HTMLElement>('#app')!
-  iniciarApp(raiz, caso, { animacoes: false })
+  iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0 })
 })
 
 describe('fluxo das 6 telas', () => {
@@ -318,5 +318,18 @@ describe('novidades: Portal grátis, estrelas e modo desafio', () => {
     clicar('jogar-novamente')
     clicar('comecar', 'historia')
     expect(raiz.querySelector('.tag-desafio')).toBeNull()
+  })
+})
+
+describe('pistas com texto sorteado', () => {
+  it('outra partida pode mostrar outra versão da mesma pista', () => {
+    document.body.innerHTML = '<div id="app3"></div>'
+    raiz = document.querySelector<HTMLElement>('#app3')!
+    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0.99 })
+    clicar('comecar')
+    clicar('visitar', 'ex_funcionario')
+    const balao = raiz.querySelector('.balao .pista')?.textContent ?? ''
+    expect(balao).toContain('A chefia dizia que registrar sai caro')
+    expect(texto()).toContain('Funcionários sem carteira')
   })
 })
