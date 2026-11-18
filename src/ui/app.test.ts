@@ -22,9 +22,12 @@ function marcar(nome: string, valor: string): void {
   input.dispatchEvent(new Event('change', { bubbles: true }))
 }
 
+/** Título do card de pista aberto sobre o tabuleiro. */
+const tituloCard = () => raiz.querySelector('.card-pista h2')?.textContent?.trim()
+
 function visitar(id: string): void {
   clicar('visitar', id)
-  clicar('voltar-mapa')
+  clicar('guardar-pista')
 }
 
 function acusarCom(suspeito: string, provas: [string, string]): void {
@@ -51,12 +54,15 @@ describe('fluxo das 6 telas', () => {
     expect(texto()).toContain('3 dias restantes')
 
     clicar('visitar', 'operadora_cartao')
-    expect(titulo()).toBe('Operadora de cartão')
+    expect(titulo()).toBe('Para onde investigar?') // o card abre sobre o tabuleiro
+    expect(tituloCard()).toBe('Operadora de cartão')
     expect(texto()).toContain('Nova pista')
     expect(texto()).toContain('2 dias restantes')
     expect(raiz.querySelector('.pip.recem-gasto')).not.toBeNull()
+    expect(raiz.querySelector('main')?.hasAttribute('inert')).toBe(true)
 
-    clicar('abrir-caderno')
+    clicar('guardar-abrir-caderno')
+    expect(raiz.querySelector('.card-pista')).toBeNull()
     expect(titulo()).toBe('Caderno de suspeitos')
 
     clicar('voltar-caderno')
@@ -224,23 +230,55 @@ describe('tabuleiro e personagens', () => {
 describe('peão animado', () => {
   afterEach(() => vi.useRealTimers())
 
-  it('anda até o local e só depois mostra a pista', () => {
-    vi.useFakeTimers()
+  function iniciarAnimado(): void {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] })
     document.body.innerHTML = '<div id="app2"></div>'
     raiz = document.querySelector<HTMLElement>('#app2')!
-    iniciarApp(raiz, caso, { animacoes: true })
+    iniciarApp(raiz, caso, { animacoes: true, aleatorio: () => 0 })
     clicar('comecar')
+  }
 
+  it('caminha pela estrada, entra na casa, o dia passa e só então o card abre', async () => {
+    iniciarAnimado()
     clicar('visitar', 'praca')
-    expect(titulo()).toBe('Para onde investigar?') // ainda andando
-    expect(raiz.querySelector('.peao.em-movimento')).not.toBeNull()
+    const peao = raiz.querySelector<HTMLElement>('.peao')!
+    const inicio = peao.style.left
+    expect(peao.classList.contains('caminhando')).toBe(true)
+    expect(raiz.querySelector('.card-pista')).toBeNull()
 
-    // cliques durante o passeio são ignorados
+    // cliques durante a caminhada são ignorados
     raiz.querySelector<HTMLButtonElement>('[data-id="junta_comercial"]')!.click()
 
-    vi.advanceTimersByTime(1000)
-    expect(titulo()).toBe('Consumidores na praça')
+    await vi.advanceTimersByTimeAsync(300)
+    expect(peao.style.left).not.toBe(inicio) // está andando pela estrada
+
+    await vi.advanceTimersByTimeAsync(6000)
+    expect(tituloCard()).toBe('Consumidores na praça')
+    expect(raiz.querySelector('.card-pista.virando')).not.toBeNull()
+    expect(raiz.querySelector('.casa.iluminada .predio.porta-aberta')).not.toBeNull()
+    expect(raiz.querySelector('.peao.dentro')).not.toBeNull()
     expect(texto()).toContain('2 dias restantes')
+    expect(raiz.querySelectorAll('[data-id="junta_comercial"].visitado')).toHaveLength(0)
+  })
+
+  it('ao guardar a pista, o peão sai da casa e a porta fecha', async () => {
+    iniciarAnimado()
+    clicar('visitar', 'operadora_cartao')
+    await vi.advanceTimersByTimeAsync(6000)
+    clicar('guardar-pista')
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(raiz.querySelector('.card-pista')).toBeNull()
+    expect(raiz.querySelector('.peao.saindo')).not.toBeNull()
+    expect(raiz.querySelector('.predio.porta-aberta')).toBeNull()
+  })
+
+  it('o Portal (grátis) não tem noite: o dia não passa', async () => {
+    iniciarAnimado()
+    clicar('visitar', 'portal_transparencia')
+    await vi.advanceTimersByTimeAsync(6000)
+    expect(tituloCard()).toBe('Portal da Transparência')
+    expect(raiz.querySelector('.pip.apagando')).toBeNull()
+    expect(texto()).toContain('3 dias restantes')
   })
 })
 

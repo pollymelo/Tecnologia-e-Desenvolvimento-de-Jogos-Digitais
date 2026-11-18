@@ -64,16 +64,24 @@ export function boneco(
 
   return `
   <svg class="boneco ${opcoes.classe ?? ''}" viewBox="0 -8 60 108" ${rotulo}>
-    <!-- pernas e sapatos -->
-    <rect x="17" y="64" width="12" height="28" fill="${calca}" ${s}/>
-    <rect x="31" y="64" width="12" height="28" fill="${calca}" ${s}/>
-    <rect x="16" y="90" width="14" height="7" rx="1" fill="#2b2b2b" ${s}/>
-    <rect x="30" y="90" width="14" height="7" rx="1" fill="#2b2b2b" ${s}/>
+    <!-- pernas e sapatos (grupos animados na caminhada) -->
+    <g class="perna perna-e">
+      <rect x="17" y="64" width="12" height="28" fill="${calca}" ${s}/>
+      <rect x="16" y="90" width="14" height="7" rx="1" fill="#2b2b2b" ${s}/>
+    </g>
+    <g class="perna perna-d">
+      <rect x="31" y="64" width="12" height="28" fill="${calca}" ${s}/>
+      <rect x="30" y="90" width="14" height="7" rx="1" fill="#2b2b2b" ${s}/>
+    </g>
     <!-- braços e mãos -->
-    <rect x="3" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/>
-    <rect x="47" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/>
-    <rect x="4" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/>
-    <rect x="48" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/>
+    <g class="braco braco-e">
+      <rect x="3" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/>
+      <rect x="4" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/>
+    </g>
+    <g class="braco braco-d">
+      <rect x="47" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/>
+      <rect x="48" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/>
+    </g>
     <!-- tronco -->
     <rect x="13" y="33" width="34" height="33" rx="2" fill="${camisa}" ${s}/>
     ${tem('avental') ? `<rect x="18" y="42" width="24" height="26" rx="1" fill="#f7f4ec" ${s}/>` : ''}
@@ -97,11 +105,11 @@ const janelas = (x: number, y: number, colunas: number, linhas: number, corJanel
   Array.from({ length: colunas * linhas }, (_, i) => {
     const cx = x + (i % colunas) * 11
     const cy = y + Math.floor(i / colunas) * 11
-    return `<rect x="${cx}" y="${cy}" width="7" height="7" fill="${corJanela}" stroke="${CONTORNO}" stroke-width="1"/>`
+    return `<rect class="janela-predio" x="${cx}" y="${cy}" width="7" height="7" fill="${corJanela}" stroke="${CONTORNO}" stroke-width="1"/>`
   }).join('')
 
 const porta = (x: number, y: number, corPorta = '#6b4f2f') =>
-  `<rect x="${x}" y="${y}" width="12" height="16" fill="${corPorta}" stroke="${CONTORNO}" stroke-width="1.5"/>`
+  `<rect class="vao" x="${x}" y="${y}" width="12" height="16" fill="#1b2430"/><rect class="porta" x="${x}" y="${y}" width="12" height="16" fill="${corPorta}" stroke="${CONTORNO}" stroke-width="1.5"/>`
 
 const PREDIOS: Record<string, string> = {
   // Operadora de cartão: prédio com um cartão gigante na fachada
@@ -230,5 +238,23 @@ export function fundoTabuleiro(quantidadeLocais: number): string {
     <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#f7f4ec" stroke-width="2" stroke-dasharray="8 8"/>
     ${casinhas.join('')}
     ${arvore(30, 30)}${arvore(372, 290)}${arvore(372, 34)}${arvore(28, 292)}${arvore(150, 120)}${arvore(258, 210)}
+  </svg>`
+}
+
+// ---------- Céu (dia e noite) ----------
+
+/** Camada do céu noturno com lua e estrelas, que aparece quando um dia passa. */
+export function ceuNoturno(): string {
+  const estrelas = [
+    [40, 30], [90, 60], [150, 22], [210, 48], [262, 18], [330, 40], [372, 80], [60, 110], [300, 110], [120, 280], [280, 270], [20, 200],
+  ]
+    .map(([x, y], i) => `<rect class="estrela-ceu" style="animation-delay:${(i % 4) * 0.15}s" x="${x}" y="${y}" width="4" height="4" fill="#fff6c9"/>`)
+    .join('')
+  return `
+  <svg class="ceu-desenho" viewBox="0 0 ${TABULEIRO.largura} ${TABULEIRO.altura}" aria-hidden="true">
+    ${estrelas}
+    <rect x="330" y="16" width="34" height="34" rx="10" fill="#fff6c9" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="337" y="24" width="7" height="7" rx="2" fill="#e8dca0"/>
+    <rect x="350" y="35" width="6" height="6" rx="2" fill="#e8dca0"/>
   </svg>`
 }

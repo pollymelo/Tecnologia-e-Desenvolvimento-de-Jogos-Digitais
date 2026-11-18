@@ -487,13 +487,8 @@ legend {
   text-align: left;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation: none !important;
-  }
-}
+/* Movimento reduzido: o app põe a classe .movimento-suave quando o sistema pede menos
+   movimento (a pessoa pode trocar para "completas" na tela inicial). Ver o fim do arquivo. */
 
 /* ---------- Personagens (bonecos de blocos) ---------- */
 
@@ -796,30 +791,215 @@ button.casa:disabled:not(.visitado) .predio {
   position: absolute;
   z-index: 2;
   width: 6%;
-  /* fica ao lado esquerdo da casa, sem cobrir o nome do local */
+  /* parado: fica ao lado esquerdo da casa, sem cobrir o nome do local */
   transform: translate(-200%, -20%);
   pointer-events: none;
   filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.45));
+  transition: transform 0.25s ease-out;
+}
+
+/* andando: os pés ficam sobre a estrada */
+.peao.na-estrada {
+  transform: translate(-50%, -92%);
+}
+
+.peao.dentro {
+  visibility: hidden;
 }
 
 .peao .boneco {
   width: 100%;
 }
 
-.peao.em-movimento {
-  transition:
-    left 0.8s ease-in-out,
-    top 0.8s ease-in-out;
+.peao.saindo .peao-corpo {
+  animation: sair-da-casa 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both;
 }
 
-.peao.em-movimento .boneco {
-  animation: pular 0.2s ease-in-out infinite alternate;
-}
-
-@keyframes pular {
-  to {
-    transform: translateY(-12%);
+@keyframes sair-da-casa {
+  from {
+    transform: scale(0.4) translateY(-10%);
+    opacity: 0;
   }
+}
+
+/* Ciclo de caminhada: pernas sobem alternadas, braços balançam, corpo quica */
+.boneco .perna,
+.boneco .braco {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+
+.peao.caminhando .peao-corpo {
+  animation: quicar 0.32s ease-in-out infinite alternate;
+}
+
+.peao.caminhando .perna-e,
+.peao.caminhando .braco-d {
+  animation: passo 0.32s ease-in-out infinite alternate;
+}
+
+.peao.caminhando .perna-d,
+.peao.caminhando .braco-e {
+  animation: passo 0.32s ease-in-out infinite alternate-reverse;
+}
+
+.peao.caminhando .braco-e,
+.peao.caminhando .braco-d {
+  animation-name: balanco;
+}
+
+@keyframes passo {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-14%);
+  }
+}
+
+@keyframes balanco {
+  from {
+    transform: rotate(16deg);
+  }
+  to {
+    transform: rotate(-16deg);
+  }
+}
+
+@keyframes quicar {
+  to {
+    transform: translateY(-5%);
+  }
+}
+
+/* ---------- Porta e casa iluminada ---------- */
+
+.predio .porta {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  transition: transform 0.28s ease-out;
+}
+
+.predio.porta-aberta .porta {
+  transform: scaleX(0.15);
+}
+
+.predio .janela-predio {
+  transition: fill 0.3s;
+}
+
+.casa.iluminada {
+  border-color: var(--destaque);
+  box-shadow:
+    3px 3px 0 #121a24,
+    0 0 0 4px var(--destaque),
+    0 0 28px 8px rgba(232, 176, 75, 0.65);
+}
+
+.casa.iluminada .janela-predio {
+  fill: #ffe08a;
+}
+
+/* ---------- Céu: noite e amanhecer ---------- */
+
+.ceu {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: 14px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ceu-noite {
+  background: rgba(14, 22, 52, 0.78);
+}
+
+.ceu-desenho {
+  width: 100%;
+  height: 100%;
+}
+
+.estrela-ceu {
+  animation: piscar 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes piscar {
+  to {
+    opacity: 0.3;
+  }
+}
+
+.ceu-amanhecer {
+  background: linear-gradient(180deg, rgba(255, 170, 90, 0.9), rgba(255, 220, 140, 0.3));
+}
+
+.pip.apagando {
+  animation: gastar 0.6s ease-out forwards;
+}
+
+/* ---------- Card da pista ---------- */
+
+.camada-card {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 14, 20, 0.45);
+  perspective: 1000px;
+}
+
+.card-pista {
+  position: relative;
+  width: min(40rem, 100%);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 1rem 1.25rem 1.25rem;
+  background: var(--fundo);
+  border: 4px solid #121a24;
+  border-radius: 18px;
+  box-shadow:
+    8px 8px 0 #121a24,
+    0 0 0 3px var(--destaque) inset;
+}
+
+.card-pista:focus {
+  outline: none;
+}
+
+.card-pista.virando {
+  animation: virar-card 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.15) both;
+}
+
+@keyframes virar-card {
+  from {
+    transform: rotateY(95deg) scale(0.55);
+    opacity: 0.2;
+  }
+  55% {
+    opacity: 1;
+  }
+}
+
+.card-topo h2 {
+  margin: 0.1rem 0 0;
+  color: var(--destaque);
+  font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+}
+
+.card-selo {
+  position: absolute;
+  top: 0.9rem;
+  right: 1rem;
+  padding: 0.15rem 0.6rem;
+  border: 3px solid var(--destaque);
+  border-radius: 6px;
+  color: var(--destaque);
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  transform: rotate(6deg);
 }
 
 /* ---------- Avatares no caderno e na acusação ---------- */
@@ -1022,4 +1202,45 @@ button.termo:hover {
 
 .janela:focus {
   outline: none;
+}
+
+/* ---------- Animações suaves (movimento reduzido) ---------- */
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+/* sem pulos, balanço de braços e pernas, piscadas e pulsos */
+.movimento-suave .peao.caminhando .peao-corpo,
+.movimento-suave .peao.caminhando .perna,
+.movimento-suave .peao.caminhando .braco,
+.movimento-suave .estrela-ceu,
+.movimento-suave .badge {
+  animation: none;
+}
+
+/* giros e zooms viram fades */
+.movimento-suave .card-pista.virando,
+.movimento-suave .peao.saindo .peao-corpo,
+.movimento-suave .carimbo,
+.movimento-suave .estrela.ganha,
+.movimento-suave .nova-pista,
+.movimento-suave .janela {
+  animation-name: aparecer;
+  animation-timing-function: ease-out;
+}
+
+.movimento-suave .card-pista.virando {
+  animation-duration: 0.35s;
+}
+
+.movimento-suave .pip.recem-gasto,
+.movimento-suave .pip.apagando {
+  animation: aparecer 0.4s reverse forwards;
+}
+
+.movimento-suave .peao {
+  transition: none;
 }

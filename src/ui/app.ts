@@ -17,9 +17,10 @@ import {
   type Aleatorio,
 } from '../game/rules.ts'
 import type { Caso, IndicioId, Local, LocalId, TipoResultado } from '../game/types.ts'
-import { angulosDasCasas, AUDITOR, boneco, fundoTabuleiro, pontoNaEstrada, predio, TABULEIRO } from './arte.ts'
+import { angulosDasCasas, AUDITOR, boneco, ceuNoturno, fundoTabuleiro, pontoNaEstrada, predio, TABULEIRO } from './arte.ts'
+import { caminharPelaEstrada, entrarNaCasa, guardarNoCaderno, passarDia } from './animacao.ts'
 
-type Tela = 'briefing' | 'mapa' | 'pista' | 'caderno' | 'acusacao' | 'resultado'
+type Tela = 'briefing' | 'mapa' | 'caderno' | 'acusacao' | 'resultado'
 
 /** Estado só da interface (o estado do jogo fica em EstadoJogo). */
 interface Ui {
@@ -36,8 +37,14 @@ interface Ui {
   provas: string[]
   /** Onde está o peão do auditor no tabuleiro (null = casa de partida). */
   posicaoPeao: LocalId | null
-  /** true enquanto o peão anda (bloqueia novos cliques). */
+  /** true enquanto uma animação roda (bloqueia novos cliques). */
   andando: boolean
+  /** Local cuja pista está aberta no card sobre o tabuleiro (o auditor está dentro da casa). */
+  cardAberto: LocalId | null
+  /** true só na primeira exibição do card, para tocar a animação de virar. */
+  animarCard: boolean
+  /** true logo depois de fechar o card: o peão sai da casa com animação. */
+  peaoSaindo: boolean
   /** Verbete do glossário aberto ("todos" = lista completa; null = fechado). */
   termoAberto: string | null
   /** Elemento que abriu o glossário, para devolver o foco ao fechar. */
@@ -52,8 +59,6 @@ export interface OpcoesApp {
   /** Sorteios (culpado no modo desafio e textos das pistas). Injetável para testes. */
   aleatorio?: Aleatorio
 }
-
-const DURACAO_PASSEIO_MS = 800
 
 const reais = (valor: number) =>
   valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })
@@ -86,17 +91,25 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       provas: [],
       posicaoPeao: null,
       andando: false,
+      cardAberto: null,
+      animarCard: false,
+      peaoSaindo: false,
       termoAberto: null,
       focoAntesDoGlossario: null,
     }
   }
 
+  /**
+   * Nível de animação: "completo", "suave" (quem pediu movimento reduzido no sistema:
+   * o boneco ainda anda, mas sem pulos, giros nem zoom) ou "nenhum" (testes).
+   */
+  type Movimento = 'completo' | 'suave' | 'nenhum'
+  const sistemaPedeMenosMovimento =
+    typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  let movimento: Movimento = opcoes.animacoes === false ? 'nenhum' : sistemaPedeMenosMovimento ? 'suave' : 'completo'
+
   function animar(): boolean {
-    if (opcoes.animacoes === false) return false
-    const reduzir =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    return !reduzir
+    return movimento !== 'nenhum'
   }
 
   const nomeIndicio = (id: IndicioId) => caso.indicios.find((i) => i.id === id)?.nome ?? id
@@ -220,6 +233,16 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
           <button type="button" class="secundario" data-acao="comecar" data-id="desafio">Modo desafio: culpado sorteado</button>
         </div>
         <p class="nota">Palavras sublinhadas abrem o glossário. No modo desafio, o culpado muda a cada partida.</p>
+        ${
+          movimento === 'nenhum'
+            ? ''
+            : `<p class="nota">
+                <button type="button" class="secundario pequeno" data-acao="alternar-movimento" aria-pressed="${movimento === 'completo'}">
+                  Animações: ${movimento === 'completo' ? 'completas' : 'suaves'}
+                </button>
+                ${movimento === 'suave' ? 'Seu sistema pede menos movimento, então o jogo usa animações suaves.' : ''}
+              </p>`
+        }
       </section>`
   }
 
@@ -235,10 +258,11 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
           : custo === 0
             ? '<span class="tag tag-gratis">Grátis (online)</span>'
             : `<span class="tag tag-custo">${custo} ${custo === 1 ? 'dia' : 'dias'}</span>`
+        const dentro = ui.cardAberto === local.id
         return `
-          <button type="button" class="casa ${visitado ? 'visitado' : ''}" style="${estiloPos(local.id)}"
+          <button type="button" class="casa ${visitado ? 'visitado' : ''} ${dentro ? 'iluminada' : ''}" style="${estiloPos(local.id)}"
             data-acao="visitar" data-id="${esc(local.id)}" ${disponivel ? '' : 'disabled'}>
-            ${predio(local.icone)}
+            ${predio(local.icone, dentro ? 'porta-aberta' : '')}
             <span class="casa-nome">${esc(local.nome)}</span>
             ${tag}
           </button>`
@@ -271,9 +295,11 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
               <span class="casa-nome">Auditoria (partida)</span>
             </div>
             ${casas}
-            <div class="peao" style="${estiloPos(ui.posicaoPeao)}">
-              ${boneco(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}
+            <div class="peao ${ui.cardAberto ? 'dentro' : ''} ${ui.peaoSaindo ? 'saindo' : ''}" style="${estiloPos(ui.posicaoPeao)}">
+              <div class="peao-corpo">${boneco(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}</div>
             </div>
+            <div class="ceu ceu-noite" aria-hidden="true">${ceuNoturno()}</div>
+            <div class="ceu ceu-amanhecer" aria-hidden="true"></div>
           </div>
         </div>
         <div class="acoes">
@@ -284,8 +310,10 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       </section>`
   }
 
-  function telaPista(): string {
-    const local = ui.ultimaPista!
+  /** Card da pista, aberto sobre o tabuleiro quando o auditor entra na casa. */
+  function cardPista(): string {
+    if (ui.cardAberto === null) return ''
+    const local = buscarLocal(caso, ui.cardAberto)
     const testemunha = local.testemunha
     const quemFala = testemunha
       ? boneco(testemunha.aparencia, { classe: 'grande', rotulo: testemunha.nome })
@@ -297,7 +325,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
            <span class="rotulo">Nova pista</span>
            <strong>${termo(caso.indicios.find((i) => i.id === local.indicio)?.termo, esc(nomeIndicio(local.indicio)))}</strong>
            ${local.forca === 'fraca' ? '<span class="nota">É um testemunho: indica o mesmo que um documento, mas vem de uma conversa.</span>' : ''}
-           <span class="nota">Abra o caderno para ver quais comerciantes apresentam esse indício.</span>
+           <span class="nota">No caderno, veja quais comerciantes apresentam esse indício.</span>
          </div>`
       : `<div class="sem-indicio" role="status">
            <span class="rotulo">Sem indício novo</span>
@@ -305,25 +333,30 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
          </div>`
 
     return `
-      ${hud()}
-      <section class="tela">
-        <p class="rotulo">Você visitou</p>
-        <h1 tabindex="-1">${esc(local.nome)}</h1>
-        <div class="cena">
-          ${predio(local.icone, 'cena-predio')}
-          ${testemunha ? `<div class="cena-ouvinte">${boneco(AUDITOR, { classe: 'pequeno' })}</div>` : ''}
-          <div class="cena-personagem">
-            ${quemFala}
-            <span class="nome-personagem">${nomeQuemFala}</span>
+      <div class="camada-card">
+        <article class="card-pista ${ui.animarCard ? 'virando' : ''}" role="dialog" aria-modal="true"
+          aria-labelledby="titulo-card" tabindex="-1" ${ui.termoAberto ? 'inert' : ''}>
+          <header class="card-topo">
+            <span class="card-selo" aria-hidden="true">PISTA</span>
+            <span class="rotulo">Você visitou</span>
+            <h2 id="titulo-card">${esc(local.nome)}</h2>
+          </header>
+          <div class="cena">
+            ${predio(local.icone, 'cena-predio')}
+            ${testemunha ? `<div class="cena-ouvinte">${boneco(AUDITOR, { classe: 'pequeno' })}</div>` : ''}
+            <div class="cena-personagem">
+              ${quemFala}
+              <span class="nome-personagem">${nomeQuemFala}</span>
+            </div>
+            ${balao(`<blockquote class="pista">${esc(local.pista)}</blockquote>`)}
           </div>
-          ${balao(`<blockquote class="pista">${esc(local.pista)}</blockquote>`)}
-        </div>
-        ${destaque}
-        <div class="acoes">
-          <button type="button" data-acao="abrir-caderno">Abrir caderno</button>
-          <button type="button" class="secundario" data-acao="voltar-mapa">Voltar ao tabuleiro</button>
-        </div>
-      </section>`
+          ${destaque}
+          <div class="acoes">
+            <button type="button" data-acao="guardar-pista">Guardar no caderno</button>
+            <button type="button" class="secundario" data-acao="guardar-abrir-caderno">Guardar e abrir o caderno</button>
+          </div>
+        </article>
+      </div>`
   }
 
   function telaCaderno(): string {
@@ -542,7 +575,6 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   const telas: Record<Tela, () => string> = {
     briefing: telaBriefing,
     mapa: telaMapa,
-    pista: telaPista,
     caderno: telaCaderno,
     acusacao: telaAcusacao,
     resultado: telaResultado,
@@ -585,8 +617,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   }
 
   function render(focar = true): void {
-    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${ui.termoAberto ? 'inert' : ''}>${telas[ui.tela]()}</main>${glossario()}`
+    raiz.classList.toggle('movimento-suave', movimento === 'suave')
+    const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null
+    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${glossario()}`
     ui.diaAcabouDeGastar = false
+    ui.animarCard = false
+    ui.peaoSaindo = false
     if (focar) raiz.querySelector<HTMLElement>('h1')?.focus()
   }
 
@@ -595,35 +631,72 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     render()
   }
 
-  function concluirVisita(localId: LocalId): void {
+  /** Registra a visita no estado do jogo e abre o card da pista. */
+  function concluirVisita(localId: LocalId, animou: boolean): void {
     const { estado, pista } = visitarLocal(caso, ui.estado, localId)
     ui = {
       ...ui,
+      tela: 'mapa',
       estado,
       ultimaPista: pista,
       pistasNovas: ui.pistasNovas + 1,
-      diaAcabouDeGastar: true,
+      // Com animação, a bolinha já se apagou durante a noite.
+      diaAcabouDeGastar: !animou,
       posicaoPeao: localId,
       andando: false,
+      cardAberto: localId,
+      animarCard: animou,
     }
-    irPara('pista')
+    render(false)
+    raiz.querySelector<HTMLElement>('.card-pista')?.focus()
   }
 
-  /** Anda com o peão até o local e só então mostra a pista. */
-  function visitarComPasseio(localId: LocalId): void {
+  function anguloDe(localId: LocalId | null): number {
+    const indice = localId === null ? -1 : caso.locais.findIndex((l) => l.id === localId)
+    return indice < 0 ? angulos.partida : angulos.locais[indice]
+  }
+
+  /** O peão caminha pela estrada, entra na casa, o dia passa e o card da pista abre. */
+  async function visitarComPasseio(localId: LocalId): Promise<void> {
     if (ui.andando || !podeVisitar(caso, ui.estado, localId)) return
     const peao = raiz.querySelector<HTMLElement>('.peao')
-    if (!animar() || !peao) {
-      concluirVisita(localId)
+    const tabuleiro = raiz.querySelector<HTMLElement>('.tabuleiro')
+    const casa = raiz.querySelector<HTMLElement>(`.casa[data-id="${CSS.escape(localId)}"]`)
+    if (!animar() || !peao || !tabuleiro || !casa) {
+      concluirVisita(localId, false)
       return
     }
+
     ui.andando = true
-    raiz.querySelector('.tabuleiro')?.classList.add('andando')
-    const { left, top } = posicaoPct(localId)
-    peao.classList.add('em-movimento')
-    peao.style.left = left
-    peao.style.top = top
-    window.setTimeout(() => concluirVisita(localId), DURACAO_PASSEIO_MS)
+    tabuleiro.classList.add('andando')
+    const suave = movimento === 'suave'
+    await caminharPelaEstrada(peao, anguloDe(ui.posicaoPeao), anguloDe(localId), suave)
+    await entrarNaCasa(peao, casa, tabuleiro, suave)
+    if (custoDoLocal(caso, buscarLocal(caso, localId)) > 0) {
+      const pips = raiz.querySelectorAll<HTMLElement>('.pip:not(.gasto)')
+      await passarDia(tabuleiro, pips[pips.length - 1] ?? null)
+    }
+    concluirVisita(localId, true)
+  }
+
+  /** Fecha o card: ele voa até o caderno e o peão sai da casa. */
+  async function guardarPista(depois: 'mapa' | 'caderno'): Promise<void> {
+    if (animar()) {
+      ui.andando = true
+      await guardarNoCaderno(
+        raiz.querySelector<HTMLElement>('.card-pista'),
+        raiz.querySelector<HTMLElement>('.hud [data-acao="abrir-caderno"]'),
+        movimento === 'suave',
+      )
+    }
+    ui = { ...ui, andando: false, cardAberto: null, peaoSaindo: animar() }
+    if (depois === 'caderno') {
+      ui = { ...ui, pistasNovas: 0, voltarDoCaderno: 'mapa' }
+      irPara('caderno')
+    } else {
+      render(false)
+      raiz.querySelector<HTMLElement>('h1')?.focus()
+    }
   }
 
   raiz.addEventListener('click', (evento) => {
@@ -648,14 +721,25 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         render()
         break
       case 'visitar':
-        visitarComPasseio(id)
+        void visitarComPasseio(id)
+        break
+      case 'alternar-movimento':
+        movimento = movimento === 'completo' ? 'suave' : 'completo'
+        render(false)
+        raiz.querySelector<HTMLElement>('[data-acao="alternar-movimento"]')?.focus()
+        break
+      case 'guardar-pista':
+        void guardarPista('mapa')
+        break
+      case 'guardar-abrir-caderno':
+        void guardarPista('caderno')
         break
       case 'abrir-caderno':
         ui = { ...ui, pistasNovas: 0, voltarDoCaderno: ui.tela === 'caderno' ? ui.voltarDoCaderno : ui.tela }
         irPara('caderno')
         break
       case 'voltar-caderno':
-        irPara(ui.voltarDoCaderno === 'pista' ? 'mapa' : ui.voltarDoCaderno)
+        irPara(ui.voltarDoCaderno)
         break
       case 'riscar':
         ui = { ...ui, estado: alternarDescarte(caso, ui.estado, id) }

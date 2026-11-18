@@ -174,12 +174,32 @@ As duas provas escolhidas são **válidas** se:
   personagens e o ícone de cada local ficam no JSON do caso, então novos casos podem ter novos personagens.
 - As animações respeitam a preferência do sistema por **movimento reduzido**.
 
+### Animação da visita (sequência)
+
+Ao clicar num local do tabuleiro:
+
+| # | Animação | Duração aproximada |
+|:-:|---|---|
+| 1 | O boneco **caminha pela estrada oval**, pelo caminho mais curto, com ciclo de passos (pernas alternadas, braços balançando, corpo quicando) | 0,6 a 2,2 s, conforme a distância |
+| 2 | Ele vai até a **porta**, que **abre**; ele **entra** e a casa **acende** (janelas amarelas e brilho) | cerca de 1,1 s |
+| 3 | **O dia passa:** o céu escurece, aparecem lua e estrelas, uma **bolinha de dia se apaga** e amanhece. O Portal da Transparência, que é grátis, não tem noite | cerca de 1,7 s |
+| 4 | O **card da pista vira** (efeito 3D) sobre o tabuleiro, com a testemunha e a fala | cerca de 0,65 s |
+| 5 | Em **Guardar no caderno**, o card **voa até o botão do caderno** e o boneco sai da casa | cerca de 0,55 s |
+
+Durante a sequência, novos cliques são ignorados. A animação usa `requestAnimationFrame` e a Web
+Animations API, sem bibliotecas (`src/ui/animacao.ts`).
+
+**Acessibilidade:** se o sistema pede **movimento reduzido** (comum no Windows com "efeitos de
+animação" desligados), o jogo usa **animações suaves**. O boneco ainda anda, mais rápido e sem pulos
+nem balanço, e os giros e zooms viram fades. Na tela inicial, o botão **"Animações: completas / suaves"**
+deixa a pessoa escolher.
+
 ### Feedback visual
 
 | Elemento | Feedback |
 |---|---|
 | Dias restantes | Bolinhas no topo de todas as telas. A bolinha gasta "apaga" com animação; o contador fica amarelo com 1 dia e vermelho com 0 |
-| Pistas novas | Selo "N nova(s)" pulsando no botão do caderno até ele ser aberto; destaque verde "Nova pista" na tela do local |
+| Pistas novas | O card voa até o botão do caderno, que ganha o selo "N nova(s)" pulsando até ser aberto; destaque verde "Nova pista" no card |
 | Local sem indício | Caixa tracejada "Sem indício novo", explicando que a informação serve de contexto |
 | Suspeitos riscados | Nome e empresa tachados em vermelho e linha esmaecida; contador "Riscados: N/4" no topo |
 | Locais visitados | Marcados como "✔ Visitado" no tabuleiro; o peão fica parado ao lado do último local |
