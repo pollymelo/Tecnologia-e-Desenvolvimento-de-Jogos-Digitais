@@ -2,6 +2,7 @@
 // Tudo é desenhado em código, sem imagens externas.
 
 import type { Aparencia } from '../game/types.ts'
+import { LARGURA_CALCADA, LARGURA_RUA, LOTES_LOCAIS, MAPA, RUAS, trechos, type Ponto } from './mapa.ts'
 
 const CONTORNO = '#1b2430'
 
@@ -197,57 +198,78 @@ export function predio(icone: string | undefined, classe = ''): string {
   return `<svg class="predio ${classe}" viewBox="0 0 80 66" aria-hidden="true">${desenho}</svg>`
 }
 
-// ---------- Tabuleiro ----------
+// ---------- Tabuleiro (mapa de Vila Aurora) ----------
 
-export const TABULEIRO = { largura: 400, altura: 320, cx: 200, cy: 160, rx: 140, ry: 112 }
-
-/** Ponto na estrada oval do tabuleiro (ângulo em graus; 90 = embaixo, no centro). */
-export function pontoNaEstrada(anguloGraus: number): { x: number; y: number } {
-  const a = (anguloGraus * Math.PI) / 180
-  return { x: TABULEIRO.cx + TABULEIRO.rx * Math.cos(a), y: TABULEIRO.cy + TABULEIRO.ry * Math.sin(a) }
-}
+const n1 = (v: number) => v.toFixed(1)
 
 /**
- * Ângulos das casas: a partida fica embaixo, e os locais se distribuem no sentido horário.
- * Funciona para qualquer número de locais, então casos novos se ajustam sozinhos.
+ * Fundo do mapa: grama, ruas com calçada e faixa, calçadas até as portas, árvores e,
+ * nos lotes que o caso não usa, uma pracinha.
  */
-export function angulosDasCasas(quantidadeLocais: number): { partida: number; locais: number[] } {
-  const passo = 360 / (quantidadeLocais + 1)
-  return {
-    partida: 90,
-    locais: Array.from({ length: quantidadeLocais }, (_, i) => 90 + passo * (i + 1)),
-  }
-}
-
-/** Fundo do tabuleiro: grama, estrada oval, casinhas coloridas e árvores. */
 export function fundoTabuleiro(quantidadeLocais: number): string {
-  const { largura, altura, cx, cy, rx, ry } = TABULEIRO
-  const cores = ['#f4d35e', '#5cc28a', '#4a90d9', '#e5675d']
-  const passo = 360 / (quantidadeLocais + 1)
+  const { largura, altura } = MAPA
+  const ruas = trechos().filter((t) => t.largura === LARGURA_RUA)
+  const calcadas = trechos().filter((t) => t.largura === LARGURA_CALCADA)
 
-  // Casinhas da trilha entre um local e outro (estilo tabuleiro)
-  const casinhas: string[] = []
-  for (let i = 0; i <= quantidadeLocais; i++) {
-    for (let k = 1; k <= 2; k++) {
-      const { x, y } = pontoNaEstrada(90 + passo * i + (passo * k) / 3)
-      const c = cores[(i * 2 + k) % cores.length]
-      casinhas.push(
-        `<rect x="${(x - 7).toFixed(1)}" y="${(y - 7).toFixed(1)}" width="14" height="14" rx="3" fill="${c}" stroke="${CONTORNO}" stroke-width="1.5"/>`,
-      )
-    }
+  const ret = (t: { de: Ponto; para: Ponto }, meia: number, cor: string, pontas = meia) => {
+    const x0 = Math.min(t.de.x, t.para.x) - (t.de.y === t.para.y ? pontas : meia)
+    const x1 = Math.max(t.de.x, t.para.x) + (t.de.y === t.para.y ? pontas : meia)
+    const y0 = Math.min(t.de.y, t.para.y) - (t.de.x === t.para.x ? pontas : meia)
+    const y1 = Math.max(t.de.y, t.para.y) + (t.de.x === t.para.x ? pontas : meia)
+    return `<rect x="${n1(x0)}" y="${n1(y0)}" width="${n1(x1 - x0)}" height="${n1(y1 - y0)}" fill="${cor}"/>`
   }
+
+  const meio = LARGURA_RUA / 2
+  const meioFio = ruas.map((t) => ret(t, meio + 3, '#d9d4c7')).join('')
+  const asfalto = ruas.map((t) => ret(t, meio, '#7d838d')).join('')
+  const faixas = ruas
+    .map(
+      (t) =>
+        `<line x1="${t.de.x}" y1="${t.de.y}" x2="${t.para.x}" y2="${t.para.y}" stroke="#f7f4ec" stroke-width="1.6" stroke-dasharray="7 7"/>`,
+    )
+    .join('')
+  const caminhos = calcadas
+    .map((t) => {
+      const x = t.de.x
+      const topo = Math.min(t.de.y, t.para.y)
+      const base = Math.max(t.de.y, t.para.y) - meio
+      return `<rect x="${n1(x - LARGURA_CALCADA / 2)}" y="${n1(topo)}" width="${LARGURA_CALCADA}" height="${n1(base - topo)}" fill="#e9e2cf" stroke="#c9bfa6" stroke-width="1"/>`
+    })
+    .join('')
+
+  // faixas de pedestre nas esquinas da rua do meio
+  const zebra = (x: number, y: number) =>
+    Array.from({ length: 4 }, (_, i) => `<rect x="${n1(x - 9 + i * 5)}" y="${n1(y - 4)}" width="3" height="8" fill="#f7f4ec"/>`).join('')
+  const zebras = RUAS.verticais
+    .slice(1, -1)
+    .flatMap((x) => RUAS.horizontais.slice(1).map((y) => zebra(x, y - meio - 6)))
+    .join('')
 
   const arvore = (x: number, y: number) =>
-    `<rect x="${x - 2}" y="${y}" width="4" height="8" fill="#8a5a44"/><rect x="${x - 8}" y="${y - 12}" width="16" height="14" rx="3" fill="#3e8e41" stroke="${CONTORNO}" stroke-width="1"/>`
+    `<rect x="${x - 2}" y="${y}" width="4" height="7" fill="#8a5a44"/><rect x="${x - 7}" y="${y - 11}" width="14" height="13" rx="3" fill="#3e8e41" stroke="${CONTORNO}" stroke-width="1"/>`
+  const arvores = [
+    [137.5, 30], [262.5, 30], [16, 40], [384, 40], [137.5, 150], [262.5, 150], [137.5, 262], [262.5, 262],
+  ]
+    .map(([x, y]) => arvore(x, y))
+    .join('')
+
+  // lotes vagos viram pracinha (árvores, banco e chafariz)
+  const pracinhas = LOTES_LOCAIS.slice(quantidadeLocais)
+    .map(({ porta: { x, y } }) => {
+      const topo = y - 70
+      return `
+      <rect x="${x - 40}" y="${topo}" width="80" height="66" rx="10" fill="#86c96a" stroke="#6fb556" stroke-width="2"/>
+      ${arvore(x - 24, topo + 22)}${arvore(x + 24, topo + 22)}${arvore(x - 24, topo + 50)}
+      <circle cx="${x + 10}" cy="${topo + 44}" r="11" fill="#9ad1f5" stroke="${CONTORNO}" stroke-width="1.5"/>
+      <rect x="${x + 7}" y="${topo + 36}" width="6" height="10" fill="#f7f4ec" stroke="${CONTORNO}" stroke-width="1"/>
+      <rect x="${x - 12}" y="${topo + 56}" width="20" height="4" fill="#8a5a44"/>`
+    })
+    .join('')
 
   return `
   <svg class="tabuleiro-fundo" viewBox="0 0 ${largura} ${altura}" aria-hidden="true">
     <rect width="${largura}" height="${altura}" rx="18" fill="#9bd77f"/>
-    <rect x="6" y="6" width="${largura - 12}" height="${altura - 12}" rx="14" fill="none" stroke="#7bc96f" stroke-width="4" stroke-dasharray="2 10"/>
-    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#8a8f98" stroke-width="30"/>
-    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#f7f4ec" stroke-width="2" stroke-dasharray="8 8"/>
-    ${casinhas.join('')}
-    ${arvore(30, 30)}${arvore(372, 290)}${arvore(372, 34)}${arvore(28, 292)}${arvore(150, 120)}${arvore(258, 210)}
+    ${meioFio}${asfalto}${faixas}${zebras}${caminhos}${arvores}${pracinhas}
   </svg>`
 }
 
@@ -261,7 +283,7 @@ export function ceuNoturno(): string {
     .map(([x, y], i) => `<rect class="estrela-ceu" style="animation-delay:${(i % 4) * 0.15}s" x="${x}" y="${y}" width="4" height="4" fill="#fff6c9"/>`)
     .join('')
   return `
-  <svg class="ceu-desenho" viewBox="0 0 ${TABULEIRO.largura} ${TABULEIRO.altura}" aria-hidden="true">
+  <svg class="ceu-desenho" viewBox="0 0 ${MAPA.largura} ${MAPA.altura}" aria-hidden="true">
     ${estrelas}
     <rect x="330" y="16" width="34" height="34" rx="10" fill="#fff6c9" stroke="${CONTORNO}" stroke-width="2"/>
     <rect x="337" y="24" width="7" height="7" rx="2" fill="#e8dca0"/>

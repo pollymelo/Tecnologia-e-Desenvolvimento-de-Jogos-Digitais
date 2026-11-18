@@ -163,7 +163,7 @@ As duas provas escolhidas são **válidas** se:
 - **Público:** jovens do Ensino Médio. A estética usa **bonecos de blocos** (cabeça quadrada, corpo
   de peças), um visual de brinquedo de montar que lembra os avatares de jogos populares entre eles.
   **Todos os personagens são originais**; o jogo não usa marca, logotipo nem personagem de outro jogo.
-- **Mapa em estilo tabuleiro:** cidade com estrada oval e casinhas coloridas, o hospital no centro
+- **Mapa de Vila Aurora visto de cima:** 3 ruas e 4 transversais formando quarteirões, com calçada, faixa e faixa de pedestre. Cada prédio fica num lote com a porta virada para a rua; o hospital fica no quarteirão do meio, a Auditoria (partida) embaixo, e lotes vagos viram pracinha
   ("verba em falta") e a Auditoria como casa de partida. Os 6 locais são prédios desenhados. O
   **peão do auditor anda** até o local escolhido antes de a pista aparecer.
 - **Personagens:** auditor(a) (jogador), os 4 suspeitos e uma **testemunha por local**, que conta a
@@ -174,13 +174,38 @@ As duas provas escolhidas são **válidas** se:
   personagens e o ícone de cada local ficam no JSON do caso, então novos casos podem ter novos personagens.
 - As animações respeitam a preferência do sistema por **movimento reduzido**.
 
+### Mapa e controle do peão
+
+O jogador **anda com o boneco** pelas ruas de Vila Aurora:
+
+| Entrada | Como funciona |
+|---|---|
+| **Teclado** | Setas ou **W A S D**. Segurar a tecla anda; soltar para. Na diagonal, o peão desliza pela borda da rua |
+| **Celular** | **Direcional na tela** (fixo no canto, em telas de toque): segurar a seta anda |
+| **Mouse / toque no mapa** | Clicar na rua (ou na grama) faz o peão ir andando até ali, **pelo caminho mais curto pelas ruas** |
+| **Clicar num local** | O peão vai sozinho até a porta e entra (atalho e acessibilidade: cada local é um botão) |
+
+**Entrar num local:** ao chegar à porta (fim da calçada), aparece o aviso **"Entrar"** com o custo
+(1 dia ou grátis) e a casa ganha contorno dourado. **Espaço**, **Enter** ou **E** (ou tocar em
+"Entrar") faz o peão entrar. Andar não gasta dia; só **entrar** gasta. Local já visitado ou sem dias
+suficientes mostra o motivo no aviso.
+
+**Para ser natural de andar** (`src/ui/mapa.ts`):
+- o peão só anda em ruas e calçadas; nunca atravessa prédio nem grama;
+- ao bater na borda, ele **desliza** ao longo da rua em vez de travar;
+- **ajuda na curva:** segurando "cima" a até 11 unidades de uma transversal ou calçada, o peão é
+  puxado para ela, então não é preciso alinhar no pixel para virar a esquina;
+- a página e o mapa rolam sozinhos para o peão não sair de vista.
+
+O mapa tem **7 lotes** para locais (a validação do JSON recusa caso com mais de 7).
+
 ### Animação da visita (sequência)
 
-Ao clicar num local do tabuleiro:
+Ao entrar num local (pela porta ou clicando nele):
 
 | # | Animação | Duração aproximada |
 |:-:|---|---|
-| 1 | O boneco **caminha pela estrada oval**, pelo caminho mais curto, com ciclo de passos (pernas alternadas, braços balançando, corpo quicando) | 0,6 a 2,2 s, conforme a distância |
+| 1 | Se o jogador clicou no local de longe, o boneco **caminha pelas ruas** até a porta, pelo caminho mais curto, com ciclo de passos (pernas alternadas, braços balançando, corpo quicando) | até 3,2 s, conforme a distância |
 | 2 | Ele vai até a **porta**, que **abre**; ele **entra** e a casa **acende** (janelas amarelas e brilho) | cerca de 1,1 s |
 | 3 | **O dia passa:** o céu escurece, aparecem lua e estrelas, uma **bolinha de dia se apaga** e amanhece. O Portal da Transparência, que é grátis, não tem noite | cerca de 1,7 s |
 | 4 | O **card da pista vira** (efeito 3D) sobre o tabuleiro, com a testemunha e a fala | cerca de 0,65 s |
@@ -251,7 +276,7 @@ para o roteiro de teste com jogadores e para o relatório.
 | Pistas novas | O card voa até o botão do caderno, que ganha o selo "N nova(s)" pulsando até ser aberto; destaque verde "Nova pista" no card |
 | Local sem indício | Caixa tracejada "Sem indício novo", explicando que a informação serve de contexto |
 | Suspeitos riscados | Nome e empresa tachados em vermelho e linha esmaecida; contador "Riscados: N/4" no topo |
-| Locais visitados | Marcados como "✔ Visitado" no tabuleiro; o peão fica parado ao lado do último local |
+| Locais visitados | Marcados como "✔ Visitado" no mapa; o peão sai pela porta do último local |
 | Resultado | Verde com o valor recuperado (vitória) ou vermelho com o valor que continua faltando ao hospital (derrota) |
 
 ### Desfechos

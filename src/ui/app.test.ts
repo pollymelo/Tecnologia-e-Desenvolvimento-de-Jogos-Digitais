@@ -189,17 +189,17 @@ describe('tabuleiro e personagens', () => {
 
   it('mostra os 6 locais como casas do tabuleiro, o hospital e o peão na partida', () => {
     expect(raiz.querySelectorAll('button.casa')).toHaveLength(6)
-    expect(raiz.querySelector('.casa-centro')?.textContent).toContain('Hospital Municipal')
+    expect(raiz.querySelector('.casa-hospital')?.textContent).toContain('Hospital Municipal')
     expect(raiz.querySelector('.casa.partida')).not.toBeNull()
     expect(raiz.querySelector('.peao .boneco')).not.toBeNull()
   })
 
   it('o peão fica no último local visitado', () => {
-    const partida = raiz.querySelector<HTMLElement>('.peao')!.style.left
+    const partida = raiz.querySelector<HTMLElement>('.peao')!.style.top // o Cartório fica na mesma coluna da Auditoria
     visitar('cartorio_detran')
     const casa = raiz.querySelector<HTMLElement>('[data-id="cartorio_detran"]')!
     const peao = raiz.querySelector<HTMLElement>('.peao')!
-    expect(peao.style.left).not.toBe(partida)
+    expect(peao.style.top).not.toBe(partida)
     expect(peao.style.left).toBe(casa.style.left)
     expect(peao.style.top).toBe(casa.style.top)
   })
@@ -475,5 +475,83 @@ describe('teste rápido, tutorial, explicação e som', () => {
     expect(botao().textContent).toContain('Som: desligado')
     expect(localStorage.getItem('rota-fantasma:som')).toBe('desligado')
     localStorage.clear()
+  })
+})
+
+describe('andar com o teclado e o direcional', () => {
+  const tecla = (tipo: 'keydown' | 'keyup', key: string) =>
+    document.dispatchEvent(new KeyboardEvent(tipo, { key, bubbles: true, cancelable: true }))
+
+  async function segurar(key: string, ms: number): Promise<void> {
+    tecla('keydown', key)
+    await vi.advanceTimersByTimeAsync(ms)
+    tecla('keyup', key)
+  }
+
+  function iniciarNoMapa(): void {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] })
+    document.body.innerHTML = '<div id="app5"></div>'
+    raiz = document.querySelector<HTMLElement>('#app5')!
+    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0, ...SEM_EXTRAS })
+    clicar('comecar')
+  }
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const peao = () => raiz.querySelector<HTMLElement>('.peao')!
+
+  it('as setas movem o peão pela rua; Espaço na porta entra no local', async () => {
+    iniciarNoMapa()
+    const inicio = peao().style.left
+    await segurar('ArrowDown', 300) // sai da porta da Auditoria para a rua de baixo
+    await segurar('ArrowLeft', 1300) // segue pela rua até a calçada do Portal (125 unidades)
+    expect(peao().style.left).not.toBe(inicio)
+    await segurar('ArrowUp', 400) // sobe a calçada até a porta
+    expect(raiz.querySelector('.aviso-porta')?.textContent).toContain('Portal da Transparência')
+    expect(raiz.querySelector('.casa.perto[data-id="portal_transparencia"]')).not.toBeNull()
+
+    tecla('keydown', ' ')
+    expect(tituloCard()).toBe('Portal da Transparência')
+  })
+
+  it('W A S D também andam, e o peão não atravessa prédios', async () => {
+    iniciarNoMapa()
+    const topo = peao().style.top
+    await segurar('w', 1000) // a Auditoria está em cima: não dá para subir
+    expect(peao().style.top).toBe(topo)
+    await segurar('s', 300)
+    expect(parseFloat(peao().style.top)).toBeGreaterThan(parseFloat(topo))
+  })
+
+  it('com o card aberto, as setas não movem o peão', async () => {
+    iniciarNoMapa()
+    clicar('visitar', 'praca')
+    const antes = peao().style.left
+    await segurar('ArrowRight', 500)
+    expect(peao().style.left).toBe(antes)
+  })
+
+  it('o direcional na tela anda enquanto o botão está pressionado', async () => {
+    iniciarNoMapa()
+    const seta = (dir: string) => raiz.querySelector<HTMLElement>(`[data-dir="${dir}"]`)!
+    seta('baixo').dispatchEvent(new Event('pointerdown', { bubbles: true, cancelable: true }))
+    await vi.advanceTimersByTimeAsync(300)
+    document.dispatchEvent(new Event('pointerup', { bubbles: true }))
+    const depois = peao().style.top
+    await vi.advanceTimersByTimeAsync(300)
+    expect(peao().style.top).toBe(depois) // soltou, parou
+    expect(parseFloat(depois)).toBeGreaterThan(87.7)
+  })
+
+  it('clicar num local leva o peão até a porta dele', () => {
+    iniciarNoMapa()
+    clicar('visitar', 'junta_comercial')
+    clicar('guardar-pista')
+    const casa = raiz.querySelector<HTMLElement>('.casa[data-id="junta_comercial"]')!
+    expect(peao().style.left).toBe(casa.style.left)
+    expect(peao().style.top).toBe(casa.style.top)
+    expect(raiz.querySelector('.aviso-porta')?.textContent).toContain('Você já visitou este local')
   })
 })

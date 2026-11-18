@@ -20,19 +20,42 @@ import {
   type LinhaExplicacao,
 } from '../game/rules.ts'
 import type { Caso, IndicioId, Local, LocalId, PerguntaQuiz, TipoResultado } from '../game/types.ts'
+import { AUDITOR, boneco, ceuNoturno, DONA_HELENA, fundoTabuleiro, predio } from './arte.ts'
 import {
-  angulosDasCasas,
-  AUDITOR,
-  boneco,
-  ceuNoturno,
-  DONA_HELENA,
-  fundoTabuleiro,
-  pontoNaEstrada,
-  predio,
-  TABULEIRO,
-} from './arte.ts'
-import { caminharPelaEstrada, duracaoCaminhada, entrarNaCasa, guardarNoCaderno, passarDia } from './animacao.ts'
+  duracaoDoCaminho,
+  entrarNaCasa,
+  guardarNoCaderno,
+  passarDia,
+  percorrer,
+  posicionarPeao,
+} from './animacao.ts'
+import {
+  caminho,
+  LOTE_HOSPITAL,
+  LOTE_PARTIDA,
+  LOTES_LOCAIS,
+  MAPA,
+  mover,
+  pontoNaRua,
+  portaProxima,
+  VELOCIDADE,
+  type Lote,
+  type Ponto,
+} from './mapa.ts'
 import { criarSom } from './som.ts'
+
+type Direcao = 'cima' | 'baixo' | 'esquerda' | 'direita'
+
+const TECLAS_DE_DIRECAO: Record<string, Direcao> = {
+  arrowup: 'cima',
+  w: 'cima',
+  arrowdown: 'baixo',
+  s: 'baixo',
+  arrowleft: 'esquerda',
+  a: 'esquerda',
+  arrowright: 'direita',
+  d: 'direita',
+}
 
 type Tela = 'briefing' | 'quiz-antes' | 'mapa' | 'caderno' | 'acusacao' | 'resultado' | 'quiz-depois'
 
@@ -49,8 +72,8 @@ interface Ui {
   voltarDoCaderno: Tela
   acusado: string | null
   provas: string[]
-  /** Onde está o peão do auditor no tabuleiro (null = casa de partida). */
-  posicaoPeao: LocalId | null
+  /** Onde estão os pés do peão, em unidades do mapa (começa na porta da Auditoria). */
+  posicaoPeao: Ponto
   /** true enquanto uma animação roda (bloqueia novos cliques). */
   andando: boolean
   /** Local cuja pista está aberta no card sobre o tabuleiro (o auditor está dentro da casa). */
@@ -122,7 +145,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       voltarDoCaderno: 'mapa',
       acusado: null,
       provas: [],
-      posicaoPeao: null,
+      posicaoPeao: LOTE_PARTIDA.porta,
       andando: false,
       cardAberto: null,
       animarCard: false,
@@ -169,23 +192,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
   // ---------- Posições no tabuleiro ----------
 
-  const angulos = angulosDasCasas(caso.locais.length)
+  /** Posição em % do tabuleiro, para pôr elementos HTML sobre o desenho do mapa. */
+  const estiloPonto = (p: Ponto) =>
+    `left:${((p.x / MAPA.largura) * 100).toFixed(2)}%;top:${((p.y / MAPA.altura) * 100).toFixed(2)}%`
 
-  /** Posição em % do tabuleiro (para posicionar elementos HTML sobre o desenho). */
-  function posicaoPct(localId: LocalId | null): { left: string; top: string } {
-    const indice = localId === null ? -1 : caso.locais.findIndex((l) => l.id === localId)
-    const angulo = indice < 0 ? angulos.partida : angulos.locais[indice]
-    const { x, y } = pontoNaEstrada(angulo)
-    return {
-      left: `${((x / TABULEIRO.largura) * 100).toFixed(2)}%`,
-      top: `${((y / TABULEIRO.altura) * 100).toFixed(2)}%`,
-    }
-  }
-
-  const estiloPos = (localId: LocalId | null) => {
-    const { left, top } = posicaoPct(localId)
-    return `left:${left};top:${top}`
-  }
+  /** Lote do mapa de cada local (na ordem do JSON). */
+  const loteDe = (localId: LocalId): Lote => LOTES_LOCAIS[caso.locais.findIndex((l) => l.id === localId)]
 
   // ---------- Componentes ----------
 
@@ -302,14 +314,15 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         const tag = visitado
           ? '<span class="tag tag-visitado">✔ Visitado</span>'
           : custo === 0
-            ? '<span class="tag tag-gratis">Grátis (online)</span>'
+            ? '<span class="tag tag-gratis">Grátis</span>'
             : `<span class="tag tag-custo">${custo} ${custo === 1 ? 'dia' : 'dias'}</span>`
         const dentro = ui.cardAberto === local.id
+        const perto = !dentro && !ui.andando && portaProxima(ui.posicaoPeao, caso.locais.length) === caso.locais.indexOf(local)
         return `
-          <button type="button" class="casa ${visitado ? 'visitado' : ''} ${dentro ? 'iluminada' : ''}" style="${estiloPos(local.id)}"
+          <button type="button" class="casa ${visitado ? 'visitado' : ''} ${dentro ? 'iluminada' : ''} ${perto ? 'perto' : ''}" style="${estiloPonto(loteDe(local.id).porta)}"
             data-acao="visitar" data-id="${esc(local.id)}" ${disponivel ? '' : 'disabled'}>
-            ${predio(local.icone, dentro ? 'porta-aberta' : '')}
             <span class="casa-nome">${esc(local.nome)}</span>
+            ${predio(local.icone, dentro ? 'porta-aberta' : '')}
             ${tag}
           </button>`
       })
@@ -322,6 +335,9 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
          </div>`
       : ''
 
+    const seta = (dir: Direcao, simbolo: string, nome: string) =>
+      `<button type="button" class="dpad-${dir}" data-dir="${dir}" tabindex="-1" aria-label="${nome}">${simbolo}</button>`
+
     return `
       ${hud()}
       <section class="tela">
@@ -329,23 +345,37 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         <p class="dica">Escolha bem: são ${caso.locais.length} locais e só ${caso.diasIniciais} dias.${temLocalGratis() ? ' Locais grátis não gastam dia.' : ''}</p>
         ${aviso}
         <div class="tabuleiro-rolagem">
-          <div class="tabuleiro ${ui.andando ? 'andando' : ''}">
+          <div class="tabuleiro ${ui.andando ? 'andando' : ''}" aria-describedby="como-andar">
             ${fundoTabuleiro(caso.locais.length)}
-            <div class="casa-centro">
-              ${predio('hospital')}
+            <div class="casa casa-hospital" style="${estiloPonto(LOTE_HOSPITAL.porta)}">
               <span class="casa-nome">Hospital Municipal</span>
+              ${predio('hospital')}
               <span class="tag tag-falta">Verba em falta</span>
             </div>
-            <div class="casa partida" style="${estiloPos(null)}">
+            <div class="casa partida" style="${estiloPonto(LOTE_PARTIDA.porta)}">
+              <span class="casa-nome">Auditoria</span>
               ${predio('auditoria')}
-              <span class="casa-nome">Auditoria (partida)</span>
+              <span class="tag tag-partida">Partida</span>
             </div>
             ${casas}
-            <div class="peao ${ui.cardAberto ? 'dentro' : ''} ${ui.peaoSaindo ? 'saindo' : ''}" style="${estiloPos(ui.posicaoPeao)}">
+            <div class="peao ${ui.cardAberto ? 'dentro' : ''} ${ui.peaoSaindo ? 'saindo' : ''}" style="${estiloPonto(ui.posicaoPeao)}">
               <div class="peao-corpo">${boneco(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}</div>
             </div>
+            ${avisoPorta()}
             <div class="ceu ceu-noite" aria-hidden="true">${ceuNoturno()}</div>
             <div class="ceu ceu-amanhecer" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div class="controles">
+          <p class="como-andar" id="como-andar">
+            <span class="so-teclado">Ande com as <kbd>setas</kbd> ou <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>.
+            Na porta de um local, aperte <kbd>Espaço</kbd> para entrar.</span>
+            <span class="so-toque">Segure as setas da tela para andar. Na porta de um local, toque em <strong>Entrar</strong>.</span>
+            Também dá para tocar ou clicar na rua ou num local.
+          </p>
+          <div class="dpad" aria-hidden="true">
+            ${seta('cima', '▲', 'Andar para cima')}${seta('esquerda', '◀', 'Andar para a esquerda')}
+            ${seta('direita', '▶', 'Andar para a direita')}${seta('baixo', '▼', 'Andar para baixo')}
           </div>
         </div>
         <div class="acoes">
@@ -354,6 +384,21 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         </div>
         ${podeAcusar(caso, ui.estado) ? '' : `<p class="dica">Colete pelo menos ${caso.provasExigidas} pistas para poder acusar.</p>`}
       </section>`
+  }
+
+  /** Aviso que aparece quando o peão está na porta de um local. */
+  function avisoPorta(): string {
+    const i = ui.cardAberto !== null || ui.andando ? null : portaProxima(ui.posicaoPeao, caso.locais.length)
+    if (i === null) return '<div class="aviso-porta" hidden></div>'
+    const local = caso.locais[i]
+    const custo = custoDoLocal(caso, local)
+    const preco = custo === 0 ? 'grátis' : `${custo} ${custo === 1 ? 'dia' : 'dias'}`
+    const conteudo = podeVisitar(caso, ui.estado, local.id)
+      ? `<button type="button" data-acao="entrar" data-id="${esc(local.id)}">Entrar <kbd class="so-teclado">Espaço</kbd></button>
+         <span class="nota">${esc(local.nome)} · ${preco}</span>`
+      : `<span class="nota">${ui.estado.locaisVisitados.includes(local.id) ? 'Você já visitou este local.' : 'Não há dias para esta visita.'}</span>`
+    const lado = ['esquerda', 'meio', 'direita'][LOTES_LOCAIS[i].coluna]
+    return `<div class="aviso-porta lado-${lado}" style="${estiloPonto(LOTES_LOCAIS[i].porta)}" role="status">${conteudo}</div>`
   }
 
   /** Card da pista, aberto sobre o tabuleiro quando o auditor entra na casa. */
@@ -648,7 +693,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       {
         alvo: '.tabuleiro',
         texto:
-          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Este é o tabuleiro de Vila Aurora: clique num local e seu peão vai até lá ouvir uma testemunha.',
+          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Esta é Vila Aurora: ande pelas ruas com as setas (ou W A S D), chegue à porta de um local e aperte Espaço para entrar e ouvir a testemunha. No celular, use as setas da tela. Também dá para clicar num local.',
       },
       {
         alvo: '.hud .dias',
@@ -847,6 +892,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     raiz.classList.toggle('movimento-suave', movimento === 'suave')
     const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null || ui.tutorialPasso !== null
     raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${tutorial()}${glossario()}`
+    ultimoAviso = ui.tela === 'mapa' ? avisoPorta() : ''
     if (ui.tutorialPasso !== null) {
       const alvo = raiz.querySelector(passosTutorial()[ui.tutorialPasso].alvo)
       alvo?.classList.add('alvo-tutorial')
@@ -881,7 +927,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       pistasNovas: ui.pistasNovas + 1,
       // Com animação, a bolinha já se apagou durante a noite.
       diaAcabouDeGastar: !animou,
-      posicaoPeao: localId,
+      posicaoPeao: loteDe(localId).porta,
       andando: false,
       cardAberto: localId,
       animarCard: animou,
@@ -891,17 +937,13 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     raiz.querySelector<HTMLElement>('.card-pista')?.focus()
   }
 
-  function anguloDe(localId: LocalId | null): number {
-    const indice = localId === null ? -1 : caso.locais.findIndex((l) => l.id === localId)
-    return indice < 0 ? angulos.partida : angulos.locais[indice]
-  }
-
-  /** O peão caminha pela estrada, entra na casa, o dia passa e o card da pista abre. */
+  /** O peão anda pelas ruas até a porta, entra na casa, o dia passa e o card da pista abre. */
   async function visitarComPasseio(localId: LocalId): Promise<void> {
     if (ui.andando || !podeVisitar(caso, ui.estado, localId)) return
     const peao = raiz.querySelector<HTMLElement>('.peao')
     const tabuleiro = raiz.querySelector<HTMLElement>('.tabuleiro')
     const casa = raiz.querySelector<HTMLElement>(`.casa[data-id="${CSS.escape(localId)}"]`)
+    teclas.clear()
     if (!animar() || !peao || !tabuleiro || !casa) {
       concluirVisita(localId, false)
       return
@@ -909,13 +951,18 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
     ui.andando = true
     tabuleiro.classList.add('andando')
-    const suave = movimento === 'suave'
-    const de = anguloDe(ui.posicaoPeao)
-    const para = anguloDe(localId)
-    som.passos(duracaoCaminhada(de, para, suave))
-    await caminharPelaEstrada(peao, de, para, suave)
-    som.tocar('porta', 0.4) // a porta abre depois que o peão chega até ela
-    await entrarNaCasa(peao, casa, tabuleiro, suave)
+    atualizarPorta()
+    const porta = loteDe(localId).porta
+    const rota = caminho(ui.posicaoPeao, porta)
+    som.passos(duracaoDoCaminho(rota))
+    await percorrer(peao, rota, (p) => {
+      ui.posicaoPeao = p
+      seguirPeao(peao)
+    })
+    ui.posicaoPeao = porta
+    posicionarPeao(peao, porta)
+    som.tocar('porta')
+    await entrarNaCasa(peao, casa, movimento === 'suave')
     if (custoDoLocal(caso, buscarLocal(caso, localId)) > 0) {
       const pips = raiz.querySelectorAll<HTMLElement>('.pip:not(.gasto)')
       som.tocar('dia')
@@ -923,6 +970,186 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     }
     concluirVisita(localId, true)
   }
+
+  // ---------- Controle do peão (teclado, direcional e clique na rua) ----------
+
+  /** Direções seguradas agora (teclado e direcional na tela). */
+  const teclas = new Set<Direcao>()
+  let andandoLivre = false
+  let ultimoQuadro = 0
+  let andadoDesdeUltimoPasso = 0
+  let ultimoAviso = ''
+
+  /** O peão só anda livre no tabuleiro, sem nada aberto por cima e fora de outra animação. */
+  const podeAndarLivre = () =>
+    ui.tela === 'mapa' &&
+    !ui.andando &&
+    ui.cardAberto === null &&
+    ui.termoAberto === null &&
+    ui.tutorialPasso === null &&
+    ui.estado.resultado === null
+
+  function direcaoSegurada(): { dx: number; dy: number } {
+    const dx = (teclas.has('direita') ? 1 : 0) - (teclas.has('esquerda') ? 1 : 0)
+    const dy = (teclas.has('baixo') ? 1 : 0) - (teclas.has('cima') ? 1 : 0)
+    const n = Math.hypot(dx, dy) || 1
+    return { dx: dx / n, dy: dy / n }
+  }
+
+  function comecarAAndar(): void {
+    if (andandoLivre) return
+    andandoLivre = true
+    ultimoQuadro = performance.now()
+    proximoQuadro()
+  }
+
+  /** requestAnimationFrame, com setTimeout de reserva (mesma ideia de interpolar). */
+  function proximoQuadro(): void {
+    let feito = false
+    const uma = () => {
+      if (feito) return
+      feito = true
+      quadroDoPeao()
+    }
+    requestAnimationFrame(uma)
+    setTimeout(uma, 40)
+  }
+
+  function quadroDoPeao(): void {
+    const agora = performance.now()
+    const dt = Math.min(0.05, Math.max(0, (agora - ultimoQuadro) / 1000))
+    ultimoQuadro = agora
+    const { dx, dy } = direcaoSegurada()
+    const peao = raiz.querySelector<HTMLElement>('.peao')
+    if (!raiz.isConnected || !peao || (dx === 0 && dy === 0) || !podeAndarLivre()) {
+      andandoLivre = false
+      peao?.classList.remove('caminhando')
+      return
+    }
+    const antes = ui.posicaoPeao
+    const depois = mover(antes, dx * VELOCIDADE * dt, dy * VELOCIDADE * dt)
+    const andou = Math.hypot(depois.x - antes.x, depois.y - antes.y)
+    ui.posicaoPeao = depois
+    posicionarPeao(peao, depois)
+    peao.classList.toggle('caminhando', andou > 0)
+    andadoDesdeUltimoPasso += andou
+    if (andadoDesdeUltimoPasso >= 14) {
+      andadoDesdeUltimoPasso = 0
+      som.tocar('passo')
+    }
+    atualizarPorta()
+    seguirPeao(peao)
+    proximoQuadro()
+  }
+
+  /** Mostra ou esconde o aviso "Entrar" e destaca a casa cuja porta está ao alcance. */
+  function atualizarPorta(): void {
+    const novo = avisoPorta()
+    if (novo === ultimoAviso) return
+    ultimoAviso = novo
+    raiz.querySelector('.aviso-porta')?.replaceWith(htmlParaElemento(novo))
+    const i = ui.andando || ui.cardAberto !== null ? null : portaProxima(ui.posicaoPeao, caso.locais.length)
+    raiz.querySelectorAll('.casa.perto').forEach((c) => c.classList.remove('perto'))
+    if (i !== null) raiz.querySelector(`.casa[data-id="${CSS.escape(caso.locais[i].id)}"]`)?.classList.add('perto')
+  }
+
+  function htmlParaElemento(html: string): Element {
+    const molde = document.createElement('template')
+    molde.innerHTML = html.trim()
+    return molde.content.firstElementChild!
+  }
+
+  /** Rola a página (e o tabuleiro, em telas estreitas) para o peão não sair de vista. */
+  function seguirPeao(peao: HTMLElement): void {
+    const r = peao.getBoundingClientRect()
+    if (r.width === 0) return
+    const margem = 70
+    if (r.top < margem) window.scrollBy?.(0, r.top - margem)
+    else if (r.bottom > window.innerHeight - margem) window.scrollBy?.(0, r.bottom - window.innerHeight + margem)
+    const rolagem = raiz.querySelector<HTMLElement>('.tabuleiro-rolagem')
+    if (rolagem && rolagem.scrollWidth > rolagem.clientWidth) {
+      const c = rolagem.getBoundingClientRect()
+      if (r.left < c.left + margem) rolagem.scrollLeft -= c.left + margem - r.left
+      else if (r.right > c.right - margem) rolagem.scrollLeft += r.right - (c.right - margem)
+    }
+  }
+
+  /** Clique na rua (ou na grama): o peão vai andando até o ponto de rua mais perto. */
+  async function andarAte(destino: Ponto): Promise<void> {
+    const peao = raiz.querySelector<HTMLElement>('.peao')
+    if (!peao || !podeAndarLivre()) return
+    const alvo = pontoNaRua(destino)
+    if (!animar()) {
+      ui.posicaoPeao = alvo
+      posicionarPeao(peao, alvo)
+      atualizarPorta()
+      return
+    }
+    ui.andando = true
+    atualizarPorta()
+    const rota = caminho(ui.posicaoPeao, alvo)
+    som.passos(duracaoDoCaminho(rota))
+    await percorrer(peao, rota, (p) => {
+      ui.posicaoPeao = p
+      seguirPeao(peao)
+    })
+    ui.posicaoPeao = alvo
+    ui.andando = false
+    atualizarPorta()
+  }
+
+  function pontoDoClique(tabuleiro: HTMLElement, evento: MouseEvent): Ponto | null {
+    const r = tabuleiro.getBoundingClientRect()
+    if (r.width === 0 || r.height === 0) return null
+    return {
+      x: ((evento.clientX - r.left) / r.width) * MAPA.largura,
+      y: ((evento.clientY - r.top) / r.height) * MAPA.altura,
+    }
+  }
+
+  document.addEventListener('keydown', (evento) => {
+    if (!raiz.isConnected || ui.tela !== 'mapa' || evento.ctrlKey || evento.metaKey || evento.altKey) return
+    const alvo = evento.target as HTMLElement
+    if (alvo.closest?.('input, textarea, select')) return
+    const tecla = evento.key.toLowerCase()
+    const direcao = TECLAS_DE_DIRECAO[tecla]
+    if (direcao) {
+      if (!podeAndarLivre()) return
+      evento.preventDefault() // as setas não rolam a página enquanto o peão anda
+      teclas.add(direcao)
+      comecarAAndar()
+      return
+    }
+    if (tecla === ' ' || tecla === 'enter' || tecla === 'e') {
+      if (!podeAndarLivre()) return
+      // Espaço/Enter num botão focado continuam apertando o botão (exceto o "Entrar" do aviso)
+      if (tecla !== 'e' && alvo.closest?.('button') && !alvo.closest('.aviso-porta')) return
+      const i = portaProxima(ui.posicaoPeao, caso.locais.length)
+      if (i === null) return
+      evento.preventDefault()
+      void visitarComPasseio(caso.locais[i].id)
+    }
+  })
+
+  document.addEventListener('keyup', (evento) => {
+    const direcao = TECLAS_DE_DIRECAO[evento.key.toLowerCase()]
+    if (direcao) teclas.delete(direcao)
+  })
+  window.addEventListener('blur', () => teclas.clear())
+
+  // Direcional na tela (celular e mouse): segurar o botão faz o peão andar.
+  raiz.addEventListener('pointerdown', (evento) => {
+    const botao = (evento.target as HTMLElement).closest<HTMLElement>('[data-dir]')
+    if (!botao || !podeAndarLivre()) return
+    evento.preventDefault()
+    teclas.add(botao.dataset.dir as Direcao)
+    comecarAAndar()
+  })
+  document.addEventListener('pointerup', () => teclas.clear())
+  document.addEventListener('pointercancel', () => teclas.clear())
+  raiz.addEventListener('contextmenu', (evento) => {
+    if ((evento.target as HTMLElement).closest('.dpad')) evento.preventDefault()
+  })
 
   /** Fecha o card: ele voa até o caderno e o peão sai da casa. */
   async function guardarPista(depois: 'mapa' | 'caderno'): Promise<void> {
@@ -953,6 +1180,15 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
   raiz.addEventListener('click', (evento) => {
     const alvo = (evento.target as HTMLElement).closest<HTMLElement>('[data-acao]')
+
+    // Clique na rua ou na grama do tabuleiro (fora das casas): o peão anda até lá.
+    const tabuleiro = (evento.target as HTMLElement).closest<HTMLElement>('.tabuleiro')
+    if (tabuleiro && !(evento.target as HTMLElement).closest('.casa, .aviso-porta')) {
+      const ponto = pontoDoClique(tabuleiro, evento)
+      if (ponto) void andarAte(ponto)
+      return
+    }
+
     if (!alvo || (alvo as HTMLButtonElement).disabled || ui.andando) return
     const id = alvo.dataset.id ?? ''
 
@@ -1022,6 +1258,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         raiz.querySelector<HTMLElement>('[data-acao="alternar-som"]')?.focus()
         break
       case 'visitar':
+      case 'entrar':
         void visitarComPasseio(id)
         break
       case 'alternar-movimento':

@@ -689,7 +689,12 @@ legend {
 .tabuleiro {
   position: relative;
   min-width: 36rem;
-  aspect-ratio: 400 / 320;
+  /* cabe na altura da tela do notebook, para ver o mapa inteiro enquanto anda */
+  width: min(100%, calc((100vh - 9rem) * 400 / 340));
+  margin: 0 auto;
+  aspect-ratio: 400 / 340;
+  cursor: pointer;
+  user-select: none;
   border-radius: 18px;
   border: 4px solid #121a24;
   box-shadow: 6px 6px 0 #121a24;
@@ -706,23 +711,39 @@ legend {
   height: 100%;
 }
 
-.casa,
-.casa-centro {
+.casa {
   position: absolute;
-  transform: translate(-50%, -62%);
+  z-index: 1;
+  transform: translate(-50%, -100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
+  gap: 0.1rem;
   width: 19%;
-  padding: 0.3rem 0.3rem 0.4rem;
-  background: rgba(255, 253, 247, 0.92);
+  padding: 0.25rem 0.25rem 0;
+  background: rgba(255, 253, 247, 0.9);
   color: #1b2430;
   border: 3px solid #121a24;
-  border-radius: 12px;
-  box-shadow: 3px 3px 0 #121a24;
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 3px 0 0 #121a24;
   font-weight: 600;
   text-align: center;
+}
+
+/* o selo de custo fica no canto do lote, sem empurrar o prédio para cima */
+.casa .tag {
+  position: absolute;
+  top: -0.7rem;
+  right: -0.4rem;
+  border: 2px solid #121a24;
+}
+
+.casa.perto {
+  border-color: var(--destaque);
+  box-shadow:
+    3px 0 0 #121a24,
+    0 0 0 3px var(--destaque);
 }
 
 button.casa {
@@ -732,7 +753,6 @@ button.casa {
 
 button.casa:hover:not(:disabled) {
   filter: none;
-  transform: translate(-50%, -66%);
   background: #fff;
   border-color: var(--destaque);
 }
@@ -754,16 +774,14 @@ button.casa:disabled:not(.visitado) .predio {
   background: #fff3d6;
 }
 
-.casa-centro {
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 22%;
+.casa-hospital {
+  background: #fde9e7;
+  cursor: default;
 }
 
-.casa .predio,
-.casa-centro .predio {
-  width: 70%;
+.casa .predio {
+  display: block;
+  width: 74%;
   height: auto;
 }
 
@@ -772,9 +790,14 @@ button.casa:disabled:not(.visitado) .predio {
   line-height: 1.15;
 }
 
-.casa .tag,
-.casa-centro .tag {
-  font-size: 0.65rem;
+.casa .tag {
+  font-size: 0.62rem;
+  padding: 0 0.4rem;
+}
+
+.tag-partida {
+  background: var(--destaque);
+  color: #1b2430;
 }
 
 .tag-visitado {
@@ -790,17 +813,11 @@ button.casa:disabled:not(.visitado) .predio {
 .peao {
   position: absolute;
   z-index: 2;
-  width: 6%;
-  /* parado: fica ao lado esquerdo da casa, sem cobrir o nome do local */
-  transform: translate(-200%, -20%);
+  width: 5%;
+  /* os pés ficam no ponto do mapa */
+  transform: translate(-50%, -92%);
   pointer-events: none;
   filter: drop-shadow(2px 3px 0 rgba(0, 0, 0, 0.45));
-  transition: transform 0.25s ease-out;
-}
-
-/* andando: os pés ficam sobre a estrada */
-.peao.na-estrada {
-  transform: translate(-50%, -92%);
 }
 
 .peao.dentro {
@@ -1460,4 +1477,171 @@ button.termo:hover {
 .movimento-suave .alvo-tutorial,
 .movimento-suave .tutorial {
   animation: none;
+}
+
+/* ---------- Andar pelo mapa: aviso da porta, dicas e direcional ---------- */
+
+.aviso-porta {
+  position: absolute;
+  z-index: 3;
+  transform: translate(-50%, 0.6rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.5rem;
+  border: 2px solid #121a24;
+  border-radius: 10px;
+  background: var(--painel);
+  box-shadow: 3px 3px 0 #121a24;
+  white-space: nowrap;
+  animation: surgir 0.2s ease-out;
+  cursor: default;
+}
+
+/* nas colunas da ponta, o aviso cresce para dentro do mapa */
+.aviso-porta.lado-esquerda {
+  transform: translate(-22%, 0.6rem);
+}
+
+.aviso-porta.lado-direita {
+  transform: translate(-78%, 0.6rem);
+}
+
+.aviso-porta[hidden] {
+  display: none;
+}
+
+.aviso-porta button {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.aviso-porta .nota {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 0.3em;
+  margin: 0 0.1em;
+  border: 1px solid var(--suave);
+  border-bottom-width: 3px;
+  border-radius: 5px;
+  font: inherit;
+  font-size: 0.8em;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: -0.25rem 0 0.5rem;
+}
+
+.como-andar {
+  margin: 0;
+  color: var(--suave);
+  font-size: 0.9rem;
+}
+
+/* direcional em cruz: segurar faz o peão andar (celular e mouse) */
+.dpad {
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(3, 2.9rem);
+  grid-template-rows: repeat(3, 2.9rem);
+  gap: 0.2rem;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+.dpad button {
+  padding: 0;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  touch-action: none;
+}
+
+.dpad button:active {
+  background: var(--destaque);
+  color: #1b2430;
+}
+
+.dpad-cima {
+  grid-area: 1 / 2;
+}
+
+.dpad-esquerda {
+  grid-area: 2 / 1;
+}
+
+.dpad-direita {
+  grid-area: 2 / 3;
+}
+
+.dpad-baixo {
+  grid-area: 3 / 2;
+}
+
+@media (max-width: 40rem) {
+  .controles {
+    flex-direction: column-reverse;
+  }
+
+  /* o mapa inteiro cabe na largura do celular */
+  .tabuleiro {
+    min-width: 0;
+  }
+
+  /* sem rolagem lateral, o aviso da porta pode passar da borda de baixo do mapa */
+  .tabuleiro-rolagem {
+    overflow: visible;
+  }
+
+  .casa-nome {
+    font-size: 0.5rem;
+  }
+
+  .casa .tag {
+    font-size: 0.5rem;
+    top: -0.55rem;
+  }
+}
+
+/* telas de toque: o direcional fica fixo no canto, por cima da página, como em jogo de celular */
+@media (pointer: coarse) {
+  .dpad {
+    position: fixed;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 30;
+    grid-template-columns: repeat(3, 3.4rem);
+    grid-template-rows: repeat(3, 3.4rem);
+    opacity: 0.9;
+  }
+
+  .tela-mapa .tela {
+    padding-bottom: 11rem;
+  }
+
+  .so-teclado {
+    display: none;
+  }
+}
+
+@media (pointer: fine), (pointer: none) {
+  .so-toque {
+    display: none;
+  }
+}
+
+.casa .tag {
+  white-space: nowrap;
 }

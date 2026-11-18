@@ -214,6 +214,8 @@ export function validarCaso(caso: Caso): string[] {
       erros.push(`Local "${l.id}" revela indício desconhecido "${l.indicio}".`)
     }
   }
+  // O mapa de Vila Aurora tem 7 lotes para locais (src/ui/mapa.ts, LOTES_LOCAIS).
+  if (caso.locais.length > 7) erros.push('O mapa comporta no máximo 7 locais.')
   if (new Set(caso.locais.map((l) => l.id)).size !== caso.locais.length) {
     erros.push('Há locais com id repetido.')
   }

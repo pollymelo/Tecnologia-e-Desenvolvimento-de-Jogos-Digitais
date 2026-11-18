@@ -1,7 +1,7 @@
-// Animações do tabuleiro: caminhada pela estrada, entrada na casa e passagem do dia.
+// Animações do tabuleiro: caminhada pelas ruas, entrada na casa e passagem do dia.
 // Usa requestAnimationFrame e a Web Animations API, sem bibliotecas.
 
-import { pontoNaEstrada, TABULEIRO } from './arte.ts'
+import { comprimento, MAPA, pontoNoCaminho, type Ponto } from './mapa.ts'
 
 export const esperar = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
@@ -50,60 +50,39 @@ export function animarElemento(
   return Promise.race([fim, esperar(duracao + 150)])
 }
 
-const suavizar = (t: number) => 0.5 - Math.cos(Math.PI * t) / 2
-
 const pct = (valor: number, total: number) => `${((valor / total) * 100).toFixed(2)}%`
 
-/**
- * Faz o peão caminhar pela estrada oval, do ângulo `de` ao ângulo `para`,
- * pelo caminho mais curto. A duração cresce com a distância.
- */
-const menorDelta = (de: number, para: number) => ((((para - de) % 360) + 540) % 360) - 180
-
-/** Duração da caminhada em ms (também usada para tocar os passos). */
-export function duracaoCaminhada(de: number, para: number, suave = false): number {
-  return Math.min(2200, Math.max(600, Math.abs(menorDelta(de, para)) * 12)) * (suave ? 0.6 : 1)
+/** Põe o peão num ponto do mapa (os pés dele ficam no ponto). */
+export function posicionarPeao(peao: HTMLElement, p: Ponto): void {
+  peao.style.left = pct(p.x, MAPA.largura)
+  peao.style.top = pct(p.y, MAPA.altura)
 }
 
-export async function caminharPelaEstrada(peao: HTMLElement, de: number, para: number, suave = false): Promise<void> {
-  const delta = menorDelta(de, para)
-  const duracao = duracaoCaminhada(de, para, suave)
-  peao.classList.add('na-estrada', 'caminhando')
-  await interpolar(duracao, (t) => {
-    const { x, y } = pontoNaEstrada(de + delta * suavizar(t))
-    peao.style.left = pct(x, TABULEIRO.largura)
-    peao.style.top = pct(y, TABULEIRO.altura)
+/** Velocidade da caminhada automática (clique), em unidades do mapa por segundo. */
+const VELOCIDADE_CLIQUE = 150
+
+/** Duração da caminhada por um caminho, em ms (também usada para tocar os passos). */
+export function duracaoDoCaminho(pontos: Ponto[]): number {
+  return Math.min(3200, Math.max(200, (comprimento(pontos) / VELOCIDADE_CLIQUE) * 1000))
+}
+
+/** O peão anda pelo caminho, em velocidade constante, com o ciclo de passos. */
+export async function percorrer(peao: HTMLElement, pontos: Ponto[], aoMover?: (p: Ponto) => void): Promise<void> {
+  const total = comprimento(pontos)
+  if (total < 0.5) return
+  peao.classList.add('caminhando')
+  await interpolar(duracaoDoCaminho(pontos), (t) => {
+    const p = pontoNoCaminho(pontos, total * t)
+    posicionarPeao(peao, p)
+    aoMover?.(p)
   })
+  peao.classList.remove('caminhando')
 }
 
-/** Leva o peão da estrada até a porta da casa, abre a porta e faz o peão entrar. */
-export async function entrarNaCasa(
-  peao: HTMLElement,
-  casa: HTMLElement,
-  tabuleiro: HTMLElement,
-  suave = false,
-): Promise<void> {
-  const desenho = casa.querySelector<SVGSVGElement>('.predio')
-  const area = tabuleiro.getBoundingClientRect()
-  const r = desenho?.getBoundingClientRect()
-
-  // Porta: centro horizontal do prédio, rente ao chão (ver as coordenadas em arte.ts)
-  if (r && area.width > 0 && area.height > 0) {
-    const portaX = r.left + r.width / 2 - area.left
-    const portaY = r.top + r.height * (62 / 66) - area.top
-    const inicioX = parseFloat(peao.style.left) || 0
-    const inicioY = parseFloat(peao.style.top) || 0
-    const fimX = (portaX / area.width) * 100
-    const fimY = (portaY / area.height) * 100
-    await interpolar(450, (t) => {
-      const e = suavizar(t)
-      peao.style.left = `${(inicioX + (fimX - inicioX) * e).toFixed(2)}%`
-      peao.style.top = `${(inicioY + (fimY - inicioY) * e).toFixed(2)}%`
-    })
-  }
-
+/** Com o peão na porta: a porta abre, a casa acende e o peão entra. */
+export async function entrarNaCasa(peao: HTMLElement, casa: HTMLElement, suave = false): Promise<void> {
   peao.classList.remove('caminhando')
-  desenho?.classList.add('porta-aberta')
+  casa.querySelector('.predio')?.classList.add('porta-aberta')
   await esperar(280)
   casa.classList.add('iluminada')
   await animarElemento(
