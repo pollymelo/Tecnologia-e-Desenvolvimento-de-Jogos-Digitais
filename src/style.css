@@ -1244,3 +1244,220 @@ button.termo:hover {
 .movimento-suave .peao {
   transition: none;
 }
+
+/* ---------- HUD com mais botões: quebra linha em telas estreitas ---------- */
+
+.hud-botoes {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ---------- Teste rápido (antes e depois) ---------- */
+
+.quiz {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.quiz .pergunta {
+  margin-bottom: 1rem;
+}
+
+.quiz .pergunta legend {
+  line-height: 1.4;
+}
+
+.quiz .opcao {
+  border: 2px solid transparent;
+  align-items: flex-start;
+}
+
+.quiz .opcao input {
+  flex: none;
+  margin-top: 0.15rem;
+}
+
+.quiz .opcao.escolhido {
+  border-color: var(--destaque);
+  background: var(--painel);
+}
+
+.cartao-quiz:focus {
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+.placar-quiz {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.placar-quiz > div {
+  display: grid;
+  text-align: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--raio);
+  background: var(--painel-2);
+}
+
+.placar-quiz strong {
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.placar-quiz .subiu {
+  background: color-mix(in srgb, var(--ok) 25%, var(--painel-2));
+}
+
+.placar-quiz .subiu strong {
+  color: var(--ok);
+}
+
+.placar-quiz .seta {
+  font-size: 1.6rem;
+  color: var(--suave);
+}
+
+.correcao-quiz {
+  padding-left: 1.25rem;
+}
+
+.correcao-quiz li {
+  margin-bottom: 0.9rem;
+}
+
+.correcao-quiz li > * {
+  display: block;
+  margin-top: 0.2rem;
+}
+
+.correcao-quiz .certo {
+  color: var(--ok);
+  font-weight: 700;
+}
+
+.correcao-quiz .errado {
+  color: var(--perigo);
+  font-weight: 700;
+}
+
+/* ---------- Por que deu esse resultado ---------- */
+
+.explicacao h3 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1rem;
+  color: var(--suave);
+}
+
+.lista-explicacao {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.lista-explicacao li {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+}
+
+.lista-explicacao li > span[aria-hidden] {
+  flex: none;
+  width: 1.2rem;
+  font-weight: 700;
+}
+
+.lista-explicacao li.ok > span[aria-hidden] {
+  color: var(--ok);
+}
+
+.lista-explicacao li.falhou > span[aria-hidden] {
+  color: var(--perigo);
+}
+
+.culpado-era {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid var(--destaque);
+  background: var(--painel-2);
+  font-weight: 700;
+}
+
+/* ---------- Tutorial da Dona Helena ---------- */
+
+.tutorial {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 1rem;
+  z-index: 40;
+  width: min(36rem, calc(100% - 2rem));
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  animation: surgir 0.35s ease-out;
+}
+
+.tutorial.no-topo {
+  top: 1rem;
+  bottom: auto;
+  align-items: flex-start;
+}
+
+.tutorial:focus {
+  outline: none;
+}
+
+.tutorial-personagem .boneco {
+  width: 4.5rem;
+  height: auto;
+  filter: drop-shadow(0 4px 6px rgb(0 0 0 / 0.4));
+}
+
+.tutorial-balao {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--destaque);
+  border-radius: var(--raio);
+  background: var(--painel);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+}
+
+.tutorial-balao p {
+  margin: 0 0 0.5rem;
+}
+
+.tutorial-balao .acoes {
+  margin: 0.5rem 0 0;
+}
+
+.alvo-tutorial {
+  position: relative;
+  z-index: 1;
+  outline: 3px solid var(--destaque);
+  outline-offset: 4px;
+  border-radius: var(--raio);
+  box-shadow: 0 0 0 6px rgb(232 176 75 / 0.25), 0 0 24px 6px rgb(232 176 75 / 0.45);
+  animation: alvo 1.4s ease-in-out infinite;
+}
+
+/* o tabuleiro fica dentro de uma área com rolagem: o destaque vai por dentro da borda */
+.tabuleiro.alvo-tutorial {
+  outline-offset: -5px;
+  box-shadow: inset 0 0 24px 6px rgb(232 176 75 / 0.55);
+}
+
+@keyframes alvo {
+  50% {
+    outline-color: rgb(232 176 75 / 0.45);
+  }
+}
+
+.movimento-suave .alvo-tutorial,
+.movimento-suave .tutorial {
+  animation: none;
+}

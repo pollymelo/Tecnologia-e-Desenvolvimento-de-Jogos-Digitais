@@ -20,6 +20,16 @@ export const AUDITOR: Aparencia = {
   acessorios: ['cracha'],
 }
 
+/** Dona Helena, chefe da Auditoria Fiscal de Vila Aurora (ver docs/lore.md). Dá as dicas do tutorial. */
+export const DONA_HELENA: Aparencia = {
+  pele: '#8d5524',
+  cabelo: '#d6d6d6',
+  estiloCabelo: 'coque',
+  camisa: '#6b2d5c',
+  calca: '#2b2b2b',
+  acessorios: ['oculos', 'cracha'],
+}
+
 export type Expressao = 'feliz' | 'neutro' | 'triste'
 
 export function boneco(

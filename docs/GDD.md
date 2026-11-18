@@ -194,6 +194,55 @@ animação" desligados), o jogo usa **animações suaves**. O boneco ainda anda,
 nem balanço, e os giros e zooms viram fades. Na tela inicial, o botão **"Animações: completas / suaves"**
 deixa a pessoa escolher.
 
+### Som
+
+Efeitos curtos, **sintetizados no navegador** com a Web Audio API (`src/ui/som.ts`). Não há
+arquivos de áudio, então não há nada para baixar nem problema de direito autoral.
+
+| Momento | Som |
+|---|---|
+| Caminhada | Passos a cada ~0,28 s |
+| Porta abrindo | Rangido curto |
+| O dia passa | Acorde grave (noite) e dois piados (amanhecer) |
+| Card da pista | Sininho de duas notas |
+| Guardar no caderno | "Vuuush" |
+| Riscar suspeito | Risco de lápis |
+| Resultado | Carimbo, seguido de fanfarra (resolvido) ou duas notas descendo (demais desfechos) |
+
+O botão **"Som: ligado / desligado"** fica na tela inicial e no HUD. A escolha fica salva no navegador.
+
+### Tutorial (Dona Helena)
+
+Na **primeira partida da sessão**, a chefe da Auditoria (ver a lore) dá **4 dicas**, uma por vez, e
+o elemento da dica pisca com um contorno dourado: o tabuleiro, os dias, o caderno e o botão do auto
+de infração. Dá para pular, e o botão **Dicas** no HUD reabre o tutorial. O tutorial não volta
+sozinho em "Jogar novamente".
+
+### Explicação do resultado
+
+Depois de qualquer acusação, a tela de resultado mostra **por que** ela deu certo ou errado:
+- **cada prova:** que indício aponta e se a pessoa acusada tem esse indício (local sem indício
+  aparece como "não serve de prova");
+- **cada outro suspeito:** qual indício o descarta ou, se nenhum descarta, que ele "também tem"
+  os indícios das provas. É assim que o auto é anulado;
+- **acusação injusta:** quem tinha todos os indícios do caso.
+
+A explicação é calculada pelas regras (`explicarAcusacao` em `rules.ts`), então funciona também no
+modo desafio e em novos casos do NAF.
+
+### Teste rápido (antes e depois): medir o aprendizado
+
+São **3 perguntas** de múltipla escolha (campo `quiz` do JSON): **sem nota fiscal**, **patrimônio
+incompatível = indício, não prova** e **Portal da Transparência**.
+
+1. Antes da primeira partida, o jogador responde sem ver as respostas certas (pode pular).
+2. No resultado, o cartão **"Teste rápido: e agora?"** chama para responder **as mesmas perguntas**.
+3. Depois, a tela mostra o placar **Antes X/3 → Depois Y/3**, a resposta certa e uma explicação de
+   cada pergunta.
+
+O teste aparece **uma vez por sessão**. Assim, o placar mede a primeira partida e serve de dado
+para o roteiro de teste com jogadores e para o relatório.
+
 ### Feedback visual
 
 | Elemento | Feedback |
@@ -243,3 +292,4 @@ apenas o JSON, sem mexer no código.
 - **Vite** com TypeScript (template vanilla-ts)
 - HTML + CSS
 - Git/GitHub para versionamento
+- **GitHub Pages** para publicar: cada push na `main` testa, gera o build e publica (GitHub Actions)

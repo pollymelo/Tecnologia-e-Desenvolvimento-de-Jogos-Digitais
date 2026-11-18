@@ -58,9 +58,16 @@ const pct = (valor: number, total: number) => `${((valor / total) * 100).toFixed
  * Faz o peão caminhar pela estrada oval, do ângulo `de` ao ângulo `para`,
  * pelo caminho mais curto. A duração cresce com a distância.
  */
+const menorDelta = (de: number, para: number) => ((((para - de) % 360) + 540) % 360) - 180
+
+/** Duração da caminhada em ms (também usada para tocar os passos). */
+export function duracaoCaminhada(de: number, para: number, suave = false): number {
+  return Math.min(2200, Math.max(600, Math.abs(menorDelta(de, para)) * 12)) * (suave ? 0.6 : 1)
+}
+
 export async function caminharPelaEstrada(peao: HTMLElement, de: number, para: number, suave = false): Promise<void> {
-  const delta = ((((para - de) % 360) + 540) % 360) - 180
-  const duracao = Math.min(2200, Math.max(600, Math.abs(delta) * 12)) * (suave ? 0.6 : 1)
+  const delta = menorDelta(de, para)
+  const duracao = duracaoCaminhada(de, para, suave)
   peao.classList.add('na-estrada', 'caminhando')
   await interpolar(duracao, (t) => {
     const { x, y } = pontoNaEstrada(de + delta * suavizar(t))

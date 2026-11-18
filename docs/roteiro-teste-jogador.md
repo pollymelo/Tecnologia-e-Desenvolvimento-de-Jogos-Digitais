@@ -5,7 +5,8 @@
 
 ## Antes
 
-- Rode `npm run dev` e abra o jogo no navegador. Teste também no celular, se possível.
+- Abra o jogo pelo link https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/ (ou rode `npm run dev`). Teste também no celular, se possível.
+- Entre um testador e outro, **recarregue a página (F5)**: assim o teste rápido e as dicas da Dona Helena aparecem de novo.
 - Perfil ideal do testador: estudante do Ensino Médio ou alguém sem conhecimento de tributos.
 - Diga apenas: *"É um jogo sobre fiscalização de tributos. Jogue como achar melhor e pense em voz alta."*
 - **Não explique as regras e não ajude**, a menos que a pessoa fique travada por mais de 1 minuto. Anote quando isso acontecer.
@@ -29,6 +30,8 @@ Registre também:
 - **Locais visitados, em ordem:**
 - **Resultado obtido:** resolvido / auto anulado / acusação injusta / prazo encerrado
 - **Tempo total de jogo:**
+- **Teste rápido:** antes ___/3 → depois ___/3 (aparece na tela de resultado)
+- **Leu as dicas da Dona Helena ou pulou?**
 
 ## Depois: perguntas ao testador
 

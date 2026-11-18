@@ -5,6 +5,9 @@ import { iniciarApp } from './app.ts'
 
 let raiz: HTMLElement
 
+/** Sem teste rápido, tutorial e som: os testes do fluxo principal vão direto ao tabuleiro. */
+const SEM_EXTRAS = { quiz: false, tutorial: false, som: false }
+
 const texto = () => raiz.textContent ?? ''
 const titulo = () => raiz.querySelector('h1')?.textContent?.trim()
 
@@ -41,7 +44,7 @@ function acusarCom(suspeito: string, provas: [string, string]): void {
 beforeEach(() => {
   document.body.innerHTML = '<div id="app"></div>'
   raiz = document.querySelector<HTMLElement>('#app')!
-  iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0 })
+  iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0, ...SEM_EXTRAS })
 })
 
 describe('fluxo das 6 telas', () => {
@@ -234,7 +237,7 @@ describe('peão animado', () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] })
     document.body.innerHTML = '<div id="app2"></div>'
     raiz = document.querySelector<HTMLElement>('#app2')!
-    iniciarApp(raiz, caso, { animacoes: true, aleatorio: () => 0 })
+    iniciarApp(raiz, caso, { animacoes: true, aleatorio: () => 0, ...SEM_EXTRAS })
     clicar('comecar')
   }
 
@@ -363,11 +366,114 @@ describe('pistas com texto sorteado', () => {
   it('outra partida pode mostrar outra versão da mesma pista', () => {
     document.body.innerHTML = '<div id="app3"></div>'
     raiz = document.querySelector<HTMLElement>('#app3')!
-    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0.99 })
+    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0.99, ...SEM_EXTRAS })
     clicar('comecar')
     clicar('visitar', 'ex_funcionario')
     const balao = raiz.querySelector('.balao .pista')?.textContent ?? ''
     expect(balao).toContain('A chefia dizia que registrar sai caro')
     expect(texto()).toContain('Funcionários sem carteira')
+  })
+})
+
+describe('teste rápido, tutorial, explicação e som', () => {
+  function iniciarCompleto(): void {
+    localStorage.clear()
+    document.body.innerHTML = '<div id="app4"></div>'
+    raiz = document.querySelector<HTMLElement>('#app4')!
+    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0, som: false })
+  }
+
+  const responderQuiz = (respostas: number[]) => respostas.forEach((r, i) => marcar(`quiz-${i}`, String(r)))
+
+  /** Começa a partida pulando o teste e as dicas. */
+  function irDiretoAoMapa(): void {
+    iniciarCompleto()
+    clicar('comecar')
+    clicar('pular-quiz')
+    clicar('tutorial-fechar')
+  }
+
+  it('teste antes → tutorial → partida → teste depois → comparação', () => {
+    iniciarCompleto()
+    clicar('comecar')
+    expect(titulo()).toBe('3 perguntas rápidas')
+    expect(raiz.querySelector<HTMLButtonElement>('[data-acao="concluir-quiz"]')!.disabled).toBe(true)
+    responderQuiz([0, 0, 1]) // nenhuma certa (as certas são 1, 2 e 0)
+    clicar('concluir-quiz')
+
+    // tutorial da Dona Helena, uma dica por vez, com o alvo destacado
+    expect(texto()).toContain('Dona Helena · dica 1 de 4')
+    expect(raiz.querySelector('.tabuleiro.alvo-tutorial')).not.toBeNull()
+    expect(raiz.querySelector('main')?.hasAttribute('inert')).toBe(true)
+    clicar('tutorial-proximo')
+    expect(raiz.querySelector('.dias.alvo-tutorial')).not.toBeNull()
+    clicar('tutorial-fechar')
+    expect(raiz.querySelector('.tutorial')).toBeNull()
+    expect(raiz.querySelector('main')?.hasAttribute('inert')).toBe(false)
+
+    visitar('cartorio_detran')
+    visitar('ex_funcionario')
+    acusarCom('ricardo', ['cartorio_detran', 'ex_funcionario'])
+    expect(texto()).toContain('Por que deu certo')
+    expect(texto()).toContain('Teste rápido: e agora?')
+
+    clicar('ir-quiz-depois')
+    expect(titulo()).toBe('As mesmas 3 perguntas')
+    expect(raiz.querySelectorAll('input[name^="quiz-"]:checked')).toHaveLength(0) // começa em branco
+    responderQuiz([1, 2, 0])
+    clicar('concluir-quiz')
+    expect(titulo()).toBe('Caso resolvido')
+    expect(raiz.querySelector('.placar-quiz')!.getAttribute('aria-label')).toBe(
+      'Antes do jogo: 0 de 3 acertos. Depois: 3 de 3.',
+    )
+    expect(texto()).toContain('Você acertou mais depois de jogar!')
+    expect(texto()).toContain('No Portal da Transparência')
+
+    // jogar de novo não repete o teste nem o tutorial
+    clicar('jogar-novamente')
+    clicar('comecar')
+    expect(titulo()).toBe('Para onde investigar?')
+    expect(raiz.querySelector('.tutorial')).toBeNull()
+  })
+
+  it('dá para pular o teste; aí o resultado não oferece o teste final', () => {
+    iniciarCompleto()
+    clicar('comecar')
+    clicar('pular-quiz')
+    expect(raiz.querySelector('.tutorial')).not.toBeNull()
+    for (let i = 0; i < 4; i++) clicar('tutorial-proximo')
+    expect(raiz.querySelector('.tutorial')).toBeNull()
+    visitar('operadora_cartao')
+    visitar('ex_funcionario')
+    acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
+    expect(texto()).toContain('Onde a acusação falhou')
+    expect(texto()).toContain('Marta também tem')
+    expect(raiz.querySelector('.cartao-quiz')).toBeNull()
+  })
+
+  it('o botão Dicas reabre o tutorial e Esc fecha', () => {
+    irDiretoAoMapa()
+    clicar('tutorial-abrir')
+    expect(raiz.querySelector('.tutorial')).not.toBeNull()
+    raiz.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(raiz.querySelector('.tutorial')).toBeNull()
+  })
+
+  it('acusação injusta mostra quem era o culpado', () => {
+    irDiretoAoMapa()
+    visitar('cartorio_detran')
+    visitar('praca')
+    acusarCom('marta', ['cartorio_detran', 'praca'])
+    expect(texto()).toContain('Quem tinha todos os indícios do caso era Ricardo')
+  })
+
+  it('o botão de som liga e desliga, e a escolha fica salva', () => {
+    iniciarCompleto()
+    const botao = () => raiz.querySelector<HTMLButtonElement>('[data-acao="alternar-som"]')!
+    expect(botao().getAttribute('aria-pressed')).toBe('true')
+    clicar('alternar-som')
+    expect(botao().textContent).toContain('Som: desligado')
+    expect(localStorage.getItem('rota-fantasma:som')).toBe('desligado')
+    localStorage.clear()
   })
 })

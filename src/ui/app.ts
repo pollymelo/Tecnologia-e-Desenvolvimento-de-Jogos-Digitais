@@ -14,13 +14,27 @@ import {
   preencherTexto,
   avaliarDesempenho,
   sortearPistas,
+  explicarAcusacao,
+  pontuarQuiz,
   type Aleatorio,
+  type LinhaExplicacao,
 } from '../game/rules.ts'
-import type { Caso, IndicioId, Local, LocalId, TipoResultado } from '../game/types.ts'
-import { angulosDasCasas, AUDITOR, boneco, ceuNoturno, fundoTabuleiro, pontoNaEstrada, predio, TABULEIRO } from './arte.ts'
-import { caminharPelaEstrada, entrarNaCasa, guardarNoCaderno, passarDia } from './animacao.ts'
+import type { Caso, IndicioId, Local, LocalId, PerguntaQuiz, TipoResultado } from '../game/types.ts'
+import {
+  angulosDasCasas,
+  AUDITOR,
+  boneco,
+  ceuNoturno,
+  DONA_HELENA,
+  fundoTabuleiro,
+  pontoNaEstrada,
+  predio,
+  TABULEIRO,
+} from './arte.ts'
+import { caminharPelaEstrada, duracaoCaminhada, entrarNaCasa, guardarNoCaderno, passarDia } from './animacao.ts'
+import { criarSom } from './som.ts'
 
-type Tela = 'briefing' | 'mapa' | 'caderno' | 'acusacao' | 'resultado'
+type Tela = 'briefing' | 'quiz-antes' | 'mapa' | 'caderno' | 'acusacao' | 'resultado' | 'quiz-depois'
 
 /** Estado só da interface (o estado do jogo fica em EstadoJogo). */
 interface Ui {
@@ -49,6 +63,10 @@ interface Ui {
   termoAberto: string | null
   /** Elemento que abriu o glossário, para devolver o foco ao fechar. */
   focoAntesDoGlossario: string | null
+  /** Respostas marcadas no teste rápido em andamento (índice da opção ou null). */
+  respostas: (number | null)[]
+  /** Passo do tutorial da Dona Helena (null = fechado). */
+  tutorialPasso: number | null
 }
 
 type Modo = 'historia' | 'desafio'
@@ -58,6 +76,12 @@ export interface OpcoesApp {
   animacoes?: boolean
   /** Sorteios (culpado no modo desafio e textos das pistas). Injetável para testes. */
   aleatorio?: Aleatorio
+  /** false pula o teste rápido de antes e depois (usado nos testes). */
+  quiz?: boolean
+  /** false não mostra o tutorial da primeira partida (usado nos testes). */
+  tutorial?: boolean
+  /** false deixa o jogo mudo. */
+  som?: boolean
 }
 
 const reais = (valor: number) =>
@@ -77,6 +101,15 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   let caso: Caso = casoBase
   let modo: Modo = 'historia'
   const aleatorio: Aleatorio = opcoes.aleatorio ?? Math.random
+  const som = criarSom(opcoes.som !== false)
+  /**
+   * Teste rápido: feito na primeira partida da sessão (antes) e depois do primeiro resultado.
+   * null = ainda não respondido; [] = a pessoa pulou o teste.
+   */
+  let quizAntes: (number | null)[] | null = null
+  let quizDepois: (number | null)[] | null = null
+  /** O tutorial aparece sozinho só na primeira vez que o tabuleiro abre na sessão. */
+  let tutorialVisto = opcoes.tutorial === false
   let ui: Ui = estadoUiInicial()
 
   function estadoUiInicial(): Ui {
@@ -96,8 +129,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       peaoSaindo: false,
       termoAberto: null,
       focoAntesDoGlossario: null,
+      respostas: [],
+      tutorialPasso: null,
     }
   }
+
+  const perguntas = (): PerguntaQuiz[] => (opcoes.quiz === false ? [] : (casoBase.quiz ?? []))
 
   /**
    * Nível de animação: "completo", "suave" (quem pediu movimento reduzido no sistema:
@@ -177,10 +214,18 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         <div class="hud-info">Riscados: <strong>${riscados}/${caso.suspeitos.length}</strong></div>
         ${modo === 'desafio' ? '<span class="tag tag-desafio">Modo desafio</span>' : ''}
         <div class="hud-botoes">
+          ${botaoSom()}
+          ${ui.tela === 'mapa' ? '<button type="button" class="secundario" data-acao="tutorial-abrir" aria-haspopup="dialog">Dicas</button>' : ''}
           <button type="button" class="secundario" data-acao="termo" data-id="todos" aria-haspopup="dialog">Glossário</button>
           <button type="button" class="secundario" data-acao="abrir-caderno">Caderno ${badge}</button>
         </div>
       </header>`
+  }
+
+  function botaoSom(): string {
+    return `<button type="button" class="secundario" data-acao="alternar-som" aria-pressed="${som.ligado}">
+      <span aria-hidden="true">${som.ligado ? '♪' : '✕'}</span> Som: ${som.ligado ? 'ligado' : 'desligado'}
+    </button>`
   }
 
   function balao(texto: string, classe = ''): string {
@@ -233,6 +278,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
           <button type="button" class="secundario" data-acao="comecar" data-id="desafio">Modo desafio: culpado sorteado</button>
         </div>
         <p class="nota">Palavras sublinhadas abrem o glossário. No modo desafio, o culpado muda a cada partida.</p>
+        <p class="nota">${botaoSom()}</p>
         ${
           movimento === 'nenhum'
             ? ''
@@ -480,6 +526,183 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       </section>`
   }
 
+  /** Teste rápido: as mesmas perguntas antes de jogar e depois do resultado. */
+  function telaQuiz(fase: 'antes' | 'depois'): string {
+    const qs = perguntas()
+    const itens = qs
+      .map(
+        (q, i) => `
+        <fieldset class="pergunta">
+          <legend>${i + 1}. ${esc(q.pergunta)}</legend>
+          ${q.opcoes
+            .map(
+              (o, j) => `
+            <label class="opcao ${ui.respostas[i] === j ? 'escolhido' : ''}">
+              <input type="radio" name="quiz-${i}" value="${j}" ${ui.respostas[i] === j ? 'checked' : ''}>
+              <span>${esc(o)}</span>
+            </label>`,
+            )
+            .join('')}
+        </fieldset>`,
+      )
+      .join('')
+    const respondidas = qs.filter((_, i) => ui.respostas[i] !== null && ui.respostas[i] !== undefined).length
+    const pronto = respondidas === qs.length
+
+    const cabecalho =
+      fase === 'antes'
+        ? `<p class="rotulo">Antes de começar</p>
+           <h1 tabindex="-1">${qs.length} perguntas rápidas</h1>
+           <p class="dica">Não vale nota e não precisa saber a resposta: marque o que você acha agora.
+           No fim do jogo você responde de novo e compara.</p>`
+        : `<p class="rotulo">Depois de jogar</p>
+           <h1 tabindex="-1">As mesmas ${qs.length} perguntas</h1>
+           <p class="dica">Responda de novo. Em seguida você vê as respostas certas e compara com o começo.</p>`
+
+    const botoes =
+      fase === 'antes'
+        ? `<button type="button" class="secundario" data-acao="pular-quiz">Pular o teste</button>
+           <button type="button" data-acao="concluir-quiz" ${pronto ? '' : 'disabled'}>Começar investigação</button>`
+        : `<button type="button" class="secundario" data-acao="voltar-resultado">Voltar ao resultado</button>
+           <button type="button" data-acao="concluir-quiz" ${pronto ? '' : 'disabled'}>Ver a comparação</button>`
+
+    return `
+      <section class="tela quiz">
+        ${cabecalho}
+        ${itens}
+        <p class="nota" role="status">${respondidas} de ${qs.length} respondidas</p>
+        <div class="acoes">${botoes}</div>
+      </section>`
+  }
+
+  /** Cartão do resultado: convite para o teste final ou a comparação antes × depois. */
+  function cartaoQuiz(): string {
+    const qs = perguntas()
+    if (!qs.length || !quizAntes || quizAntes.length === 0) return ''
+    if (!quizDepois) {
+      return `
+        <div class="cartao cartao-quiz">
+          <h2>Teste rápido: e agora?</h2>
+          <p>No começo você respondeu ${qs.length} perguntas. Responda de novo e veja o quanto aprendeu.</p>
+          <button type="button" data-acao="ir-quiz-depois">Responder de novo</button>
+        </div>`
+    }
+    const antes = pontuarQuiz(qs, quizAntes)
+    const depois = pontuarQuiz(qs, quizDepois)
+    const frase =
+      depois > antes
+        ? 'Você acertou mais depois de jogar!'
+        : depois === qs.length
+          ? 'Você acertou tudo nas duas vezes!'
+          : depois === antes
+            ? 'O mesmo número de acertos. Leia as explicações abaixo.'
+            : 'Leia as explicações abaixo e tente de novo numa próxima partida.'
+    const marca = (ok: boolean) => (ok ? '<span class="certo">✔ certo</span>' : '<span class="errado">✘ errado</span>')
+    const correcao = qs
+      .map(
+        (q, i) => `
+        <li>
+          <strong>${esc(q.pergunta)}</strong>
+          <span class="marcas">Antes: ${marca(quizAntes![i] === q.correta)} · Depois: ${marca(quizDepois![i] === q.correta)}</span>
+          <span>Resposta certa: <em>${esc(q.opcoes[q.correta])}</em></span>
+          <span class="nota">${esc(q.explicacao)}</span>
+        </li>`,
+      )
+      .join('')
+    return `
+      <div class="cartao cartao-quiz" id="comparacao-quiz" tabindex="-1">
+        <h2>Teste rápido: antes e depois</h2>
+        <div class="placar-quiz" role="img" aria-label="Antes do jogo: ${antes} de ${qs.length} acertos. Depois: ${depois} de ${qs.length}.">
+          <div><span class="rotulo">Antes</span><strong>${antes}/${qs.length}</strong></div>
+          <span class="seta" aria-hidden="true">→</span>
+          <div class="${depois > antes ? 'subiu' : ''}"><span class="rotulo">Depois</span><strong>${depois}/${qs.length}</strong></div>
+        </div>
+        <p>${frase}</p>
+        <ol class="correcao-quiz">${correcao}</ol>
+      </div>`
+  }
+
+  /** Cartão do resultado que mostra o raciocínio: o que cada prova aponta e quem ela descarta. */
+  function cartaoExplicacao(): string {
+    const r = ui.estado.resultado
+    if (!r || r.suspeitoAcusadoId === null) return ''
+    const e = explicarAcusacao(caso, r.suspeitoAcusadoId, r.provas)
+    const linha = (l: LinhaExplicacao) =>
+      `<li class="${l.ok ? 'ok' : 'falhou'}"><span aria-hidden="true">${l.ok ? '✔' : '✘'}</span><span class="sr">${l.ok ? 'Certo:' : 'Problema:'}</span> ${esc(l.texto)}</li>`
+    return `
+      <div class="cartao explicacao">
+        <h2>${r.tipo === 'resolvido' ? 'Por que deu certo' : 'Onde a acusação falhou'}</h2>
+        <h3>O que cada prova aponta</h3>
+        <ul class="lista-explicacao">${e.provas.map(linha).join('')}</ul>
+        <h3>Os outros suspeitos</h3>
+        <ul class="lista-explicacao">${e.outros.map(linha).join('')}</ul>
+        ${e.culpadoEra ? `<p class="culpado-era">${esc(e.culpadoEra)}</p>` : ''}
+      </div>`
+  }
+
+  // ---------- Tutorial (Dona Helena) ----------
+
+  function passosTutorial(): { alvo: string; texto: string }[] {
+    const dia = caso.custoVisitaDias === 1 ? '1 dia' : `${caso.custoVisitaDias} dias`
+    return [
+      {
+        alvo: '.tabuleiro',
+        texto:
+          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Este é o tabuleiro de Vila Aurora: clique num local e seu peão vai até lá ouvir uma testemunha.',
+      },
+      {
+        alvo: '.hud .dias',
+        texto: `Cada visita gasta ${dia}, e você só tem ${caso.diasIniciais}. Escolha bem!${temLocalGratis() ? ' Locais online, como o Portal da Transparência, não gastam dia.' : ''}`,
+      },
+      {
+        alvo: '.hud [data-acao="abrir-caderno"]',
+        texto: 'Cada pista vai para o caderno. Lá você vê quem tem cada indício e risca quem não tem.',
+      },
+      {
+        alvo: '[data-acao="ir-acusacao"]',
+        texto: `Quando tiver ${caso.provasExigidas} provas que só batem com uma pessoa, emita o auto de infração. Prova fraca anula o auto, e acusar a pessoa errada prejudica um inocente.`,
+      },
+    ]
+  }
+
+  function tutorial(): string {
+    if (ui.tutorialPasso === null) return ''
+    const passos = passosTutorial()
+    const i = ui.tutorialPasso
+    const ultimo = i === passos.length - 1
+    return `
+      <div class="tutorial" role="dialog" aria-modal="true" aria-labelledby="titulo-tutorial" aria-describedby="texto-tutorial" tabindex="-1">
+        <div class="tutorial-personagem">${boneco(DONA_HELENA, { expressao: 'feliz', rotulo: 'Dona Helena' })}</div>
+        <div class="tutorial-balao">
+          <p class="rotulo" id="titulo-tutorial">Dona Helena · dica ${i + 1} de ${passos.length}</p>
+          <p id="texto-tutorial">${esc(passos[i].texto)}</p>
+          <div class="acoes">
+            <button type="button" data-acao="tutorial-proximo">${ultimo ? 'Vamos lá!' : 'Próxima dica'}</button>
+            ${ultimo ? '' : '<button type="button" class="secundario" data-acao="tutorial-fechar">Pular dicas</button>'}
+          </div>
+        </div>
+      </div>`
+  }
+
+  function abrirTutorial(): void {
+    tutorialVisto = true
+    ui = { ...ui, tutorialPasso: 0 }
+    render(false)
+    raiz.querySelector<HTMLElement>('.tutorial')?.focus()
+  }
+
+  function fecharTutorial(): void {
+    ui = { ...ui, tutorialPasso: null }
+    render()
+  }
+
+  /** Vai para o tabuleiro e, na primeira vez da sessão, abre as dicas. */
+  function entrarNoMapa(): void {
+    ui = { ...ui, tela: 'mapa', respostas: [] }
+    if (!tutorialVisto) abrirTutorial()
+    else render()
+  }
+
   function cenaResultado(tipo: TipoResultado, acusadoId: string | null): string {
     const acusado = acusadoId ? buscarSuspeito(caso, acusadoId) : null
     const bonecoAcusado = (expressao: 'feliz' | 'neutro' | 'triste') =>
@@ -551,11 +774,13 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         ${estrelas}
         <p class="mensagem">${esc(texto.mensagem)}</p>
         ${acusacao}
+        ${cartaoExplicacao()}
         ${valor}
         <div class="cartao">
           <h2>O que este resultado ensina</h2>
           <p>${esc(texto.ensina)}</p>
         </div>
+        ${cartaoQuiz()}
         <div class="cartao">
           <h2>Para debater</h2>
           <ol>${perguntas}</ol>
@@ -574,10 +799,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
   const telas: Record<Tela, () => string> = {
     briefing: telaBriefing,
+    'quiz-antes': () => telaQuiz('antes'),
     mapa: telaMapa,
     caderno: telaCaderno,
     acusacao: telaAcusacao,
     resultado: telaResultado,
+    'quiz-depois': () => telaQuiz('depois'),
   }
 
   function glossario(): string {
@@ -618,8 +845,20 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
   function render(focar = true): void {
     raiz.classList.toggle('movimento-suave', movimento === 'suave')
-    const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null
-    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${glossario()}`
+    const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null || ui.tutorialPasso !== null
+    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${tutorial()}${glossario()}`
+    if (ui.tutorialPasso !== null) {
+      const alvo = raiz.querySelector(passosTutorial()[ui.tutorialPasso].alvo)
+      alvo?.classList.add('alvo-tutorial')
+      // o balão fica embaixo da tela: o alvo vai para o meio, para não ficar escondido
+      alvo?.scrollIntoView?.({ block: 'center' })
+      // alvo no fim da página (não dá para centralizar): o balão sobe para o topo
+      const balao = raiz.querySelector<HTMLElement>('.tutorial')
+      if (alvo && balao) {
+        const baixoDoAlvo = alvo.getBoundingClientRect().bottom
+        balao.classList.toggle('no-topo', baixoDoAlvo > window.innerHeight - balao.offsetHeight - 24)
+      }
+    }
     ui.diaAcabouDeGastar = false
     ui.animarCard = false
     ui.peaoSaindo = false
@@ -648,6 +887,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       animarCard: animou,
     }
     render(false)
+    som.tocar('pista')
     raiz.querySelector<HTMLElement>('.card-pista')?.focus()
   }
 
@@ -670,10 +910,15 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     ui.andando = true
     tabuleiro.classList.add('andando')
     const suave = movimento === 'suave'
-    await caminharPelaEstrada(peao, anguloDe(ui.posicaoPeao), anguloDe(localId), suave)
+    const de = anguloDe(ui.posicaoPeao)
+    const para = anguloDe(localId)
+    som.passos(duracaoCaminhada(de, para, suave))
+    await caminharPelaEstrada(peao, de, para, suave)
+    som.tocar('porta', 0.4) // a porta abre depois que o peão chega até ela
     await entrarNaCasa(peao, casa, tabuleiro, suave)
     if (custoDoLocal(caso, buscarLocal(caso, localId)) > 0) {
       const pips = raiz.querySelectorAll<HTMLElement>('.pip:not(.gasto)')
+      som.tocar('dia')
       await passarDia(tabuleiro, pips[pips.length - 1] ?? null)
     }
     concluirVisita(localId, true)
@@ -681,6 +926,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
   /** Fecha o card: ele voa até o caderno e o peão sai da casa. */
   async function guardarPista(depois: 'mapa' | 'caderno'): Promise<void> {
+    som.tocar('guardar')
     if (animar()) {
       ui.andando = true
       await guardarNoCaderno(
@@ -697,6 +943,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       render(false)
       raiz.querySelector<HTMLElement>('h1')?.focus()
     }
+  }
+
+  /** Carimbo e, logo depois, fanfarra (caso resolvido) ou duas notas descendo. */
+  function somDoResultado(): void {
+    som.tocar('carimbo', 0.3)
+    som.tocar(ui.estado.resultado?.tipo === 'resolvido' ? 'vitoria' : 'falha', 0.7)
   }
 
   raiz.addEventListener('click', (evento) => {
@@ -717,8 +969,57 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       case 'comecar':
         modo = id === 'desafio' ? 'desafio' : 'historia'
         caso = sortearPistas(modo === 'desafio' ? sortearCaso(casoBase, aleatorio) : casoBase, aleatorio)
-        ui = { ...estadoUiInicial(), tela: 'mapa' }
+        ui = estadoUiInicial()
+        if (quizAntes === null && perguntas().length > 0) {
+          ui = { ...ui, tela: 'quiz-antes', respostas: perguntas().map(() => null) }
+          render()
+        } else {
+          entrarNoMapa()
+        }
+        break
+      case 'concluir-quiz':
+        if (ui.tela === 'quiz-antes') {
+          quizAntes = [...ui.respostas]
+          entrarNoMapa()
+        } else {
+          quizDepois = [...ui.respostas]
+          ui = { ...ui, tela: 'resultado', respostas: [] }
+          render(false)
+          raiz.querySelector<HTMLElement>('#comparacao-quiz')?.focus()
+        }
+        break
+      case 'pular-quiz':
+        quizAntes = []
+        entrarNoMapa()
+        break
+      case 'ir-quiz-depois':
+        ui = { ...ui, tela: 'quiz-depois', respostas: perguntas().map(() => null) }
         render()
+        break
+      case 'voltar-resultado':
+        ui = { ...ui, tela: 'resultado', respostas: [] }
+        render()
+        break
+      case 'tutorial-abrir':
+        abrirTutorial()
+        break
+      case 'tutorial-proximo':
+        if (ui.tutorialPasso === null || ui.tutorialPasso >= passosTutorial().length - 1) {
+          fecharTutorial()
+        } else {
+          ui = { ...ui, tutorialPasso: ui.tutorialPasso + 1 }
+          render(false)
+          raiz.querySelector<HTMLElement>('.tutorial')?.focus()
+        }
+        break
+      case 'tutorial-fechar':
+        fecharTutorial()
+        break
+      case 'alternar-som':
+        som.alternar()
+        som.tocar('pista')
+        render(false)
+        raiz.querySelector<HTMLElement>('[data-acao="alternar-som"]')?.focus()
         break
       case 'visitar':
         void visitarComPasseio(id)
@@ -743,6 +1044,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         break
       case 'riscar':
         ui = { ...ui, estado: alternarDescarte(caso, ui.estado, id) }
+        som.tocar('risco')
         render(false)
         raiz.querySelector<HTMLElement>(`[data-acao="riscar"][data-id="${CSS.escape(id)}"]`)?.focus()
         break
@@ -755,10 +1057,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       case 'emitir-auto':
         ui = { ...ui, estado: acusar(caso, ui.estado, ui.acusado!, ui.provas) }
         irPara('resultado')
+        somDoResultado()
         break
       case 'encerrar-prazo':
         ui = { ...ui, estado: encerrarPrazo(caso, ui.estado) }
         irPara('resultado')
+        somDoResultado()
         break
       case 'jogar-novamente':
         caso = casoBase
@@ -778,6 +1082,10 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         ? [...ui.provas, input.value]
         : ui.provas.filter((p) => p !== input.value)
       ui = { ...ui, provas }
+    } else if (input.name.startsWith('quiz-')) {
+      const respostas = [...ui.respostas]
+      respostas[Number(input.name.slice(5))] = Number(input.value)
+      ui = { ...ui, respostas }
     } else {
       return
     }
@@ -786,7 +1094,9 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   })
 
   raiz.addEventListener('keydown', (evento) => {
-    if (evento.key === 'Escape' && ui.termoAberto !== null) fecharTermo()
+    if (evento.key !== 'Escape') return
+    if (ui.termoAberto !== null) fecharTermo()
+    else if (ui.tutorialPasso !== null) fecharTutorial()
   })
 
   render(false)

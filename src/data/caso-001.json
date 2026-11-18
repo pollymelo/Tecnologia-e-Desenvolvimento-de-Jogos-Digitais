@@ -290,6 +290,41 @@
       ]
     }
   },
+  "quiz": [
+    {
+      "id": "sem_nota",
+      "pergunta": "Na loja, o vendedor oferece desconto se você pagar \"sem nota\". O que acontece com o imposto que estava no preço?",
+      "opcoes": [
+        "Nada: é só uma economia combinada entre você e a loja.",
+        "Ele deixa de chegar aos cofres públicos, e falta dinheiro para serviços como saúde e escola.",
+        "A loja paga esse imposto em dobro no fim do mês."
+      ],
+      "correta": 1,
+      "explicacao": "O imposto já vem embutido no preço. Sem nota fiscal, a venda não fica registrada e o imposto pago por você pode ficar com a loja, sem chegar ao hospital, à escola ou à rua da sua cidade."
+    },
+    {
+      "id": "patrimonio",
+      "pergunta": "Um comerciante declara ganhar pouco, mas compra imóveis e carros caros. Para a fiscalização, isso é:",
+      "opcoes": [
+        "Prova suficiente para multar na hora.",
+        "Normal, e não interessa à fiscalização.",
+        "Um indício que merece ser investigado e comparado com outras provas."
+      ],
+      "correta": 2,
+      "explicacao": "Patrimônio incompatível com a renda declarada é um indício, não uma prova completa. A fiscalização precisa juntar provas que diferenciem o responsável; acusar só por suspeita pode punir um inocente."
+    },
+    {
+      "id": "portal",
+      "pergunta": "Onde qualquer cidadão pode consultar como o dinheiro público foi gasto?",
+      "opcoes": [
+        "No Portal da Transparência, na internet.",
+        "Só pedindo pessoalmente ao prefeito.",
+        "Em lugar nenhum: essa informação é sigilosa."
+      ],
+      "correta": 0,
+      "explicacao": "Por lei, os gastos públicos precisam ser divulgados. O Portal da Transparência mostra receitas e despesas, e qualquer pessoa pode consultar e cobrar."
+    }
+  ],
   "glossario": [
     {
       "id": "tributo",

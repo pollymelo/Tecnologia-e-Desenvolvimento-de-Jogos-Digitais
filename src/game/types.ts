@@ -88,6 +88,17 @@ export interface Impacto {
   detalhes: string[]
 }
 
+/** Pergunta do teste rápido, feito antes e depois da partida para medir o aprendizado. */
+export interface PerguntaQuiz {
+  id: string
+  pergunta: string
+  opcoes: string[]
+  /** Índice (a partir de 0) da opção correta em `opcoes`. */
+  correta: number
+  /** Explicação mostrada só depois do teste final. */
+  explicacao: string
+}
+
 export interface Caso {
   id: string
   titulo: string
@@ -105,6 +116,8 @@ export interface Caso {
   /** Gancho para o próximo caso, exibido quando o caso é resolvido. */
   gancho?: string
   glossario?: Termo[]
+  /** Teste rápido de antes e depois da partida (opcional). */
+  quiz?: PerguntaQuiz[]
   resultados: Record<TipoResultado, TextoResultado>
 }
 

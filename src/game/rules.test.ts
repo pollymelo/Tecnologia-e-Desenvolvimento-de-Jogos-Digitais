@@ -18,6 +18,8 @@ import {
   custoDoLocal,
   sortearPistas,
   versoesDaPista,
+  explicarAcusacao,
+  pontuarQuiz,
   visitarLocal,
 } from './rules.ts'
 import type { Caso } from './types.ts'
@@ -337,5 +339,73 @@ describe('textos das pistas variam a cada partida', () => {
         for (const p of proibidos) expect(texto).not.toContain(p)
       }
     }
+  })
+})
+
+describe('explicação da acusação', () => {
+  it('caso resolvido: cada prova vale contra o culpado e cada inocente fica de fora', () => {
+    const e = explicarAcusacao(caso, 'ricardo', ['cartorio_detran', 'ex_funcionario'])
+    expect(e.provas.every((l) => l.ok)).toBe(true)
+    expect(e.outros).toHaveLength(3)
+    expect(e.outros.every((l) => l.ok)).toBe(true)
+    expect(e.outros.find((l) => l.texto.startsWith('Marta'))?.texto).toContain('não tem Patrimônio incompatível')
+    expect(e.culpadoEra).toBeNull()
+  })
+
+  it('auto anulado: aponta quem as provas não descartam', () => {
+    const e = explicarAcusacao(caso, 'ricardo', ['operadora_cartao', 'ex_funcionario'])
+    const marta = e.outros.find((l) => l.texto.startsWith('Marta'))!
+    expect(marta.ok).toBe(false)
+    expect(marta.texto).toContain('também tem')
+    expect(e.outros.filter((l) => !l.ok)).toHaveLength(1)
+  })
+
+  it('local sem indício é apontado como prova que não serve', () => {
+    const e = explicarAcusacao(caso, 'ricardo', ['junta_comercial', 'cartorio_detran'])
+    expect(e.provas[0].ok).toBe(false)
+    expect(e.provas[0].texto).toContain('não revela nenhum indício')
+  })
+
+  it('acusação injusta: mostra a prova que não vale contra o acusado e quem era o culpado', () => {
+    const e = explicarAcusacao(caso, 'marta', ['cartorio_detran', 'praca'])
+    expect(e.provas[0].ok).toBe(false)
+    expect(e.provas[0].texto).toContain('Marta não tem esse indício')
+    expect(e.culpadoEra).toContain('Ricardo')
+  })
+
+  it('no modo desafio, explica com o culpado sorteado', () => {
+    const sorteado = sortearCaso(caso, () => 0)
+    const culpado = sorteado.suspeitos.find((s) => s.id === sorteado.culpadoId)!
+    const outro = sorteado.suspeitos.find((s) => s.id !== culpado.id)!
+    expect(explicarAcusacao(sorteado, outro.id, ['cartorio_detran', 'praca']).culpadoEra).toContain(culpado.nome)
+  })
+})
+
+describe('teste rápido', () => {
+  const quiz = caso.quiz!
+
+  it('o caso 001 tem 3 perguntas, todas com a resposta certa entre as opções', () => {
+    expect(quiz).toHaveLength(3)
+    for (const q of quiz) expect(q.opcoes[q.correta]).toBeDefined()
+  })
+
+  it('conta acertos; sem resposta conta como erro', () => {
+    const certas = quiz.map((q) => q.correta)
+    expect(pontuarQuiz(quiz, certas)).toBe(3)
+    expect(pontuarQuiz(quiz, [certas[0], null, null])).toBe(1)
+    expect(pontuarQuiz(quiz, [])).toBe(0)
+  })
+
+  it('a validação pega resposta certa inexistente e id repetido', () => {
+    const ruim: Caso = {
+      ...caso,
+      quiz: [
+        { ...quiz[0], correta: 5 },
+        { ...quiz[1], id: quiz[0].id },
+      ],
+    }
+    const erros = validarCaso(ruim)
+    expect(erros.some((e) => e.includes('opção correta'))).toBe(true)
+    expect(erros.some((e) => e.includes('id repetido'))).toBe(true)
   })
 })

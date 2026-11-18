@@ -3,6 +3,7 @@ import type {
   IndicioId,
   Local,
   LocalId,
+  PerguntaQuiz,
   Resultado,
   Suspeito,
   SuspeitoId,
@@ -217,6 +218,15 @@ export function validarCaso(caso: Caso): string[] {
     erros.push('Há locais com id repetido.')
   }
   if (suspeitos.size !== caso.suspeitos.length) erros.push('Há suspeitos com id repetido.')
+  for (const q of caso.quiz ?? []) {
+    if (q.opcoes.length < 2) erros.push(`Pergunta "${q.id}" precisa de pelo menos 2 opções.`)
+    if (!Number.isInteger(q.correta) || q.correta < 0 || q.correta >= q.opcoes.length) {
+      erros.push(`Pergunta "${q.id}" aponta uma opção correta que não existe.`)
+    }
+  }
+  if (caso.quiz && new Set(caso.quiz.map((q) => q.id)).size !== caso.quiz.length) {
+    erros.push('Há perguntas do teste com id repetido.')
+  }
 
   // O caso precisa ter solução: algum par (ou grupo) de locais com provas válidas.
   if (erros.length === 0 && !existeSolucao(caso)) {
@@ -320,4 +330,71 @@ export function sortearPistas(caso: Caso, aleatorio: Aleatorio = Math.random): C
       return { ...local, pista: versoes[Math.floor(aleatorio() * versoes.length)] }
     }),
   }
+}
+
+// ---------- Por que deu esse resultado ----------
+
+export interface LinhaExplicacao {
+  texto: string
+  /** true = esse ponto ajudou a acusação; false = foi onde ela falhou. */
+  ok: boolean
+}
+
+export interface Explicacao {
+  /** Uma linha por prova: o que ela aponta e se vale contra o acusado. */
+  provas: LinhaExplicacao[]
+  /** Uma linha por outro suspeito: se as provas o descartam ou não. */
+  outros: LinhaExplicacao[]
+  /** Só quando a pessoa acusada era inocente: quem tinha todos os indícios. */
+  culpadoEra: string | null
+}
+
+/**
+ * Explica, em linguagem do jogador, por que a acusação deu certo ou errado.
+ * Mostra o raciocínio: cada prova precisa valer contra o acusado e, juntas,
+ * precisam descartar todos os outros suspeitos.
+ */
+export function explicarAcusacao(caso: Caso, suspeitoId: SuspeitoId, provas: LocalId[]): Explicacao {
+  const acusado = buscarSuspeito(caso, suspeitoId)
+  const nome = (id: IndicioId) => caso.indicios.find((i) => i.id === id)?.nome ?? id
+  const indicios = indiciosDasProvas(caso, provas).filter((i): i is IndicioId => i !== null)
+
+  const linhasProvas = provas.map((id): LinhaExplicacao => {
+    const local = buscarLocal(caso, id)
+    if (local.indicio === null) {
+      return { texto: `${local.nome} não revela nenhum indício: ajuda a entender o caso, mas não serve de prova.`, ok: false }
+    }
+    return acusado.indicios.includes(local.indicio)
+      ? { texto: `${local.nome} aponta ${nome(local.indicio)}, e ${acusado.nome} tem esse indício.`, ok: true }
+      : { texto: `${local.nome} aponta ${nome(local.indicio)}, mas ${acusado.nome} não tem esse indício.`, ok: false }
+  })
+
+  const outros = caso.suspeitos
+    .filter((s) => s.id !== acusado.id)
+    .map((outro): LinhaExplicacao => {
+      const falta = indicios.find((i) => !outro.indicios.includes(i))
+      if (falta) return { texto: `${outro.nome} fica de fora: não tem ${nome(falta)}.`, ok: true }
+      const tem = [...new Set(indicios)].map(nome)
+      return {
+        texto: tem.length
+          ? `${outro.nome} também tem ${tem.join(' e ')}: essas provas não descartam essa pessoa.`
+          : `Nada nas provas descarta ${outro.nome}.`,
+        ok: false,
+      }
+    })
+
+  const culpado = buscarSuspeito(caso, caso.culpadoId)
+  const culpadoEra =
+    acusado.id === culpado.id
+      ? null
+      : `Quem tinha todos os indícios do caso era ${culpado.nome} (${culpado.empresa}).`
+
+  return { provas: linhasProvas, outros, culpadoEra }
+}
+
+// ---------- Teste rápido (antes e depois) ----------
+
+/** Quantas respostas estão certas. Resposta ausente ou null conta como errada. */
+export function pontuarQuiz(quiz: PerguntaQuiz[], respostas: (number | null)[]): number {
+  return quiz.filter((q, i) => respostas[i] === q.correta).length
 }
