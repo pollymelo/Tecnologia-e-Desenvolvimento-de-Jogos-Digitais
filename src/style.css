@@ -688,11 +688,11 @@ legend {
 
 .tabuleiro {
   position: relative;
-  min-width: 36rem;
+  min-width: 44rem;
   /* cabe na altura da tela do notebook, para ver o mapa inteiro enquanto anda */
-  width: min(100%, calc((100vh - 9rem) * 400 / 340));
+  width: min(100%, calc((100vh - 9rem) * 520 / 340));
   margin: 0 auto;
-  aspect-ratio: 400 / 340;
+  aspect-ratio: 520 / 340;
   cursor: pointer;
   user-select: none;
   border-radius: 18px;
@@ -719,7 +719,7 @@ legend {
   flex-direction: column;
   align-items: center;
   gap: 0.1rem;
-  width: 19%;
+  width: 14.6%;
   padding: 0.25rem 0.25rem 0;
   background: rgba(255, 253, 247, 0.9);
   color: #1b2430;
@@ -774,7 +774,7 @@ button.casa:disabled:not(.visitado) .predio {
   background: #fff3d6;
 }
 
-.casa-hospital {
+.casa-marco {
   background: #fde9e7;
   cursor: default;
 }
@@ -813,7 +813,7 @@ button.casa:disabled:not(.visitado) .predio {
 .peao {
   position: absolute;
   z-index: 2;
-  width: 5%;
+  width: 3.8%;
   /* os pés ficam no ponto do mapa */
   transform: translate(-50%, -92%);
   pointer-events: none;
@@ -1644,4 +1644,241 @@ kbd {
 
 .casa .tag {
   white-space: nowrap;
+}
+
+/* ---------- Locais trancados, fechados e imprevistos ---------- */
+
+.casa.trancada {
+  background: rgba(220, 220, 220, 0.85);
+  border-style: dashed;
+  color: #4a4f57;
+}
+
+.casa.trancada .predio {
+  filter: grayscale(1) opacity(0.45);
+}
+
+.tag-trancado {
+  background: #4a4f57;
+  color: #fff;
+}
+
+.casa.fechado .predio {
+  filter: grayscale(0.6) brightness(0.8);
+}
+
+.tag-fechado {
+  background: var(--perigo);
+  color: #fff;
+}
+
+.imprevistos {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.85rem;
+  border-left: 4px solid var(--destaque);
+  border-radius: 6px;
+  background: var(--painel);
+}
+
+.imprevistos p {
+  margin: 0.2rem 0 0;
+}
+
+/* ---------- Escolhas dentro do local ---------- */
+
+.escolhas {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+}
+
+.escolhas legend {
+  margin-bottom: 0.25rem;
+}
+
+.escolha {
+  text-align: left;
+  background: var(--painel-2);
+  color: var(--texto);
+  border: 2px solid var(--suave);
+}
+
+.escolha:hover,
+.escolha:focus-visible {
+  border-color: var(--destaque);
+  background: var(--painel);
+}
+
+.abordagem {
+  margin: 0.6rem 0 0;
+  color: var(--suave);
+}
+
+/* ---------- Moradores ---------- */
+
+.tabuleiro .morador {
+  position: absolute;
+  z-index: 2;
+  width: 3.2%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+  transform: translate(-50%, -92%);
+  filter: drop-shadow(1px 2px 0 rgba(0, 0, 0, 0.4));
+  cursor: pointer;
+}
+
+.tabuleiro .morador:hover,
+.tabuleiro .morador:focus-visible {
+  background: none;
+  outline: 2px solid var(--destaque);
+  outline-offset: 2px;
+}
+
+.morador .boneco {
+  width: 100%;
+}
+
+.balaozinho {
+  position: absolute;
+  top: -0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 1.1rem;
+  padding: 0 0.2rem;
+  border: 2px solid #121a24;
+  border-radius: 999px;
+  background: var(--destaque);
+  color: #1b2430;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  animation: pulsar 1.2s ease-in-out infinite;
+}
+
+.morador.ouvido .balaozinho {
+  background: var(--ok);
+  animation: none;
+}
+
+.fala-morador {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, calc(-100% - 2.6rem));
+  display: grid;
+  gap: 0.15rem;
+  width: min(17rem, 60%);
+  padding: 0.5rem 0.7rem;
+  border: 2px solid #121a24;
+  border-radius: 10px;
+  background: #fffdf7;
+  color: #1b2430;
+  box-shadow: 3px 3px 0 #121a24;
+  font-size: 0.85rem;
+  animation: surgir 0.2s ease-out;
+  pointer-events: none;
+}
+
+.fala-morador[hidden] {
+  display: none;
+}
+
+.fala-morador.lado-esquerda {
+  transform: translate(-15%, calc(-100% - 2.6rem));
+}
+
+.fala-morador.lado-direita {
+  transform: translate(-85%, calc(-100% - 2.6rem));
+}
+
+.fala-morador .nota {
+  color: #4a4f57;
+  font-size: 0.72rem;
+}
+
+.boatos li {
+  margin-bottom: 0.35rem;
+}
+
+.movimento-suave .balaozinho {
+  animation: none;
+}
+
+/* ---------- Arquivo de casos ---------- */
+
+.arquivo {
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.arquivo-casos {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  list-style: none;
+}
+
+.ficha-caso {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--painel-2);
+  border-radius: var(--raio);
+  background: var(--painel);
+}
+
+.ficha-caso h2 {
+  margin: 0.1rem 0;
+  font-size: 1.15rem;
+}
+
+.ficha-caso p {
+  margin: 0;
+  color: var(--suave);
+}
+
+.ficha-caso.resolvido {
+  border-color: var(--ok);
+}
+
+.ficha-caso.trancado {
+  opacity: 0.6;
+}
+
+.ficha-caso.trancado .ficha-predio {
+  filter: grayscale(1);
+}
+
+.ficha-predio .predio {
+  width: 100%;
+  height: auto;
+}
+
+.estrelas-ficha span {
+  color: #4a4f57;
+  font-size: 1.1rem;
+}
+
+.estrelas-ficha span.ganha {
+  color: var(--destaque);
+}
+
+.voltar-arquivo {
+  margin: 0 0 0.5rem;
+  text-align: left;
+}
+
+@media (max-width: 40rem) {
+  .ficha-caso {
+    grid-template-columns: 4rem 1fr;
+  }
+
+  .ficha-caso button {
+    grid-column: 1 / -1;
+  }
 }

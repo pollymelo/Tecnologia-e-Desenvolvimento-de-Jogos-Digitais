@@ -1,0 +1,277 @@
+{
+  "id": "caso-002",
+  "titulo": "A empresa fantasma",
+  "tema": "Nota fria e empresa de fachada",
+  "marco": { "nome": "Creche Municipal", "icone": "creche", "tag": "Obra parada" },
+  "abertura": "Depois do caso do hospital, um nome não sai da sua cabeça: Distribuidora Horizonte. Ela vende para metade da cidade, mas o endereço dela é um terreno baldio. Notas fiscais de uma empresa de fachada, sem mercadoria de verdade, são chamadas de notas frias: servem para fingir despesas e pagar menos tributo.",
+  "briefing": "A obra da Creche Municipal parou por falta de verba. As notas frias da Distribuidora Horizonte aparecem nas compras de quatro comerciantes. Um deles é o verdadeiro dono da empresa de fachada, escondido atrás de um sócio-laranja. Você tem 3 dias para descobrir quem.",
+  "diasIniciais": 3,
+  "custoVisitaDias": 1,
+  "provasExigidas": 2,
+  "culpadoId": "otavio",
+  "indicios": [
+    { "id": "notas_frias", "nome": "Compras da Horizonte sem mercadoria (notas frias)", "termo": "nota_fria" },
+    { "id": "socio_laranja", "nome": "Parente registrado como sócio da Horizonte", "termo": "laranja" },
+    { "id": "dinheiro_volta", "nome": "Dinheiro pago à Horizonte que volta para a conta", "termo": "empresa_fachada" }
+  ],
+  "suspeitos": [
+    {
+      "id": "otavio",
+      "nome": "Otávio",
+      "empresa": "Materiais de Construção Pedra Firme",
+      "perfil": "Vende material para quase todas as obras da cidade. Está sempre ao telefone com fornecedores.",
+      "aparencia": { "pele": "#e0ac69", "cabelo": "#3b2a1a", "estiloCabelo": "curto", "camisa": "#f3722c", "calca": "#3a3a3a", "acessorios": [] },
+      "indicios": ["notas_frias", "socio_laranja", "dinheiro_volta"]
+    },
+    {
+      "id": "sandra",
+      "nome": "Sandra",
+      "empresa": "Farmácia Bem-Estar",
+      "perfil": "Dona da farmácia mais antiga do centro. Reclama dos impostos em toda reunião da associação comercial.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#8a5a44", "estiloCabelo": "longo", "camisa": "#5cc28a", "calca": "#2b2b2b", "acessorios": ["oculos"] },
+      "indicios": ["notas_frias", "dinheiro_volta"]
+    },
+    {
+      "id": "jonas",
+      "nome": "Jonas",
+      "empresa": "Papelaria Ponto Final",
+      "perfil": "Papelaria ao lado da escola. Vende material escolar, faz cópias e conhece todos os alunos.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#4a90d9", "calca": "#3d5a80", "acessorios": [] },
+      "indicios": ["socio_laranja"]
+    },
+    {
+      "id": "fatima",
+      "nome": "Fátima",
+      "empresa": "Mercadinho Boa Vista",
+      "perfil": "Mercadinho de bairro, aberto até tarde. Chama todos os clientes pelo nome.",
+      "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#e5675d", "calca": "#6b4f6b", "acessorios": ["avental"] },
+      "indicios": ["dinheiro_volta"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "junta_comercial",
+      "nome": "Junta Comercial",
+      "pista": "O contrato social da Horizonte tem um único sócio: um parente do dono ou da dona da empresa denunciada, aposentado, que ganha um salário mínimo. Ninguém abre uma distribuidora desse tamanho assim.",
+      "variacoes": [
+        "No contrato da Horizonte, o sócio é um parente aposentado do dono ou da dona da empresa denunciada. Ele mora em outra cidade e nunca assinou mais nada na vida."
+      ],
+      "indicio": "socio_laranja",
+      "forca": "forte",
+      "icone": "junta",
+      "testemunha": { "nome": "Rafa, atendente da Junta", "aparencia": { "pele": "#e0ac69", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#3d5a80", "calca": "#2b2b2b", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "contrato", "rotulo": "Pedir o contrato social da Horizonte", "revela": true },
+        { "id": "data", "rotulo": "Perguntar quando a Horizonte foi aberta", "texto": "Foi aberta há 2 anos. A data, sozinha, não liga a Horizonte a ninguém." },
+        { "id": "lista", "rotulo": "Pedir a lista de todas as empresas da cidade", "texto": "São 800 empresas. Sem saber o que procurar, é papel demais e pista de menos." }
+      ]
+    },
+    {
+      "id": "fazenda",
+      "nome": "Secretaria da Fazenda",
+      "pista": "Cruzando os sistemas: as notas da Horizonte para a empresa denunciada somam R$ 800 mil, mas nenhum caminhão registrou entrega. É nota sem mercadoria, ou seja, nota fria.",
+      "variacoes": [
+        "O sistema mostra centenas de notas da Horizonte para a empresa denunciada. Nenhuma tem frete, nem estoque que tenha entrado. Mercadoria que só existe no papel."
+      ],
+      "indicio": "notas_frias",
+      "forca": "forte",
+      "icone": "fazenda",
+      "testemunha": { "nome": "Dra. Vera, auditora estadual", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#2f4b7c", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "cruzar", "rotulo": "Cruzar as notas da Horizonte com as entregas", "revela": true },
+        { "id": "imposto", "rotulo": "Ver quanto a Horizonte pagou de imposto", "texto": "A Horizonte quase não pagou imposto. Isso a torna suspeita, mas não mostra quem está por trás dela." },
+        { "id": "dono", "rotulo": "Perguntar quem é o dono da Horizonte", "texto": "O sistema só mostra o sócio que está no papel. O dono de verdade se esconde atrás dele." }
+      ]
+    },
+    {
+      "id": "transportadora",
+      "nome": "Transportadora Rápido",
+      "pista": "\"Nunca carreguei nada da Horizonte. Mas a empresa denunciada vive dizendo que recebe mercadoria deles\", conta Leo. Mercadoria que ninguém transportou.",
+      "indicio": "notas_frias",
+      "forca": "fraca",
+      "icone": "transportadora",
+      "testemunha": { "nome": "Leo, motorista", "aparencia": { "pele": "#f1c27d", "cabelo": "#5a3825", "estiloCabelo": "bone", "camisa": "#f4d35e", "calca": "#3d5a80", "acessorios": [] } },
+      "acoes": [
+        { "id": "motoristas", "rotulo": "Conversar com os motoristas", "revela": true },
+        { "id": "planilha", "rotulo": "Pedir a planilha de fretes do ano", "texto": "A planilha tem milhares de fretes e nenhum filtro. Sem um alvo, não dá para achar nada." },
+        { "id": "patio", "rotulo": "Observar o pátio", "texto": "Caminhões entrando e saindo. Olhar o pátio não diz o que cada um leva." }
+      ]
+    },
+    {
+      "id": "banco",
+      "nome": "Banco Aurora",
+      "pista": "Com a autorização em mãos, o banco mostra: toda vez que a empresa denunciada paga a Horizonte, quase todo o dinheiro volta, dias depois, para a conta do dono ou da dona. O dinheiro dá uma volta e retorna.",
+      "indicio": "dinheiro_volta",
+      "forca": "forte",
+      "icone": "banco",
+      "testemunha": { "nome": "Seu Ademar, gerente", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#2b2b2b", "acessorios": ["gravata"] } },
+      "acoes": [
+        { "id": "oficial", "rotulo": "Apresentar o pedido oficial, com autorização", "revela": true },
+        { "id": "sem", "rotulo": "Pedir o extrato sem autorização", "texto": "Seu Ademar recusa: sigilo bancário. Sem seguir o caminho legal, a prova nem valeria." },
+        { "id": "caixa", "rotulo": "Perguntar ao caixa sobre depósitos grandes", "texto": "O caixa não pode comentar sobre clientes. Conversa de balcão não vira prova." }
+      ]
+    },
+    {
+      "id": "terreno",
+      "nome": "Endereço da Horizonte",
+      "pista": "\"Distribuidora? Aqui sempre foi terreno baldio\", diz Seu Bené. Uma empresa que 'vende' para metade da cidade não tem nem porta. É uma empresa de fachada.",
+      "indicio": null,
+      "icone": "terreno",
+      "testemunha": { "nome": "Seu Bené, vizinho", "aparencia": { "pele": "#c68642", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#a3b18a", "calca": "#5a3825", "acessorios": [] } },
+      "acoes": [
+        { "id": "vizinho", "rotulo": "Conversar com o vizinho", "revela": true },
+        { "id": "placa", "rotulo": "Procurar placa ou caixa de correio", "texto": "Só mato e uma caixa de correio enferrujada, cheia de cartas do banco. Nenhum sinal de empresa." },
+        { "id": "fotos", "rotulo": "Tirar fotos do terreno", "texto": "As fotos mostram o terreno vazio. Bom registro, mas não dizem quem é o dono da Horizonte." }
+      ]
+    },
+    {
+      "id": "casa_socio",
+      "nome": "Casa do sócio da Horizonte",
+      "pista": "Seu Valdir se assusta: \"Meu parente pediu meu documento para abrir uma firma. Disse que era só uma assinatura.\" Ele é o laranja: empresta o nome, e o dono de verdade, o dono ou a dona da empresa denunciada, fica escondido.",
+      "indicio": "socio_laranja",
+      "forca": "fraca",
+      "icone": "casa",
+      "liberadoPor": "junta_comercial",
+      "testemunha": { "nome": "Seu Valdir, sócio no papel", "aparencia": { "pele": "#e0ac69", "cabelo": "#e8e8e8", "estiloCabelo": "curto", "camisa": "#8e6c8a", "calca": "#3a3a3a", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "calma", "rotulo": "Conversar com calma", "revela": true },
+        { "id": "multa", "rotulo": "Ameaçar com multa", "texto": "Seu Valdir se fecha e diz que só fala com advogado. Pressão não funciona; confiança, sim." },
+        { "id": "papeis", "rotulo": "Pedir os documentos da empresa", "texto": "Ele não tem nenhum: nunca viu a Horizonte por dentro. Sozinho, isso não mostra quem está por trás." }
+      ]
+    },
+    {
+      "id": "feira",
+      "nome": "Feira de Sábado",
+      "pista": "Os feirantes riem: a Horizonte 'vende de tudo', de cimento a remédio, de caderno a arroz. Nenhuma distribuidora de verdade vende tanta coisa diferente. Isso é típico de empresa de fachada.",
+      "indicio": null,
+      "icone": "praca",
+      "testemunha": { "nome": "Dona Lúcia, feirante", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#f3722c", "calca": "#3d5a80", "acessorios": ["avental"] } },
+      "acoes": [
+        { "id": "feirantes", "rotulo": "Ouvir os feirantes", "revela": true },
+        { "id": "pastel", "rotulo": "Comer um pastel", "texto": "O pastel estava ótimo. A investigação, nem tanto." },
+        { "id": "palpite", "rotulo": "Perguntar quem é o dono da Horizonte", "texto": "Todo mundo tem um palpite, e cada um diz um nome. Palpite não é prova." }
+      ]
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "No portal, a obra da Creche Municipal aparece parada: faltaram R$ 240.000 (valor fictício). É quanto as notas frias tiraram dos cofres públicos. O portal é um site público: consultar não gastou nenhum dia.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true,
+      "custoDias": 0,
+      "icone": "portal",
+      "acoes": [
+        { "id": "creche", "rotulo": "Ver a verba da creche", "revela": true },
+        { "id": "salarios", "rotulo": "Ver os salários dos servidores", "texto": "O portal mostra salários públicos, mas isso não ajuda a achar quem está por trás da Horizonte." },
+        { "id": "viagens", "rotulo": "Ver as viagens do prefeito", "texto": "Tudo registrado e público, como deve ser. Mas não é o caso de hoje." }
+      ]
+    },
+    {
+      "id": "associacao",
+      "nome": "Associação Comercial",
+      "pista": "Marli conta que os quatro comerciantes compravam da Horizonte porque ela 'dava nota de tudo'. \"Quem compra nota sem mercadoria também está errado\", lembra. Mas só um deles é o dono da Horizonte.",
+      "indicio": null,
+      "icone": "contabilidade",
+      "testemunha": { "nome": "Marli, presidente da associação", "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#7b4bb7", "calca": "#2b2b2b", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "conversar", "rotulo": "Perguntar como a Horizonte vendia", "revela": true },
+        { "id": "atas", "rotulo": "Ler as atas das reuniões", "texto": "As atas falam de estacionamento e de enfeites de Natal. Nada sobre a Horizonte." },
+        { "id": "acusar", "rotulo": "Perguntar quem ela acusaria", "texto": "\"Não acuso colega sem prova\", Marli responde. Ela tem razão." }
+      ]
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 240000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O valor recuperado volta ao orçamento do município e destrava a obra da Creche Municipal.",
+    "detalhes": [
+      "R$ 150.000 para terminar a obra das salas.",
+      "R$ 60.000 para berços, mesas e brinquedos.",
+      "R$ 30.000 para o parquinho e a cerca de proteção."
+    ]
+  },
+  "gancho": "Nos papéis da Horizonte, um endereço se repete: um galpão enorme no bairro Jardim Aurora, cadastrado na prefeitura como 'casa pequena'. O bairro, aliás, não tem praça nem iluminação. Quem paga o IPTU por lá?",
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "O dono escondido da Distribuidora Horizonte foi autuado. As notas frias foram anuladas e o tributo devido voltou aos cofres.",
+      "ensina": "Nota fria é fraude: ela finge uma despesa que não existiu para pagar menos tributo. Quem empresta o nome como laranja também pode responder por isso.",
+      "perguntasDebate": [
+        "Por que alguém criaria uma empresa que não vende nada de verdade?",
+        "O que pode acontecer com quem empresta o nome para abrir empresa para outra pessoa?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a pessoa certa, mas as provas não a diferenciam dos outros compradores da Horizonte. O auto foi anulado.",
+      "ensina": "Comprar da Horizonte não basta para provar que alguém é o dono dela. É preciso ligar a pessoa à empresa de fachada.",
+      "perguntasDebate": [
+        "Que prova liga o dono escondido à Horizonte, e não só aos compradores?",
+        "Por que a lei exige provas tão específicas antes de punir?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Você autuou alguém que não é o dono da Horizonte. O verdadeiro responsável continua emitindo notas frias.",
+      "ensina": "Quem compra de uma empresa suspeita não é, por isso, dono dela. Errar o alvo prejudica um inocente e deixa a fraude seguir.",
+      "perguntasDebate": [
+        "Que indício faltava à pessoa que você acusou?",
+        "Como uma acusação errada afeta a confiança das pessoas na fiscalização?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem auto de infração. A Horizonte continua emitindo notas frias, e a creche continua parada.",
+      "ensina": "Investigar empresa de fachada exige foco: os documentos certos valem mais que muitas visitas.",
+      "perguntasDebate": [
+        "Quais locais trouxeram documentos e quais trouxeram só conversa?",
+        "Por onde você começaria se jogasse de novo?"
+      ]
+    }
+  },
+  "moradores": [
+    { "nome": "Tonho, entregador", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#e5675d", "calca": "#2c5aa0" }, "fala": "Faço entrega para todo mundo. Para a {empresa}, nunca levei nada vindo da tal Horizonte.", "verdadeira": true },
+    { "nome": "Bete, boleira", "aparencia": { "pele": "#f1c27d", "cabelo": "#e07a5f", "estiloCabelo": "longo", "camisa": "#f4d35e", "calca": "#6b4f6b", "acessorios": ["avental"] }, "fala": "Juro que vi {inocente} saindo daquele terreno baldio com uma pasta. Bom... acho que era. Estava escuro.", "verdadeira": false },
+    { "nome": "Seu Zeca, aposentado", "aparencia": { "pele": "#e0ac69", "cabelo": "#e8e8e8", "estiloCabelo": "careca", "camisa": "#a3b18a", "calca": "#3a3a3a", "acessorios": ["oculos"] }, "fala": "Quem empresta o nome para firma dos outros pode acabar com as dívidas no próprio nome. Meu cunhado aprendeu do jeito difícil.", "verdadeira": true }
+  ],
+  "quiz": [
+    {
+      "id": "nota_fria",
+      "pergunta": "O que é uma \"nota fria\"?",
+      "opcoes": [
+        "Uma nota fiscal emitida no inverno.",
+        "Uma nota fiscal de uma venda que não aconteceu, usada para pagar menos tributo.",
+        "Uma nota fiscal emitida pelo próprio governo."
+      ],
+      "correta": 1,
+      "explicacao": "Nota fria registra uma compra ou venda que não existiu. Ela serve para inventar despesas e reduzir o tributo, o que é fraude."
+    },
+    {
+      "id": "laranja",
+      "pergunta": "O que é um \"laranja\" numa empresa?",
+      "opcoes": [
+        "O sócio que mais investe dinheiro.",
+        "O funcionário mais antigo.",
+        "Alguém que empresta o nome para esconder o verdadeiro dono."
+      ],
+      "correta": 2,
+      "explicacao": "O laranja aparece no papel como dono, mas quem manda é outra pessoa. Quem empresta o nome pode responder pelas dívidas e pelas fraudes."
+    },
+    {
+      "id": "sigilo",
+      "pergunta": "Por que o banco não entrega o extrato de um cliente para qualquer pessoa que pede?",
+      "opcoes": [
+        "Por causa do sigilo bancário: só pelos caminhos previstos em lei.",
+        "Porque extratos não existem mais.",
+        "Porque o banco apaga esses dados."
+      ],
+      "correta": 0,
+      "explicacao": "O sigilo bancário protege todo mundo. A fiscalização pode acessar os dados, mas só pelos caminhos legais; senão, a prova não vale."
+    }
+  ],
+  "glossario": [
+    { "id": "nota_fria", "termo": "Nota fria", "definicao": "Nota fiscal de uma venda que não aconteceu de verdade. É usada para inventar despesas e pagar menos tributo, o que é fraude." },
+    { "id": "laranja", "termo": "Laranja", "definicao": "Pessoa que empresta o próprio nome para aparecer como dona de uma empresa, escondendo quem manda de verdade." },
+    { "id": "empresa_fachada", "termo": "Empresa de fachada", "definicao": "Empresa que só existe no papel: não tem sede, funcionários nem mercadoria. Serve para emitir notas frias e fazer o dinheiro dar voltas." }
+  ]
+}

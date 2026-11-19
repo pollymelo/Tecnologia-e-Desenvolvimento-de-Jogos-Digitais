@@ -9,7 +9,7 @@ import type {
   SuspeitoId,
   TipoResultado,
 } from './types.ts'
-import type { EstadoJogo } from './state.ts'
+import type { EstadoJogo, Fechamento } from './state.ts'
 
 /** Ação inválida para o estado atual. A interface deve impedir que isso aconteça. */
 export class RegraError extends Error {
@@ -33,9 +33,57 @@ export function buscarSuspeito(caso: Caso, suspeitoId: SuspeitoId): Suspeito {
   return suspeito
 }
 
-/** Pistas que o jogador já coletou, na ordem da visita. */
+/**
+ * Pistas que o jogador já coletou, na ordem da visita. Cada local volta com o indício e o
+ * texto que a abordagem escolhida rendeu (sem a abordagem certa, `indicio` vem null).
+ */
 export function pistasColetadas(caso: Caso, estado: EstadoJogo): Local[] {
-  return estado.locaisVisitados.map((id) => buscarLocal(caso, id))
+  return estado.locaisVisitados.map((id) => ({
+    ...buscarLocal(caso, id),
+    indicio: indicioObtido(caso, estado, id),
+    pista: textoObtido(caso, estado, id),
+  }))
+}
+
+/** Indício que a visita realmente rendeu: depende da abordagem escolhida dentro do local. */
+export function indicioObtido(caso: Caso, estado: EstadoJogo, localId: LocalId): IndicioId | null {
+  const local = buscarLocal(caso, localId)
+  if (!estado.locaisVisitados.includes(localId)) return null
+  if (!local.acoes?.length) return local.indicio
+  const acao = local.acoes.find((a) => a.id === estado.escolhas[localId])
+  return acao?.revela ? local.indicio : null
+}
+
+/** Texto que o jogador leu no local (a pista, ou o resultado da abordagem escolhida). */
+export function textoObtido(caso: Caso, estado: EstadoJogo, localId: LocalId): string {
+  const local = buscarLocal(caso, localId)
+  if (!local.acoes?.length) return local.pista
+  const acao = local.acoes.find((a) => a.id === estado.escolhas[localId])
+  if (!acao) return ''
+  return acao.revela ? local.pista : (acao.texto ?? '')
+}
+
+/** true se o jogador já entrou no local, mas ainda não escolheu o que fazer lá dentro. */
+export function precisaEscolher(caso: Caso, estado: EstadoJogo, localId: LocalId): boolean {
+  const local = buscarLocal(caso, localId)
+  return Boolean(local.acoes?.length) && estado.locaisVisitados.includes(localId) && !estado.escolhas[localId]
+}
+
+/** Dia da investigação (1 = primeiro dia). Local grátis não faz o dia passar. */
+export function diaAtual(caso: Caso, estado: EstadoJogo): number {
+  return Math.min(caso.diasIniciais, caso.diasIniciais - estado.diasRestantes + 1)
+}
+
+/** Imprevisto de hoje no local, se houver. */
+export function fechadoHoje(caso: Caso, estado: EstadoJogo, localId: LocalId): Fechamento | null {
+  const f = estado.fechados[localId]
+  return f && f.dia === diaAtual(caso, estado) ? f : null
+}
+
+/** O local ainda não apareceu no mapa (depende de outra visita para ser descoberto). */
+export function localTrancado(caso: Caso, estado: EstadoJogo, localId: LocalId): boolean {
+  const local = buscarLocal(caso, localId)
+  return local.liberadoPor !== undefined && !estado.locaisVisitados.includes(local.liberadoPor)
 }
 
 /** Dias que a visita a um local custa (o local pode sobrescrever o custo padrão do caso). */
@@ -49,7 +97,9 @@ export function podeVisitar(caso: Caso, estado: EstadoJogo, localId: LocalId): b
     local !== undefined &&
     estado.resultado === null &&
     estado.diasRestantes >= custoDoLocal(caso, local) &&
-    !estado.locaisVisitados.includes(localId)
+    !estado.locaisVisitados.includes(localId) &&
+    !localTrancado(caso, estado, localId) &&
+    fechadoHoje(caso, estado, localId) === null
   )
 }
 
@@ -78,6 +128,8 @@ export function visitarLocal(
   if (estado.diasRestantes < custo) {
     throw new RegraError('Não há dias suficientes para visitar outro local.')
   }
+  if (localTrancado(caso, estado, localId)) throw new RegraError(`Local ainda não descoberto: ${local.nome}`)
+  if (fechadoHoje(caso, estado, localId)) throw new RegraError(`Local fechado hoje: ${local.nome}`)
 
   return {
     estado: {
@@ -87,6 +139,16 @@ export function visitarLocal(
     },
     pista: local,
   }
+}
+
+/** Escolhe o que fazer dentro de um local já visitado. Uma escolha só, sem volta. */
+export function escolherAcao(caso: Caso, estado: EstadoJogo, localId: LocalId, acaoId: string): EstadoJogo {
+  if (estado.resultado !== null) throw new RegraError('A partida já terminou.')
+  const local = buscarLocal(caso, localId)
+  if (!estado.locaisVisitados.includes(localId)) throw new RegraError(`Local ainda não visitado: ${local.nome}`)
+  if (estado.escolhas[localId]) throw new RegraError(`Você já escolheu o que fazer em: ${local.nome}`)
+  if (!local.acoes?.some((a) => a.id === acaoId)) throw new RegraError(`Ação inexistente: ${acaoId}`)
+  return { ...estado, escolhas: { ...estado.escolhas, [localId]: acaoId } }
 }
 
 /** Marca ou desmarca um suspeito como descartado no caderno. */
@@ -124,7 +186,7 @@ export function acusar(
     }
   }
 
-  const tipo = calcularTipoResultado(caso, suspeitoId, provas)
+  const tipo = calcularTipoResultado(caso, suspeitoId, provas, estado)
   return { ...estado, resultado: montarResultado(caso, estado, tipo, suspeitoId, provas) }
 }
 
@@ -142,9 +204,12 @@ export function encerrarPrazo(caso: Caso, estado: EstadoJogo): EstadoJogo {
 
 // ---------- Validação da acusação ----------
 
-/** Indícios das provas escolhidas. Locais só de contexto não contribuem com indício. */
-function indiciosDasProvas(caso: Caso, provas: LocalId[]): (IndicioId | null)[] {
-  return provas.map((id) => buscarLocal(caso, id).indicio)
+/**
+ * Indícios das provas escolhidas. Locais só de contexto (ou visitados com a abordagem errada)
+ * não contribuem com indício. Sem `estado`, considera a abordagem certa (usado na validação).
+ */
+function indiciosDasProvas(caso: Caso, provas: LocalId[], estado?: EstadoJogo): (IndicioId | null)[] {
+  return provas.map((id) => (estado ? indicioObtido(caso, estado, id) : buscarLocal(caso, id).indicio))
 }
 
 /**
@@ -153,9 +218,9 @@ function indiciosDasProvas(caso: Caso, provas: LocalId[]): (IndicioId | null)[] 
  * 2. juntas, descartarem todos os outros suspeitos
  *    (cada outro suspeito deixa de ter pelo menos um desses indícios).
  */
-export function provasValidas(caso: Caso, provas: LocalId[]): boolean {
+export function provasValidas(caso: Caso, provas: LocalId[], estado?: EstadoJogo): boolean {
   const culpado = buscarSuspeito(caso, caso.culpadoId)
-  const indicios = indiciosDasProvas(caso, provas)
+  const indicios = indiciosDasProvas(caso, provas, estado)
 
   const todasDoCulpado = indicios.every((i) => i !== null && culpado.indicios.includes(i))
   if (!todasDoCulpado) return false
@@ -169,9 +234,10 @@ export function calcularTipoResultado(
   caso: Caso,
   suspeitoId: SuspeitoId,
   provas: LocalId[],
+  estado?: EstadoJogo,
 ): Exclude<TipoResultado, 'prazo_encerrado'> {
   if (suspeitoId !== caso.culpadoId) return 'acusacao_injusta'
-  return provasValidas(caso, provas) ? 'resolvido' : 'auto_anulado'
+  return provasValidas(caso, provas, estado) ? 'resolvido' : 'auto_anulado'
 }
 
 function montarResultado(
@@ -214,8 +280,21 @@ export function validarCaso(caso: Caso): string[] {
       erros.push(`Local "${l.id}" revela indício desconhecido "${l.indicio}".`)
     }
   }
-  // O mapa de Vila Aurora tem 7 lotes para locais (src/ui/mapa.ts, LOTES_LOCAIS).
-  if (caso.locais.length > 7) erros.push('O mapa comporta no máximo 7 locais.')
+  // O mapa de Vila Aurora tem 10 lotes para locais (src/ui/mapa.ts, LOTES_LOCAIS).
+  if (caso.locais.length > 10) erros.push('O mapa comporta no máximo 10 locais.')
+  const idsLocais = new Set(caso.locais.map((l) => l.id))
+  for (const l of caso.locais) {
+    if (l.acoes) {
+      if (l.acoes.length < 2) erros.push(`Local "${l.id}" precisa de pelo menos 2 ações.`)
+      if (l.acoes.filter((a) => a.revela).length !== 1) erros.push(`Local "${l.id}" precisa de exatamente 1 ação que revela a pista.`)
+      if (l.acoes.some((a) => !a.revela && !a.texto?.trim())) erros.push(`Local "${l.id}" tem ação sem texto.`)
+      if (new Set(l.acoes.map((a) => a.id)).size !== l.acoes.length) erros.push(`Local "${l.id}" tem ações com id repetido.`)
+    }
+    if (l.liberadoPor !== undefined && (!idsLocais.has(l.liberadoPor) || l.liberadoPor === l.id)) {
+      erros.push(`Local "${l.id}" é liberado por um local que não existe.`)
+    }
+  }
+  if ((caso.moradores?.length ?? 0) > 4) erros.push('No máximo 4 moradores por caso.')
   if (new Set(caso.locais.map((l) => l.id)).size !== caso.locais.length) {
     erros.push('Há locais com id repetido.')
   }
@@ -274,10 +353,41 @@ export function sortearCaso(caso: Caso, aleatorio: Aleatorio = Math.random): Cas
   return { ...caso, suspeitos, culpadoId: novoCulpado }
 }
 
-/** Troca {culpado} e {empresa} pelo nome e pela empresa do culpado do caso. */
-export function preencherTexto(caso: Caso, texto: string): string {
+/**
+ * Troca {culpado} e {empresa} pelo nome e pela empresa do culpado do caso, e {inocente} por um
+ * dos inocentes (o de número `qual`), para boatos falsos continuarem falsos no modo desafio.
+ */
+export function preencherTexto(caso: Caso, texto: string, qual = 0): string {
   const culpado = buscarSuspeito(caso, caso.culpadoId)
-  return texto.replaceAll('{culpado}', culpado.nome).replaceAll('{empresa}', culpado.empresa)
+  const inocentes = caso.suspeitos.filter((s) => s.id !== culpado.id)
+  const inocente = inocentes[qual % inocentes.length]
+  return texto
+    .replaceAll('{culpado}', culpado.nome)
+    .replaceAll('{empresa}', culpado.empresa)
+    .replaceAll('{inocente}', inocente?.nome ?? '')
+}
+
+// ---------- Imprevistos ----------
+
+const MOTIVOS_FECHADO = [
+  'está fechado para reforma hoje',
+  'está em greve hoje',
+  'ficou sem luz e fechou hoje',
+  'fechou por causa do feriado do bairro',
+]
+
+/**
+ * Sorteia os imprevistos da partida: em cada dia, menos o último, um local pago fica fechado.
+ * O local reabre no dia seguinte, então o caso continua com solução.
+ */
+export function sortearImprevistos(caso: Caso, aleatorio: Aleatorio = Math.random): Record<LocalId, Fechamento> {
+  const candidatos = caso.locais.filter((l) => custoDoLocal(caso, l) > 0 && l.liberadoPor === undefined)
+  const fechados: Record<LocalId, Fechamento> = {}
+  for (let dia = 1; dia < caso.diasIniciais && candidatos.length > 0; dia++) {
+    const [local] = candidatos.splice(Math.floor(aleatorio() * candidatos.length), 1)
+    fechados[local.id] = { dia, motivo: MOTIVOS_FECHADO[Math.floor(aleatorio() * MOTIVOS_FECHADO.length)] }
+  }
+  return fechados
 }
 
 // ---------- Desempenho (estrelas) ----------
@@ -356,13 +466,25 @@ export interface Explicacao {
  * Mostra o raciocínio: cada prova precisa valer contra o acusado e, juntas,
  * precisam descartar todos os outros suspeitos.
  */
-export function explicarAcusacao(caso: Caso, suspeitoId: SuspeitoId, provas: LocalId[]): Explicacao {
+export function explicarAcusacao(
+  caso: Caso,
+  suspeitoId: SuspeitoId,
+  provas: LocalId[],
+  estado?: EstadoJogo,
+): Explicacao {
   const acusado = buscarSuspeito(caso, suspeitoId)
   const nome = (id: IndicioId) => caso.indicios.find((i) => i.id === id)?.nome ?? id
-  const indicios = indiciosDasProvas(caso, provas).filter((i): i is IndicioId => i !== null)
+  const indicios = indiciosDasProvas(caso, provas, estado).filter((i): i is IndicioId => i !== null)
 
   const linhasProvas = provas.map((id): LinhaExplicacao => {
-    const local = buscarLocal(caso, id)
+    const original = buscarLocal(caso, id)
+    const local = { ...original, indicio: estado ? indicioObtido(caso, estado, id) : original.indicio }
+    if (local.indicio === null && original.indicio !== null) {
+      return {
+        texto: `Em ${local.nome}, a abordagem escolhida não revelou o indício: sem documento ou testemunho, não há prova.`,
+        ok: false,
+      }
+    }
     if (local.indicio === null) {
       return { texto: `${local.nome} não revela nenhum indício: ajuda a entender o caso, mas não serve de prova.`, ok: false }
     }

@@ -18,6 +18,8 @@
 | 1 | Leu o briefing e entendeu que precisa achar **um** comerciante entre quatro? | | | |
 | 2 | Percebeu que cada local custa 1 dia (olhou as bolinhas e o contador de dias)? | | | |
 | 2b | Descobriu sozinho como andar com o boneco (setas, W A S D ou direcional) e entrar pela porta? | | | |
+| 2c | Dentro do local, escolheu a abordagem pensando (documento x fofoca) ou no chute? | | | |
+| 2d | Conversou com moradores? Tratou o boato como prova? | | | |
 | 3 | Notou o aviso de "Nova pista" e abriu o caderno? | | | |
 | 4 | Entendeu as colunas "?" do caderno, que se revelam com as pistas? | | | |
 | 5 | Riscou suspeitos por conta própria? | | | |

@@ -1,6 +1,12 @@
 {
   "id": "caso-001",
   "titulo": "A verba do hospital",
+  "tema": "Venda sem nota e sonegação",
+  "marco": {
+    "nome": "Hospital Municipal",
+    "icone": "hospital",
+    "tag": "Verba em falta"
+  },
   "abertura": "Vila Aurora cresceu em volta do comércio, mas há três anos a arrecadação cai sem explicação. O dinheiro que deveria chegar ao hospital some no caminho, e a cidade chama isso de \"os fantasmas da Aurora\". Você acaba de entrar na Auditoria Fiscal, e este é o seu primeiro caso.",
   "briefing": "O Hospital Municipal de Vila Aurora perdeu verba porque a arrecadação caiu. Uma denúncia anônima diz que um destes quatro comerciantes está sonegando tributos, mas não diz qual. Você tem 3 dias para investigar e emitir o auto de infração.",
   "diasIniciais": 3,
@@ -127,7 +133,24 @@
             "cracha"
           ]
         }
-      }
+      },
+      "acoes": [
+        {
+          "id": "relatorio",
+          "rotulo": "Pedir o relatório de vendas no cartão",
+          "revela": true
+        },
+        {
+          "id": "conversar",
+          "rotulo": "Conversar sobre o movimento da cidade",
+          "texto": "Bia conta que as vendas no cartão cresceram na cidade toda. Informação geral não aponta ninguém: sem os dados da empresa denunciada, não há prova."
+        },
+        {
+          "id": "observar",
+          "rotulo": "Observar a fila de atendimento",
+          "texto": "A fila está grande, mas olhar o movimento não revela nada sobre a empresa denunciada."
+        }
+      ]
     },
     {
       "id": "cartorio_detran",
@@ -153,7 +176,24 @@
             "oculos"
           ]
         }
-      }
+      },
+      "acoes": [
+        {
+          "id": "certidoes",
+          "rotulo": "Pedir as certidões de imóveis e veículos",
+          "revela": true
+        },
+        {
+          "id": "fofoca",
+          "rotulo": "Perguntar quem anda rico na cidade",
+          "texto": "Seu Jorge desconversa: \"Aqui eu falo de documento, não de fofoca.\" Sem certidão, não há prova."
+        },
+        {
+          "id": "mural",
+          "rotulo": "Ler o mural de editais",
+          "texto": "Só há editais de casamento e de leilão. Nada sobre a empresa denunciada."
+        }
+      ]
     },
     {
       "id": "ex_funcionario",
@@ -176,7 +216,65 @@
           "calca": "#2c5aa0",
           "acessorios": []
         }
-      }
+      },
+      "acoes": [
+        {
+          "id": "calma",
+          "rotulo": "Conversar com calma, sem pressa",
+          "revela": true
+        },
+        {
+          "id": "depoimento",
+          "rotulo": "Pedir que ele assine um depoimento agora",
+          "texto": "Tião fica com medo de se expor e encerra a conversa. Testemunha assustada não fala: a confiança vem antes do papel."
+        },
+        {
+          "id": "fotos",
+          "rotulo": "Mostrar as fotos dos quatro suspeitos",
+          "texto": "Tião não quer apontar ninguém por foto: \"E se eu errar?\" Reconhecer alguém por foto, sem contexto, também não é prova."
+        }
+      ]
+    },
+    {
+      "id": "concessionaria",
+      "nome": "Concessionária Aurora Motors",
+      "pista": "\"O dono ou a dona da empresa denunciada levou o carro mais caro da loja e pagou tudo à vista, em dinheiro vivo\", conta Kátia. A renda declarada não explica uma compra dessas.",
+      "variacoes": [
+        "\"Pagou à vista o modelo mais caro, sem financiamento nenhum\", lembra Kátia. Para a renda que a empresa denunciada declara, é dinheiro demais."
+      ],
+      "indicio": "patrimonio_incompativel",
+      "forca": "fraca",
+      "icone": "concessionaria",
+      "testemunha": {
+        "nome": "Kátia, vendedora",
+        "aparencia": {
+          "pele": "#c68642",
+          "cabelo": "#e07a5f",
+          "estiloCabelo": "longo",
+          "camisa": "#3d5a80",
+          "calca": "#2b2b2b",
+          "acessorios": [
+            "cracha"
+          ]
+        }
+      },
+      "acoes": [
+        {
+          "id": "vendedora",
+          "rotulo": "Conversar com a vendedora",
+          "revela": true
+        },
+        {
+          "id": "lista",
+          "rotulo": "Pedir a lista de clientes",
+          "texto": "Kátia recusa: os dados dos clientes são protegidos. A fiscalização também precisa seguir as regras."
+        },
+        {
+          "id": "testdrive",
+          "rotulo": "Fazer um test-drive",
+          "texto": "O carro é ótimo, mas passear não ajuda a investigação. Foco!"
+        }
+      ]
     },
     {
       "id": "praca",
@@ -201,7 +299,61 @@
             "oculos"
           ]
         }
-      }
+      },
+      "acoes": [
+        {
+          "id": "ouvir",
+          "rotulo": "Ouvir os consumidores",
+          "revela": true
+        },
+        {
+          "id": "olhar",
+          "rotulo": "Observar as lojas de longe",
+          "texto": "Daqui só dá para ver gente entrando e saindo. Olhar de longe não mostra se a nota foi emitida."
+        },
+        {
+          "id": "palpite",
+          "rotulo": "Perguntar quem eles acham que sonega",
+          "texto": "Cada pessoa tem um palpite diferente, e ninguém viu nada. Palpite não é prova."
+        }
+      ]
+    },
+    {
+      "id": "banco",
+      "nome": "Banco Aurora",
+      "pista": "O gerente explica: \"Extrato de cliente é protegido por sigilo bancário. Ele só sai pelos caminhos legais, com autorização.\" A fiscalização também tem regras, e prova obtida fora delas não vale.",
+      "indicio": null,
+      "icone": "banco",
+      "testemunha": {
+        "nome": "Seu Ademar, gerente",
+        "aparencia": {
+          "pele": "#8d5524",
+          "cabelo": "#1f1a17",
+          "estiloCabelo": "careca",
+          "camisa": "#f2f2f2",
+          "calca": "#2b2b2b",
+          "acessorios": [
+            "gravata"
+          ]
+        }
+      },
+      "acoes": [
+        {
+          "id": "extrato",
+          "rotulo": "Pedir o extrato da empresa denunciada",
+          "revela": true
+        },
+        {
+          "id": "depositos",
+          "rotulo": "Perguntar quem deposita muito dinheiro",
+          "texto": "Seu Ademar sorri: \"Não posso comentar sobre clientes.\" O sigilo bancário vale para todo mundo."
+        },
+        {
+          "id": "conta",
+          "rotulo": "Aproveitar e abrir uma conta",
+          "texto": "Você sai com uma conta nova e nenhuma pista. Foco no caso!"
+        }
+      ]
     },
     {
       "id": "junta_comercial",
@@ -225,7 +377,24 @@
             "cracha"
           ]
         }
-      }
+      },
+      "acoes": [
+        {
+          "id": "cadastro",
+          "rotulo": "Consultar o cadastro das quatro empresas",
+          "revela": true
+        },
+        {
+          "id": "faturamento",
+          "rotulo": "Pedir o faturamento das empresas",
+          "texto": "A Junta Comercial registra empresas, não faturamento. Para isso, a Auditoria cruza outras fontes."
+        },
+        {
+          "id": "fechou",
+          "rotulo": "Perguntar se alguma empresa fechou",
+          "texto": "Nenhuma das quatro fechou ou mudou de nome. Nada de estranho por aqui."
+        }
+      ]
     },
     {
       "id": "portal_transparencia",
@@ -238,6 +407,60 @@
       "variacoes": [
         "No portal, você vê que a verba do hospital caiu R$ 180.000 neste ano (valor fictício). É o tamanho do \"fantasma\". O portal é um site público: consultar não gastou nenhum dia.",
         "O portal mostra que, neste ano, faltaram R$ 180.000 (valor fictício) para a farmácia e a pediatria do hospital. Consultar o site não gastou nenhum dia."
+      ],
+      "acoes": [
+        {
+          "id": "receita",
+          "rotulo": "Ver a receita e a verba do hospital",
+          "revela": true
+        },
+        {
+          "id": "salarios",
+          "rotulo": "Ver os salários dos servidores",
+          "texto": "O portal mostra os salários públicos, mas isso não ajuda a achar quem sonega."
+        },
+        {
+          "id": "obras",
+          "rotulo": "Ver a lista de obras da cidade",
+          "texto": "Você vê as obras da cidade. Interessante, mas o caso é a verba do hospital."
+        }
+      ]
+    },
+    {
+      "id": "contabilidade",
+      "nome": "Escritório Contábil Soma",
+      "pista": "O contador explica que cada empresa declara o próprio faturamento todo mês. \"Se alguém vende sem nota, essa venda nem chega até mim\", diz. A sonegação começa no balcão.",
+      "indicio": null,
+      "icone": "contabilidade",
+      "testemunha": {
+        "nome": "Dr. Paulo, contador",
+        "aparencia": {
+          "pele": "#f1c27d",
+          "cabelo": "#5a3825",
+          "estiloCabelo": "curto",
+          "camisa": "#a3b18a",
+          "calca": "#3a3a3a",
+          "acessorios": [
+            "oculos"
+          ]
+        }
+      },
+      "acoes": [
+        {
+          "id": "como",
+          "rotulo": "Perguntar como funciona a declaração",
+          "revela": true
+        },
+        {
+          "id": "documentos",
+          "rotulo": "Pedir as declarações dos clientes",
+          "texto": "Dr. Paulo não pode entregar documentos dos clientes sem autorização. É ética profissional."
+        },
+        {
+          "id": "desconfia",
+          "rotulo": "Perguntar se ele desconfia de alguém",
+          "texto": "\"Eu não aponto cliente\", ele responde. Desconfiança não é prova."
+        }
       ]
     }
   ],
@@ -327,46 +550,6 @@
   ],
   "glossario": [
     {
-      "id": "tributo",
-      "termo": "Tributo",
-      "definicao": "Valor obrigatório que pessoas e empresas pagam ao governo. Inclui impostos, taxas e contribuições, e é ele que financia escolas, hospitais e ruas."
-    },
-    {
-      "id": "funcao_social",
-      "termo": "Função social do tributo",
-      "definicao": "A ideia de que o tributo volta para a sociedade em forma de serviços públicos, como saúde, educação e segurança."
-    },
-    {
-      "id": "sonegacao",
-      "termo": "Sonegação",
-      "definicao": "Deixar de pagar um tributo devido escondendo informações do governo. Exemplo: vender sem emitir nota fiscal."
-    },
-    {
-      "id": "nota_fiscal",
-      "termo": "Nota fiscal",
-      "definicao": "Documento que registra uma venda ou um serviço. É com base nela que o tributo é calculado. Pedir a nota é um direito de quem compra."
-    },
-    {
-      "id": "auditor",
-      "termo": "Auditor(a) fiscal",
-      "definicao": "Servidor(a) público(a) que fiscaliza se pessoas e empresas pagam os tributos corretamente."
-    },
-    {
-      "id": "indicio",
-      "termo": "Indício",
-      "definicao": "Sinal que aponta para uma irregularidade, mas que sozinho não prova nada. Vários indícios combinados podem virar prova."
-    },
-    {
-      "id": "prova",
-      "termo": "Prova",
-      "definicao": "Informação que sustenta uma acusação. No jogo, as provas precisam diferenciar o culpado de todos os outros suspeitos."
-    },
-    {
-      "id": "auto",
-      "termo": "Auto de infração",
-      "definicao": "Documento em que a fiscalização registra a irregularidade, as provas encontradas e a cobrança do tributo devido. Sem provas suficientes, ele pode ser anulado."
-    },
-    {
       "id": "patrimonio",
       "termo": "Patrimônio incompatível com a renda",
       "definicao": "Quando alguém tem bens, como casa e carro, de valor muito maior do que a renda declarada permitiria comprar."
@@ -380,11 +563,47 @@
       "id": "junta",
       "termo": "Junta Comercial",
       "definicao": "Órgão onde as empresas são registradas. Estar registrada não garante que a empresa paga os tributos corretamente."
+    }
+  ],
+  "moradores": [
+    {
+      "nome": "Seu Nonato, carteiro",
+      "aparencia": {
+        "pele": "#8d5524",
+        "cabelo": "#1f1a17",
+        "estiloCabelo": "bone",
+        "camisa": "#f4d35e",
+        "calca": "#2c5aa0"
+      },
+      "fala": "Entrego muita caixa de mercadoria na {empresa}, e o dono vive dizendo que o movimento está fraco. Estranho, né?",
+      "verdadeira": true
     },
     {
-      "id": "portal",
-      "termo": "Portal da Transparência",
-      "definicao": "Site público onde qualquer pessoa pode ver quanto o governo arrecada e como gasta o dinheiro."
+      "nome": "Duda, estudante",
+      "aparencia": {
+        "pele": "#f1c27d",
+        "cabelo": "#e07a5f",
+        "estiloCabelo": "coque",
+        "camisa": "#5cc28a",
+        "calca": "#3d5a80"
+      },
+      "fala": "Minha tia jura que quem sonega é {inocente}. Ela não viu nada, mas tem certeza...",
+      "verdadeira": false
+    },
+    {
+      "nome": "Dona Cida, aposentada",
+      "aparencia": {
+        "pele": "#e0ac69",
+        "cabelo": "#d6d6d6",
+        "estiloCabelo": "curto",
+        "camisa": "#e5675d",
+        "calca": "#6b4f6b",
+        "acessorios": [
+          "oculos"
+        ]
+      },
+      "fala": "No meu tempo, ninguém pedia nota. Hoje eu peço sempre: é o meu imposto chegando ao posto de saúde!",
+      "verdadeira": true
     }
   ]
 }

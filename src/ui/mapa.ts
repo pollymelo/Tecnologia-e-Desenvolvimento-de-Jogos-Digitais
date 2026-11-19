@@ -1,4 +1,4 @@
-// Mapa de Vila Aurora: ruas, lotes e portas, em unidades do desenho (viewBox 400 × 340).
+// Mapa de Vila Aurora: ruas, lotes e portas, em unidades do desenho (viewBox 520 × 340).
 // Aqui fica só a geometria (sem DOM): por onde o peão pode andar, como ele desliza nas
 // bordas e vira nas esquinas, e o caminho mais curto pelas ruas.
 
@@ -7,7 +7,7 @@ export interface Ponto {
   y: number
 }
 
-export const MAPA = { largura: 400, altura: 340 }
+export const MAPA = { largura: 520, altura: 340 }
 
 /** Largura das ruas e da calçada que leva até cada porta. */
 export const LARGURA_RUA = 22
@@ -17,8 +17,8 @@ export const LARGURA_CALCADA = 10
 export const VELOCIDADE = 95
 
 const RUAS_Y = [96, 206, 316]
-const RUAS_X = [16, 137.5, 262.5, 384]
-const COLUNAS = [75, 200, 325]
+const RUAS_X = [14, 134, 260, 386, 506]
+const COLUNAS = [74, 197, 323, 446]
 /** Distância entre a porta e o meio da rua (o tamanho da calçada). */
 const RECUO = 18
 
@@ -38,13 +38,18 @@ function lote(linha: number, coluna: number): Lote {
   return { linha, coluna, porta: { x, y: y - RECUO }, rua: { x, y } }
 }
 
-export const LOTE_HOSPITAL = lote(1, 1)
-export const LOTE_PARTIDA = lote(2, 1)
-/** Lotes dos locais do caso, na ordem em que aparecem no JSON. */
-export const LOTES_LOCAIS: Lote[] = [lote(0, 0), lote(0, 1), lote(0, 2), lote(1, 0), lote(1, 2), lote(2, 0), lote(2, 2)]
+/** Lote do prédio que marca o caso (hospital, creche...): não dá para entrar. */
+export const LOTE_MARCO = lote(1, 1)
+export const LOTE_PARTIDA = lote(2, 2)
+/** Lotes dos locais do caso, na ordem em que aparecem no JSON (linha de cima, do meio, de baixo). */
+export const LOTES_LOCAIS: Lote[] = [
+  lote(0, 0), lote(0, 1), lote(0, 2), lote(0, 3),
+  lote(1, 0), lote(1, 2), lote(1, 3),
+  lote(2, 0), lote(2, 1), lote(2, 3),
+]
 /** Quantos locais cabem no mapa. */
 export const MAX_LOCAIS = LOTES_LOCAIS.length
-const TODOS_OS_LOTES = [...LOTES_LOCAIS, LOTE_HOSPITAL, LOTE_PARTIDA]
+const TODOS_OS_LOTES = [...LOTES_LOCAIS, LOTE_MARCO, LOTE_PARTIDA]
 
 // ---------- Grafo das ruas ----------
 
@@ -85,7 +90,7 @@ export function trechos(): { de: Ponto; para: Ponto; largura: number }[] {
   return arestas.map((e) => ({ de: nos[e.a], para: nos[e.b], largura: e.largura }))
 }
 
-export const RUAS = { horizontais: RUAS_Y, verticais: RUAS_X }
+export const RUAS = { horizontais: RUAS_Y, verticais: RUAS_X, colunas: COLUNAS }
 
 // ---------- Onde dá para andar ----------
 
@@ -273,4 +278,41 @@ export function pontoNoCaminho(pontos: Ponto[], d: number): Ponto {
     resto -= trecho
   }
   return pontos[pontos.length - 1]
+}
+
+// ---------- Moradores ----------
+
+/** Quarteirões (coluna da rua da esquerda, linha da rua de cima) onde cada morador dá voltas. */
+const QUARTEIROES_DOS_MORADORES: [number, number][] = [
+  [0, 0],
+  [2, 1],
+  [3, 0],
+  [1, 1],
+]
+
+/** Volta completa em torno de um quarteirão, pelo meio das ruas (o último ponto é o primeiro). */
+export function rotaDoMorador(i: number): Ponto[] {
+  const [c, l] = QUARTEIROES_DOS_MORADORES[i % QUARTEIROES_DOS_MORADORES.length]
+  const x0 = RUAS_X[c]
+  const x1 = RUAS_X[c + 1]
+  const y0 = RUAS_Y[l]
+  const y1 = RUAS_Y[l + 1]
+  return [
+    { x: x0, y: y0 },
+    { x: x1, y: y0 },
+    { x: x1, y: y1 },
+    { x: x0, y: y1 },
+    { x: x0, y: y0 },
+  ]
+}
+
+/** Velocidade dos moradores (mais devagar que o peão), em unidades por segundo. */
+export const VELOCIDADE_MORADOR = 22
+
+/** Onde está o morador `i` depois de `segundos` andando (cada um começa num ponto da volta). */
+export function posicaoDoMorador(i: number, segundos: number): Ponto {
+  const rota = rotaDoMorador(i)
+  const total = comprimento(rota)
+  const d = (((segundos * VELOCIDADE_MORADOR + i * 97) % total) + total) % total
+  return pontoNoCaminho(rota, d)
 }

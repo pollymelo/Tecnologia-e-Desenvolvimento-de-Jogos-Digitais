@@ -1,0 +1,274 @@
+{
+  "id": "caso-003",
+  "titulo": "O IPTU esquecido",
+  "tema": "IPTU e a função social da cidade",
+  "marco": { "nome": "Praça do Jardim Aurora", "icone": "praca_apagada", "tag": "Sem luz" },
+  "abertura": "O IPTU é o imposto que quem tem imóvel na cidade paga à prefeitura. Ele depende do tamanho e do uso do imóvel, e paga boa parte da iluminação, das praças e das calçadas. No Jardim Aurora, a conta não fecha: o bairro dobrou de tamanho, mas o IPTU arrecadado é o mesmo de dez anos atrás.",
+  "briefing": "A praça do Jardim Aurora está às escuras e sem brinquedos. Uma denúncia diz que um dos quatro donos de imóveis grandes do bairro esconde o tamanho e o uso do imóvel para pagar menos IPTU. Você tem 3 dias para descobrir quem.",
+  "diasIniciais": 3,
+  "custoVisitaDias": 1,
+  "provasExigidas": 2,
+  "culpadoId": "henrique",
+  "indicios": [
+    { "id": "area_maior", "nome": "Construção maior do que a cadastrada", "termo": "cadastro_imobiliario" },
+    { "id": "uso_comercial", "nome": "Comércio funcionando em imóvel cadastrado como casa", "termo": "iptu" },
+    { "id": "iptu_atrasado", "nome": "IPTU sem pagar há anos (dívida ativa)", "termo": "divida_ativa" }
+  ],
+  "suspeitos": [
+    {
+      "id": "henrique",
+      "nome": "Henrique",
+      "empresa": "Galpão Estrela (festas e eventos)",
+      "perfil": "Promove os maiores eventos do bairro. Diz que o Jardim Aurora precisa de mais diversão.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#1b2430", "calca": "#3a3a3a", "acessorios": ["oculos"] },
+      "indicios": ["area_maior", "uso_comercial", "iptu_atrasado"]
+    },
+    {
+      "id": "rosa",
+      "nome": "Rosa",
+      "empresa": "Pousada Recanto",
+      "perfil": "Transformou o casarão da família numa pousada charmosa, cheia de turistas no fim de semana.",
+      "aparencia": { "pele": "#e0ac69", "cabelo": "#8a5a44", "estiloCabelo": "coque", "camisa": "#e5675d", "calca": "#2b2b2b", "acessorios": [] },
+      "indicios": ["area_maior", "iptu_atrasado"]
+    },
+    {
+      "id": "gilberto",
+      "nome": "Gilberto",
+      "empresa": "Oficina do Gil",
+      "perfil": "Conserta carros desde jovem. Todo mundo do bairro já levou um carro para ele dar uma olhada.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#4a90d9", "calca": "#2c5aa0", "acessorios": [] },
+      "indicios": ["uso_comercial"]
+    },
+    {
+      "id": "neusa",
+      "nome": "Neusa",
+      "empresa": "Salão Beleza Pura",
+      "perfil": "Salão de beleza movimentado. Faz os penteados de quase todos os casamentos do bairro.",
+      "aparencia": { "pele": "#c68642", "cabelo": "#7b4bb7", "estiloCabelo": "longo", "camisa": "#f4d35e", "calca": "#6b4f6b", "acessorios": [] },
+      "indicios": ["iptu_atrasado"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "cadastro",
+      "nome": "Prefeitura: Cadastro Imobiliário",
+      "pista": "No cadastro, o imóvel do dono ou da dona da empresa denunciada tem 200 m². Na foto aérea deste ano, a construção passa de 1.500 m². O IPTU continua sendo cobrado sobre os 200.",
+      "variacoes": [
+        "O cadastro registra uma casa pequena no endereço da empresa denunciada. A foto aérea mostra um galpão que ocupa o terreno inteiro."
+      ],
+      "indicio": "area_maior",
+      "forca": "forte",
+      "icone": "prefeitura",
+      "testemunha": { "nome": "Dona Celeste, servidora", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#3d5a80", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "foto", "rotulo": "Comparar o cadastro com a foto aérea", "revela": true },
+        { "id": "ranking", "rotulo": "Pedir a lista de quem paga mais IPTU", "texto": "A lista mostra quem paga mais, não quem deveria pagar mais. Sonegação aparece na comparação, não no ranking." },
+        { "id": "reclamacoes", "rotulo": "Perguntar se houve reclamações", "texto": "Há reclamações de barulho no bairro, mas reclamação não mede o tamanho de imóvel nenhum." }
+      ]
+    },
+    {
+      "id": "vistoria",
+      "nome": "Vistoria com o fiscal de obras",
+      "pista": "Com a trena e o projeto na mão, Marcão confirma: o imóvel do dono ou da dona da empresa denunciada ganhou um andar e um anexo enormes, sem nenhuma licença.",
+      "indicio": "area_maior",
+      "forca": "fraca",
+      "icone": "obras",
+      "testemunha": { "nome": "Marcão, fiscal de obras", "aparencia": { "pele": "#e0ac69", "cabelo": "#5a3825", "estiloCabelo": "bone", "camisa": "#f3722c", "calca": "#3a3a3a", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "medir", "rotulo": "Medir a construção junto com o fiscal", "revela": true },
+        { "id": "calcada", "rotulo": "Olhar de fora, pela calçada", "texto": "Do lado de fora, o muro alto esconde tudo. Sem medir, é só impressão." },
+        { "id": "opiniao", "rotulo": "Perguntar se ele desconfia de alguém", "texto": "\"Eu meço, não acuso\", diz Marcão. Desconfiança não é prova." }
+      ]
+    },
+    {
+      "id": "vizinhos",
+      "nome": "Rua dos vizinhos",
+      "pista": "\"Toda sexta tem festa paga lá, com ingresso e tudo\", conta Seu Toninho, falando do imóvel da empresa denunciada. Na prefeitura, o endereço continua cadastrado como casa de morar.",
+      "indicio": "uso_comercial",
+      "forca": "fraca",
+      "icone": "casa",
+      "testemunha": { "nome": "Seu Toninho, vizinho", "aparencia": { "pele": "#f1c27d", "cabelo": "#e8e8e8", "estiloCabelo": "careca", "camisa": "#5cc28a", "calca": "#5a3825", "acessorios": [] } },
+      "acoes": [
+        { "id": "conversar", "rotulo": "Conversar com os vizinhos", "revela": true },
+        { "id": "reclamar", "rotulo": "Reclamar do barulho junto com eles", "texto": "Vocês reclamam juntos, e todo mundo se sente melhor. Mas reclamação não é investigação." },
+        { "id": "noite", "rotulo": "Esperar anoitecer para ver o movimento", "texto": "Você vê luzes e música ao longe, mas não dá para saber de qual imóvel vêm. Observação vaga não é prova." }
+      ]
+    },
+    {
+      "id": "lanhouse",
+      "nome": "Lan House do Beto",
+      "pista": "Na internet, o endereço da empresa denunciada aparece em anúncios de aluguel para festas, com preço e fotos. É comércio funcionando num imóvel cadastrado como residência.",
+      "indicio": "uso_comercial",
+      "forca": "forte",
+      "icone": "lanhouse",
+      "testemunha": { "nome": "Beto, dono da lan house", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2c5aa0", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "anuncios", "rotulo": "Pesquisar anúncios do endereço", "revela": true },
+        { "id": "redes", "rotulo": "Olhar as redes sociais dos suspeitos", "texto": "Muitas fotos de família e de comida. Nenhuma mostra o que você precisa provar." },
+        { "id": "beto", "rotulo": "Perguntar ao Beto o que ele ouviu", "texto": "Beto ouviu falar de muita festa no bairro, mas não sabe dizer onde. Ouvir dizer não é prova." }
+      ]
+    },
+    {
+      "id": "divida_ativa",
+      "nome": "Procuradoria: Dívida Ativa",
+      "pista": "O imóvel do dono ou da dona da empresa denunciada não paga IPTU há 6 anos. A dívida já está inscrita em dívida ativa, e ninguém pediu para negociar.",
+      "indicio": "iptu_atrasado",
+      "forca": "forte",
+      "icone": "cartorio",
+      "testemunha": { "nome": "Dra. Inês, procuradora", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#1b2430", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "consultar", "rotulo": "Consultar a dívida dos quatro imóveis", "revela": true },
+        { "id": "cobranca", "rotulo": "Perguntar como funciona a cobrança", "texto": "Dra. Inês explica que quem não paga entra em dívida ativa e pode ser cobrado na Justiça. Útil, mas não aponta ninguém." },
+        { "id": "perdao", "rotulo": "Pedir para perdoar as dívidas do bairro", "texto": "\"Perdão de dívida só acontece por lei, e nunca para quem esconde o imóvel\", ela responde." }
+      ]
+    },
+    {
+      "id": "associacao_moradores",
+      "nome": "Associação de Moradores",
+      "pista": "Dona Graça mostra o abaixo-assinado: o bairro pede iluminação e uma praça há anos. \"A prefeitura diz que falta dinheiro. Mas o bairro cresceu tanto!\" O IPTU que não é pago faz falta aqui.",
+      "indicio": null,
+      "icone": "junta",
+      "testemunha": { "nome": "Dona Graça, presidente da associação", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#5cc28a", "calca": "#3d5a80", "acessorios": [] } },
+      "acoes": [
+        { "id": "abaixo", "rotulo": "Ler o abaixo-assinado", "revela": true },
+        { "id": "festa", "rotulo": "Perguntar sobre a festa junina", "texto": "A festa junina vai ser ótima, mas não é o seu caso." },
+        { "id": "culpa", "rotulo": "Perguntar de quem é a culpa", "texto": "Dona Graça suspira: \"Cada um diz uma coisa.\" Sem prova, culpa vira briga de vizinho." }
+      ]
+    },
+    {
+      "id": "cartorio",
+      "nome": "Cartório de Imóveis",
+      "pista": "Seu Jorge confirma que os quatro imóveis estão no nome dos próprios donos, sem laranjas desta vez. O problema não é de quem é o imóvel, e sim o que está cadastrado sobre ele.",
+      "indicio": null,
+      "icone": "cartorio",
+      "testemunha": { "nome": "Seu Jorge, escrevente do cartório", "aparencia": { "pele": "#f1c27d", "cabelo": "#e8e8e8", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#3a3a3a", "acessorios": ["gravata", "oculos"] } },
+      "acoes": [
+        { "id": "matriculas", "rotulo": "Pedir as matrículas dos quatro imóveis", "revela": true },
+        { "id": "historia", "rotulo": "Perguntar a história do bairro", "texto": "Seu Jorge conta que o Jardim Aurora era só chácara. Bonita história, mas não ajuda agora." },
+        { "id": "fofoca", "rotulo": "Perguntar quem anda construindo", "texto": "\"No cartório eu vejo papel, não obra\", ele responde." }
+      ]
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "O portal mostra que o IPTU arrecadado no Jardim Aurora é o mesmo de dez anos atrás, mesmo com o bairro dobrando de tamanho. A diferença chega a R$ 150.000 (valor fictício). O portal é público: consultar não gastou nenhum dia.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true,
+      "custoDias": 0,
+      "icone": "portal",
+      "acoes": [
+        { "id": "iptu", "rotulo": "Ver o IPTU arrecadado no bairro", "revela": true },
+        { "id": "festas", "rotulo": "Ver os gastos com festas da cidade", "texto": "Tudo público, como deve ser. Mas não é isso que você procura." },
+        { "id": "frota", "rotulo": "Ver os carros da prefeitura", "texto": "A frota está lá, carro por carro. Não ajuda no caso." }
+      ]
+    },
+    {
+      "id": "energia",
+      "nome": "Companhia de Energia",
+      "pista": "O consumo de energia do imóvel da empresa denunciada é de comércio grande, parecido com o de um pequeno shopping, e não de uma casa. Mesmo assim, ele segue cadastrado como residência.",
+      "indicio": "uso_comercial",
+      "forca": "forte",
+      "icone": "energia",
+      "testemunha": { "nome": "Ana, técnica da companhia", "aparencia": { "pele": "#e0ac69", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "consumo", "rotulo": "Pedir o histórico de consumo do endereço", "revela": true },
+        { "id": "postes", "rotulo": "Perguntar por que a praça está apagada", "texto": "Ana explica que a companhia só troca lâmpadas que a prefeitura paga. Sem dinheiro, sem luz. Faz sentido, mas não aponta ninguém." },
+        { "id": "gato", "rotulo": "Perguntar se alguém faz 'gato' de luz", "texto": "\"Isso é outro problema, e não é o do seu caso\", ela responde." }
+      ]
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 150000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O IPTU recuperado volta ao orçamento do município e ilumina a praça do Jardim Aurora.",
+    "detalhes": [
+      "R$ 70.000 para trocar os postes da praça por lâmpadas LED.",
+      "R$ 50.000 para brinquedos e bancos novos.",
+      "R$ 30.000 para consertar as calçadas do bairro."
+    ]
+  },
+  "gancho": "No anúncio do galpão, uma frase chama atenção: \"desconto para pagamento sem nota\". E na escola do bairro, os alunos acabam de lançar uma campanha: \"Pediu nota? A cidade agradece.\" Talvez seja hora de ouvir quem compra.",
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "O imóvel foi recadastrado com o tamanho e o uso reais, e o IPTU atrasado foi cobrado. A praça vai ganhar luz.",
+      "ensina": "O IPTU é calculado pelo tamanho e pelo uso do imóvel. Esconder qualquer um dos dois tira dinheiro da praça, da luz e da calçada de todo o bairro.",
+      "perguntasDebate": [
+        "Que serviços do seu bairro são pagos com IPTU?",
+        "É justo um imóvel grande pagar o mesmo IPTU que uma casa pequena? Por quê?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a pessoa certa, mas as provas não a diferenciam dos outros donos de imóveis. O auto foi anulado.",
+      "ensina": "Dever IPTU ou ter construído mais não basta: vários imóveis têm um desses problemas. A prova precisa separar o responsável dos outros.",
+      "perguntasDebate": [
+        "Que dupla de provas teria separado o responsável dos outros?",
+        "Por que uma dívida de IPTU, sozinha, não prova que alguém escondeu o imóvel?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Você autuou quem não escondia o imóvel. O verdadeiro responsável continua pagando IPTU de casa pequena.",
+      "ensina": "Ter uma irregularidade não faz de alguém o alvo da denúncia. A fiscalização precisa acertar quem, e por quê.",
+      "perguntasDebate": [
+        "Que indício faltava à pessoa que você acusou?",
+        "Como o bairro reagiria a uma acusação errada contra um vizinho conhecido?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem auto de infração. A praça segue às escuras.",
+      "ensina": "Fiscalização tem prazo. Documentos oficiais costumam valer mais que conversas soltas.",
+      "perguntasDebate": [
+        "Que locais trouxeram documentos oficiais?",
+        "Como você planejaria os três dias se jogasse de novo?"
+      ]
+    }
+  },
+  "moradores": [
+    { "nome": "Juca, pipoqueiro", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#e5675d", "calca": "#3a3a3a" }, "fala": "Toda sexta eu vendo pipoca na porta da {empresa}. Fila enorme, ingresso caro... e dizem que lá é 'casa de família'!", "verdadeira": true },
+    { "nome": "Lara, skatista", "aparencia": { "pele": "#f1c27d", "cabelo": "#f4d35e", "estiloCabelo": "longo", "camisa": "#7b4bb7", "calca": "#2c5aa0" }, "fala": "Meu primo disse que {inocente} não paga nada de IPTU. Mas meu primo inventa muita coisa...", "verdadeira": false },
+    { "nome": "Seu Messias, eletricista", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#f4d35e", "calca": "#2b2b2b", "acessorios": ["cracha"] }, "fala": "Poste sem lâmpada é dinheiro que não chegou. É o IPTU que paga a luz da rua, sabia?", "verdadeira": true }
+  ],
+  "quiz": [
+    {
+      "id": "iptu",
+      "pergunta": "O que é o IPTU?",
+      "opcoes": [
+        "Um imposto sobre o salário do trabalhador.",
+        "Um imposto municipal pago por quem tem imóvel na cidade.",
+        "Uma taxa paga só por quem tem carro."
+      ],
+      "correta": 1,
+      "explicacao": "IPTU é o Imposto Predial e Territorial Urbano. É municipal e depende do tamanho, da localização e do uso do imóvel."
+    },
+    {
+      "id": "esconder",
+      "pergunta": "Se alguém declara o imóvel menor do que ele é, o que acontece?",
+      "opcoes": [
+        "Paga menos IPTU do que deveria, e falta dinheiro para os serviços da cidade.",
+        "Nada: o tamanho do imóvel não muda o imposto.",
+        "Paga mais imposto, por engano."
+      ],
+      "correta": 0,
+      "explicacao": "O IPTU é calculado pela área cadastrada. Esconder a área real reduz o imposto e tira dinheiro de praças, luz e calçadas."
+    },
+    {
+      "id": "destino",
+      "pergunta": "Para onde costuma ir o dinheiro do IPTU?",
+      "opcoes": [
+        "Para o governo de outro país.",
+        "Para o dono do imóvel vizinho.",
+        "Para a própria cidade: iluminação, praças, calçadas e escolas."
+      ],
+      "correta": 2,
+      "explicacao": "O IPTU fica com o município e ajuda a pagar serviços do dia a dia, como iluminação pública, praças e manutenção das ruas."
+    }
+  ],
+  "glossario": [
+    { "id": "iptu", "termo": "IPTU", "definicao": "Imposto Predial e Territorial Urbano. É pago à prefeitura por quem tem imóvel na cidade, e o valor depende do tamanho, do lugar e do uso do imóvel (casa ou comércio)." },
+    { "id": "cadastro_imobiliario", "termo": "Cadastro imobiliário", "definicao": "Registro da prefeitura com o tamanho e o uso de cada imóvel. É a base para calcular o IPTU." },
+    { "id": "divida_ativa", "termo": "Dívida ativa", "definicao": "Lista de tributos vencidos e não pagos. Quem entra nela pode ser cobrado na Justiça." }
+  ]
+}

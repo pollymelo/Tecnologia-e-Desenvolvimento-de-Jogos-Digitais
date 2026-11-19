@@ -1,12 +1,12 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { caso001 as caso } from '../game/caso.ts'
+import { caso001 as caso, casos } from '../game/caso.ts'
 import { iniciarApp } from './app.ts'
 
 let raiz: HTMLElement
 
 /** Sem teste rápido, tutorial e som: os testes do fluxo principal vão direto ao tabuleiro. */
-const SEM_EXTRAS = { quiz: false, tutorial: false, som: false }
+const SEM_EXTRAS = { quiz: false, tutorial: false, som: false, imprevistos: false }
 
 const texto = () => raiz.textContent ?? ''
 const titulo = () => raiz.querySelector('h1')?.textContent?.trim()
@@ -28,8 +28,17 @@ function marcar(nome: string, valor: string): void {
 /** Título do card de pista aberto sobre o tabuleiro. */
 const tituloCard = () => raiz.querySelector('.card-pista h2')?.textContent?.trim()
 
-function visitar(id: string): void {
+/** Abordagem que revela a pista do local (dentro do card). */
+const certa = (id: string) => caso.locais.find((l) => l.id === id)!.acoes!.find((a) => a.revela)!.id
+
+/** Entra no local, escolhe a abordagem certa (se houver escolhas) e abre a pista. */
+function entrarEEscolher(id: string): void {
   clicar('visitar', id)
+  if (raiz.querySelector('[data-acao="escolher"]')) clicar('escolher', certa(id))
+}
+
+function visitar(id: string): void {
+  entrarEEscolher(id)
   clicar('guardar-pista')
 }
 
@@ -59,9 +68,12 @@ describe('fluxo das 6 telas', () => {
     clicar('visitar', 'operadora_cartao')
     expect(titulo()).toBe('Para onde investigar?') // o card abre sobre o tabuleiro
     expect(tituloCard()).toBe('Operadora de cartão')
-    expect(texto()).toContain('Nova pista')
+    expect(texto()).toContain('O que você faz?') // primeiro, escolher a abordagem
+    expect(raiz.querySelector('[data-acao="guardar-pista"]')).toBeNull()
     expect(texto()).toContain('2 dias restantes')
     expect(raiz.querySelector('.pip.recem-gasto')).not.toBeNull()
+    clicar('escolher', 'relatorio')
+    expect(texto()).toContain('Nova pista')
     expect(raiz.querySelector('main')?.hasAttribute('inert')).toBe(true)
 
     clicar('guardar-abrir-caderno')
@@ -124,7 +136,7 @@ describe('feedback visual', () => {
   })
 
   it('local sem indício avisa que não serve como prova', () => {
-    clicar('visitar', 'junta_comercial')
+    entrarEEscolher('junta_comercial')
     expect(texto()).toContain('Sem indício novo')
   })
 
@@ -187,9 +199,9 @@ describe('os 4 resultados na tela', () => {
 describe('tabuleiro e personagens', () => {
   beforeEach(() => clicar('comecar'))
 
-  it('mostra os 6 locais como casas do tabuleiro, o hospital e o peão na partida', () => {
-    expect(raiz.querySelectorAll('button.casa')).toHaveLength(6)
-    expect(raiz.querySelector('.casa-hospital')?.textContent).toContain('Hospital Municipal')
+  it('mostra os 9 locais como casas do tabuleiro, o hospital e o peão na partida', () => {
+    expect(raiz.querySelectorAll('button.casa')).toHaveLength(9)
+    expect(raiz.querySelector('.casa-marco')?.textContent).toContain('Hospital Municipal')
     expect(raiz.querySelector('.casa.partida')).not.toBeNull()
     expect(raiz.querySelector('.peao .boneco')).not.toBeNull()
   })
@@ -205,7 +217,7 @@ describe('tabuleiro e personagens', () => {
   })
 
   it('a testemunha do local aparece com o balão da pista', () => {
-    clicar('visitar', 'ex_funcionario')
+    entrarEEscolher('ex_funcionario')
     expect(texto()).toContain('Tião, ex-funcionário')
     expect(raiz.querySelector('.balao .pista')?.textContent).toContain('sem carteira assinada')
   })
@@ -266,8 +278,9 @@ describe('peão animado', () => {
 
   it('ao guardar a pista, o peão sai da casa e a porta fecha', async () => {
     iniciarAnimado()
-    clicar('visitar', 'operadora_cartao')
-    await vi.advanceTimersByTimeAsync(6000)
+    clicar('visitar', 'operadora_cartao') // do outro lado do mapa: caminhada longa
+    await vi.advanceTimersByTimeAsync(9000)
+    clicar('escolher', 'relatorio')
     clicar('guardar-pista')
     await vi.advanceTimersByTimeAsync(1000)
     expect(raiz.querySelector('.card-pista')).toBeNull()
@@ -329,7 +342,7 @@ describe('glossário', () => {
 
   it('a pista nova liga o indício ao glossário', () => {
     clicar('comecar')
-    clicar('visitar', 'cartorio_detran')
+    entrarEEscolher('cartorio_detran')
     clicar('termo', 'patrimonio')
     expect(raiz.querySelector('[role="dialog"]')?.textContent).toContain('renda declarada')
   })
@@ -368,7 +381,7 @@ describe('pistas com texto sorteado', () => {
     raiz = document.querySelector<HTMLElement>('#app3')!
     iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0.99, ...SEM_EXTRAS })
     clicar('comecar')
-    clicar('visitar', 'ex_funcionario')
+    entrarEEscolher('ex_funcionario')
     const balao = raiz.querySelector('.balao .pista')?.textContent ?? ''
     expect(balao).toContain('A chefia dizia que registrar sai caro')
     expect(texto()).toContain('Funcionários sem carteira')
@@ -380,7 +393,7 @@ describe('teste rápido, tutorial, explicação e som', () => {
     localStorage.clear()
     document.body.innerHTML = '<div id="app4"></div>'
     raiz = document.querySelector<HTMLElement>('#app4')!
-    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0, som: false })
+    iniciarApp(raiz, caso, { animacoes: false, aleatorio: () => 0, som: false, imprevistos: false })
   }
 
   const responderQuiz = (respostas: number[]) => respostas.forEach((r, i) => marcar(`quiz-${i}`, String(r)))
@@ -506,14 +519,14 @@ describe('andar com o teclado e o direcional', () => {
     iniciarNoMapa()
     const inicio = peao().style.left
     await segurar('ArrowDown', 300) // sai da porta da Auditoria para a rua de baixo
-    await segurar('ArrowLeft', 1300) // segue pela rua até a calçada do Portal (125 unidades)
+    await segurar('ArrowLeft', 1300) // segue pela rua até a calçada do escritório vizinho (126 unidades)
     expect(peao().style.left).not.toBe(inicio)
     await segurar('ArrowUp', 400) // sobe a calçada até a porta
-    expect(raiz.querySelector('.aviso-porta')?.textContent).toContain('Portal da Transparência')
-    expect(raiz.querySelector('.casa.perto[data-id="portal_transparencia"]')).not.toBeNull()
+    expect(raiz.querySelector('.aviso-porta')?.textContent).toContain('Escritório Contábil Soma')
+    expect(raiz.querySelector('.casa.perto[data-id="contabilidade"]')).not.toBeNull()
 
     tecla('keydown', ' ')
-    expect(tituloCard()).toBe('Portal da Transparência')
+    expect(tituloCard()).toBe('Escritório Contábil Soma')
   })
 
   it('W A S D também andam, e o peão não atravessa prédios', async () => {
@@ -547,11 +560,109 @@ describe('andar com o teclado e o direcional', () => {
 
   it('clicar num local leva o peão até a porta dele', () => {
     iniciarNoMapa()
-    clicar('visitar', 'junta_comercial')
-    clicar('guardar-pista')
+    visitar('junta_comercial')
     const casa = raiz.querySelector<HTMLElement>('.casa[data-id="junta_comercial"]')!
     expect(peao().style.left).toBe(casa.style.left)
     expect(peao().style.top).toBe(casa.style.top)
     expect(raiz.querySelector('.aviso-porta')?.textContent).toContain('Você já visitou este local')
+  })
+})
+
+describe('campanha: arquivo de casos, escolhas, moradores e imprevistos', () => {
+  function iniciarCampanha(extras: Record<string, unknown> = {}): void {
+    localStorage.clear()
+    document.body.innerHTML = '<div id="app6"></div>'
+    raiz = document.querySelector<HTMLElement>('#app6')!
+    iniciarApp(raiz, casos, { animacoes: false, aleatorio: () => 0, ...SEM_EXTRAS, ...extras })
+  }
+
+  afterEach(() => localStorage.clear())
+
+  it('o arquivo mostra os 4 casos; só o primeiro começa aberto', () => {
+    iniciarCampanha()
+    expect(titulo()).toBe('Rota Fantasma')
+    const botoes = [...raiz.querySelectorAll<HTMLButtonElement>('[data-acao="abrir-caso"]')]
+    expect(botoes).toHaveLength(4)
+    expect(botoes.map((b) => b.disabled)).toEqual([false, true, true, true])
+    expect(texto()).toContain('Resolva o caso 001 para abrir')
+  })
+
+  it('resolver o caso 001 destrava o 002, e o progresso fica salvo', () => {
+    iniciarCampanha()
+    clicar('abrir-caso', 'caso-001')
+    expect(texto()).toContain('Caso 001')
+    clicar('comecar')
+    visitar('cartorio_detran')
+    visitar('ex_funcionario')
+    acusarCom('ricardo', ['cartorio_detran', 'ex_funcionario'])
+    expect(titulo()).toBe('Caso resolvido')
+    clicar('abrir-caso', 'caso-002')
+    expect(texto()).toContain('A empresa fantasma')
+    expect(texto()).toContain('Otávio')
+
+    // outra sessão (recarregou a página): o 002 continua aberto
+    iniciarApp((document.body.innerHTML = '<div id="app7"></div>', document.querySelector<HTMLElement>('#app7')!), casos, { animacoes: false, ...SEM_EXTRAS })
+    raiz = document.querySelector<HTMLElement>('#app7')!
+    const botoes = [...raiz.querySelectorAll<HTMLButtonElement>('[data-acao="abrir-caso"]')]
+    expect(botoes.map((b) => b.disabled)).toEqual([false, false, true, true])
+  })
+
+  it('caso 002: a casa do sócio aparece no mapa depois da Junta Comercial', () => {
+    iniciarCampanha()
+    localStorage.setItem('rota-fantasma:progresso', JSON.stringify({ estrelas: {}, resolvidos: ['caso-001'] }))
+    iniciarApp((document.body.innerHTML = '<div id="app8"></div>', document.querySelector<HTMLElement>('#app8')!), casos, { animacoes: false, aleatorio: () => 0, ...SEM_EXTRAS })
+    raiz = document.querySelector<HTMLElement>('#app8')!
+    clicar('abrir-caso', 'caso-002')
+    clicar('comecar')
+    expect(raiz.querySelector('.casa.trancada[data-id="casa_socio"]')).not.toBeNull()
+    expect(raiz.querySelector('button.casa[data-id="casa_socio"]')).toBeNull()
+    clicar('visitar', 'junta_comercial')
+    clicar('escolher', 'contrato')
+    clicar('guardar-pista')
+    expect(raiz.querySelector('button.casa[data-id="casa_socio"]')).not.toBeNull()
+    expect(texto()).toContain('Novo endereço no mapa: Casa do sócio da Horizonte')
+  })
+
+  it('a abordagem errada gasta o dia e não rende prova', () => {
+    iniciarCampanha()
+    clicar('abrir-caso', 'caso-001')
+    clicar('comecar')
+    clicar('visitar', 'cartorio_detran')
+    clicar('escolher', 'fofoca')
+    expect(texto()).toContain('Sem prova')
+    expect(texto()).toContain('2 dias restantes')
+    clicar('guardar-abrir-caderno')
+    expect(texto()).toContain('sem prova (a abordagem escolhida não revelou o indício)')
+  })
+
+  it('imprevisto: um local fica fechado no dia sorteado', () => {
+    iniciarCampanha({ imprevistos: true })
+    clicar('abrir-caso', 'caso-001')
+    clicar('comecar')
+    // com o sorteio () => 0, o primeiro local pago (Operadora) fecha no dia 1
+    expect(texto()).toContain('Imprevisto: Operadora de cartão')
+    expect(raiz.querySelector<HTMLButtonElement>('[data-acao="visitar"][data-id="operadora_cartao"]')!.disabled).toBe(true)
+    expect(raiz.querySelector('.casa.fechado[data-id="operadora_cartao"]')?.textContent).toContain('Fechado hoje')
+    visitar('cartorio_detran')
+    expect(raiz.querySelector<HTMLButtonElement>('[data-acao="visitar"][data-id="operadora_cartao"]')!.disabled).toBe(false)
+  })
+
+  it('morador: conversar anota o boato no caderno, e o resultado diz se era verdade', () => {
+    iniciarCampanha()
+    clicar('abrir-caso', 'caso-001')
+    clicar('comecar')
+    expect(raiz.querySelectorAll('.morador')).toHaveLength(3)
+    clicar('conversar', '1') // Duda: boato falso
+    expect(raiz.querySelector('.fala-morador')?.textContent).toContain('Duda')
+    expect(raiz.querySelector('.fala-morador')?.textContent).not.toContain('Ricardo')
+    clicar('abrir-caderno')
+    expect(texto()).toContain('Conversas na rua')
+    expect(texto()).toContain('Boato não vale como prova')
+    clicar('voltar-caderno')
+    visitar('cartorio_detran')
+    visitar('ex_funcionario')
+    acusarCom('ricardo', ['cartorio_detran', 'ex_funcionario'])
+    expect(texto()).toContain('Conversas na rua: era verdade?')
+    expect(texto()).toContain('Era só boato.')
   })
 })

@@ -42,16 +42,27 @@ Lore completa, com motivações dos personagens e ideias de casos futuros: [lore
 
 | Mecânica | Descrição |
 |---|---|
-| **Visitar local** | Custa **1 dia** e revela uma pista. Algumas pistas trazem um indício fiscal, outras dão apenas contexto. |
+| **Andar pelo mapa** | O jogador conduz o boneco pelas ruas (teclado, direcional na tela ou clique). Andar não gasta dia. |
+| **Visitar local** | Entrar custa **1 dia**. Lá dentro, o jogador **escolhe uma abordagem** entre três (pedir documento, conversar, observar...). Só a abordagem certa revela a pista com o indício; as outras gastam a visita e ensinam por que não servem como prova. |
+| **Moradores** | Três moradores andam pelas ruas. Encostar num deles (ou clicar) faz ele contar uma dica de graça, anotada no caderno. Duas falas são verdade e uma é **boato falso**: nenhuma vale como prova. |
+| **Imprevistos** | A cada partida, um local pago fica **fechado** no dia 1 e outro no dia 2 (greve, reforma, falta de luz...). Ele reabre no dia seguinte. Alguns locais só **aparecem no mapa** depois de outra visita (ex.: a casa do sócio-laranja, descoberta na Junta Comercial). |
 | **Caderno de suspeitos** | O jogador marca manualmente quem descartou. **O jogo não elimina ninguém sozinho**: o raciocínio é do jogador, e é aí que acontece a aprendizagem. |
 | **Acusação (auto de infração)** | O jogador escolhe **1 suspeito** e **2 provas coletadas** que justifiquem a escolha. |
 | **Resultado** | Há quatro desfechos diferentes, e cada um explica o acerto ou o erro. Todos terminam com perguntas para debate com o mediador. |
 
-### Fluxo de telas (6 telas, HTML + CSS)
+### Fluxo de telas (HTML + CSS)
 
 ```
-Briefing → Mapa dos locais (dias restantes + caderno) → Pista do local → Caderno de suspeitos → Acusação → Resultado (com perguntas para debate)
+Arquivo de casos → Briefing do caso → (Teste rápido) → Mapa (andar, entrar, escolher a abordagem, ouvir moradores)
+→ Caderno de suspeitos → Acusação → Resultado (explicação, perguntas para debate, próximo caso)
 ```
+
+### Campanha: arquivo de casos
+
+A tela inicial é o **arquivo de casos** da Auditoria. Só o caso 001 começa aberto; **resolver um caso
+destrava o próximo**. As melhores estrelas de cada caso ficam salvas no navegador (`localStorage`),
+então o progresso continua depois de fechar a página. Resumo dos casos em `docs/lore.md` e soluções em
+`docs/fichas-de-solucao.md`.
 
 ## 4. O caso 001
 
@@ -100,8 +111,12 @@ Os dois últimos locais não servem como prova, mas trazem conteúdo educativo:
 |---|---|
 | Prazo do caso | **3 dias** (reduzido de 4 para criar pressão: o caso se resolve com 2) |
 | Custo de visitar um local | **1 dia**; o Portal da Transparência é **grátis** (0 dia) |
-| Locais disponíveis | **6** (4 com indício, 2 sem indício) |
-| Máximo de locais visitados por caso | **3 pagos + o Portal** (dos 6 disponíveis) |
+| Casos | **4**, destravados em sequência |
+| Locais por caso | **9** (5 com indício, 4 de contexto; até 10 cabem no mapa) |
+| Abordagens por local | **3**, e só **1** revela a pista |
+| Máximo de locais visitados por caso | **3 pagos + o Portal** (dos 9 disponíveis) |
+| Moradores por caso | **3** (2 falas verdadeiras e 1 boato falso) |
+| Imprevistos por partida | **1 local fechado no dia 1** e **1 no dia 2** (sorteados entre os pagos) |
 | Suspeitos | **4** |
 | Tipos de indício | **3** |
 | Provas exigidas na acusação | **2** |
@@ -197,7 +212,7 @@ suficientes mostra o motivo no aviso.
   puxado para ela, então não é preciso alinhar no pixel para virar a esquina;
 - a página e o mapa rolam sozinhos para o peão não sair de vista.
 
-O mapa tem **7 lotes** para locais (a validação do JSON recusa caso com mais de 7).
+O mapa tem **10 lotes** para locais, em 4 colunas e 3 linhas (a validação do JSON recusa caso com mais de 10). O prédio do meio muda com o caso: hospital, creche, praça ou biblioteca.
 
 ### Animação da visita (sequência)
 
@@ -267,6 +282,15 @@ incompatível = indício, não prova** e **Portal da Transparência**.
 
 O teste aparece **uma vez por sessão**. Assim, o placar mede a primeira partida e serve de dado
 para o roteiro de teste com jogadores e para o relatório.
+
+### Escolhas dentro do local: por que só uma abordagem dá prova
+
+Cada local tem três abordagens. A certa costuma ser **pedir o documento oficial** ou **conversar com
+calma com quem viu**; as erradas são fofoca, palpite, pressão ou "dar uma olhada". O texto de cada
+abordagem errada explica a lição: palpite não é prova, sigilo bancário existe, testemunha assustada não
+fala, observar de longe não mostra nada. A visita gasta o dia mesmo com a abordagem errada, então
+escolher bem importa. Em todos os casos, o indício que separa o culpado da armadilha aparece em pelo
+menos dois locais, e há de 6 a 9 duplas de provas válidas: um erro não trava o caso, mas custa tempo.
 
 ### Feedback visual
 

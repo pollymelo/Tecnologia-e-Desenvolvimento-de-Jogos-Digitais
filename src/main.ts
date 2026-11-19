@@ -1,5 +1,5 @@
 import './style.css'
-import { caso001 } from './game/caso.ts'
+import { casos } from './game/caso.ts'
 import { iniciarApp } from './ui/app.ts'
 
-iniciarApp(document.querySelector<HTMLDivElement>('#app')!, caso001)
+iniciarApp(document.querySelector<HTMLDivElement>('#app')!, casos)

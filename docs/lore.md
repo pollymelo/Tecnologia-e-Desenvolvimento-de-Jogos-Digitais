@@ -86,13 +86,21 @@ veio de um fornecedor chamado **Distribuidora Horizonte**. No endereço da Horiz
 **Uma empresa que só existe no papel: uma empresa fantasma.** Ricardo não agia sozinho. Os fantasmas da
 Aurora têm uma rota, e ela está só começando.
 
-### Ideias para casos futuros (criados no JSON pelo NAF)
+### A primeira temporada: quatro casos
 
-| Caso | Tema fiscal | Gancho |
-|---|---|---|
-| 002: A empresa fantasma | Nota fria e empresa de fachada | Quem está por trás da Distribuidora Horizonte? |
-| 003: O IPTU esquecido | Imposto municipal e função social da cidade | Um bairro inteiro sem praça e sem iluminação. |
-| 004: A nota que ninguém pede | Cidadania fiscal e o papel do consumidor | Campanha na escola: por que pedir nota fiscal? |
+Os quatro casos estão no jogo (`src/data/caso-00X.json`) e são destravados em sequência. O gancho de
+cada caso leva ao seguinte.
+
+| Caso | Tema fiscal | O que falta na cidade | Culpado (modo história) | Gancho para o próximo |
+|---|---|---|---|---|
+| 001: A verba do hospital | Venda sem nota e sonegação | Verba do Hospital Municipal | Ricardo, Eletrônicos TecMais | A Distribuidora Horizonte, que só existe no papel |
+| 002: A empresa fantasma | Nota fria, empresa de fachada e laranja | Obra da Creche Municipal parada | Otávio, Materiais de Construção Pedra Firme | Um galpão enorme cadastrado como "casa pequena" no Jardim Aurora |
+| 003: O IPTU esquecido | IPTU e a função social da cidade | Praça do Jardim Aurora sem luz | Henrique, Galpão Estrela | O anúncio "desconto sem nota" e a campanha dos alunos |
+| 004: A nota que ninguém pede | O consumidor e a nota fiscal | Livros novos da Biblioteca Pública | Bruno, Lanchonete Mordida | Dona Helena se aposenta: "agora a cidade inteira aprendeu a olhar" |
+
+Personagens que voltam: Seu Jorge (cartório), Rafa (Junta Comercial), Bia (operadora de cartão),
+Dona Lúcia (feira), Seu Ademar (banco) e Dr. Paulo (contador). Cada caso tem também **três moradores**
+que andam pelas ruas: dois contam verdades e um espalha um boato falso.
 
 ## Como a lore aparece no jogo
 

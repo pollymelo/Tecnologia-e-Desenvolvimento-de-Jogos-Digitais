@@ -2,7 +2,7 @@
 // (nada para baixar e nenhum problema de direito autoral).
 // Sem suporte no navegador (ou nos testes), tudo vira silêncio.
 
-export type Efeito = 'passo' | 'porta' | 'dia' | 'pista' | 'guardar' | 'risco' | 'carimbo' | 'vitoria' | 'falha'
+export type Efeito = 'passo' | 'conversa' | 'porta' | 'dia' | 'pista' | 'guardar' | 'risco' | 'carimbo' | 'vitoria' | 'falha'
 
 export interface Som {
   readonly ligado: boolean
@@ -99,6 +99,11 @@ export function criarSom(ativo = true): Som {
   let pe = 0
   const efeitos: Record<Efeito, (c: CtxAudio, t: number) => void> = {
     // um passo (alterna pé esquerdo e direito, com timbre um pouco diferente)
+    // "oi!": duas notinhas rápidas de quem puxa conversa
+    conversa: (c, t) => {
+      nota(c, t, 660, 0.08, 0.05, 'square')
+      nota(c, t + 0.1, 880, 0.12, 0.05, 'square')
+    },
     passo: (c, t) => chiado(c, t, 0.06, 0.06, 'lowpass', 500 + (pe++ % 2) * 150),
     // rangido: tom áspero que sobe e desce
     porta: (c, t) => {

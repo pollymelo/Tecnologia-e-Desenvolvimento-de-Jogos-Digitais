@@ -21,11 +21,23 @@ import {
   explicarAcusacao,
   pontuarQuiz,
   visitarLocal,
+  escolherAcao,
+  indicioObtido,
+  precisaEscolher,
+  localTrancado,
+  fechadoHoje,
+  diaAtual,
+  sortearImprevistos,
 } from './rules.ts'
+import { casos } from './caso.ts'
 import type { Caso } from './types.ts'
 
+/** Abordagem que revela a pista do local. */
+const certa = (c: Caso, id: string) => c.locais.find((l) => l.id === id)!.acoes!.find((a) => a.revela)!.id
+
+/** Visita os locais e, dentro de cada um, escolhe a abordagem certa. */
 function visitar(estado: EstadoJogo, ...locais: string[]): EstadoJogo {
-  return locais.reduce((e, id) => visitarLocal(caso, e, id).estado, estado)
+  return locais.reduce((e, id) => escolherAcao(caso, visitarLocal(caso, e, id).estado, id, certa(caso, id)), estado)
 }
 
 describe('estado inicial', () => {
@@ -118,7 +130,7 @@ describe('validação das provas', () => {
     expect(provasValidas(caso, ['operadora_cartao', 'praca'])).toBe(false)
   })
 
-  it('das 15 duplas possíveis, só 3 resolvem o caso (ficha de solução)', () => {
+  it('das 36 duplas possíveis, só 6 resolvem o caso (ficha de solução)', () => {
     const ids = caso.locais.map((l) => l.id)
     const validas: string[] = []
     for (let i = 0; i < ids.length; i++) {
@@ -130,6 +142,9 @@ describe('validação das provas', () => {
       'cartorio_detran+ex_funcionario',
       'cartorio_detran+operadora_cartao',
       'cartorio_detran+praca',
+      'concessionaria+ex_funcionario',
+      'concessionaria+operadora_cartao',
+      'concessionaria+praca',
     ])
   })
 
@@ -317,8 +332,11 @@ describe('estrelas', () => {
 })
 
 describe('textos das pistas variam a cada partida', () => {
-  it('cada local tem pelo menos 3 versões de texto', () => {
-    for (const local of caso.locais) expect(versoesDaPista(local).length).toBeGreaterThanOrEqual(3)
+  it('os locais originais do caso 001 têm pelo menos 3 versões de texto', () => {
+    const originais = ['operadora_cartao', 'cartorio_detran', 'ex_funcionario', 'praca', 'junta_comercial', 'portal_transparencia']
+    for (const local of caso.locais.filter((l) => originais.includes(l.id))) {
+      expect(versoesDaPista(local).length).toBeGreaterThanOrEqual(3)
+    }
   })
 
   it('o sorteio escolhe uma das versões e não muda o indício', () => {
@@ -407,5 +425,135 @@ describe('teste rápido', () => {
     const erros = validarCaso(ruim)
     expect(erros.some((e) => e.includes('opção correta'))).toBe(true)
     expect(erros.some((e) => e.includes('id repetido'))).toBe(true)
+  })
+})
+
+describe('escolhas dentro do local', () => {
+  it('a visita gasta o dia, mas a pista só vem com a abordagem escolhida', () => {
+    const { estado } = visitarLocal(caso, criarEstadoInicial(caso), 'cartorio_detran')
+    expect(estado.diasRestantes).toBe(2)
+    expect(precisaEscolher(caso, estado, 'cartorio_detran')).toBe(true)
+    expect(indicioObtido(caso, estado, 'cartorio_detran')).toBeNull()
+  })
+
+  it('a abordagem certa revela o indício; a errada não rende prova', () => {
+    const base = visitarLocal(caso, criarEstadoInicial(caso), 'cartorio_detran').estado
+    expect(indicioObtido(caso, escolherAcao(caso, base, 'cartorio_detran', 'certidoes'), 'cartorio_detran')).toBe('patrimonio_incompativel')
+    expect(indicioObtido(caso, escolherAcao(caso, base, 'cartorio_detran', 'fofoca'), 'cartorio_detran')).toBeNull()
+  })
+
+  it('só dá para escolher uma vez, e só depois de entrar', () => {
+    const base = criarEstadoInicial(caso)
+    expect(() => escolherAcao(caso, base, 'cartorio_detran', 'certidoes')).toThrow(RegraError)
+    const dentro = escolherAcao(caso, visitarLocal(caso, base, 'cartorio_detran').estado, 'cartorio_detran', 'fofoca')
+    expect(() => escolherAcao(caso, dentro, 'cartorio_detran', 'certidoes')).toThrow(RegraError)
+  })
+
+  it('com a abordagem errada, o auto é anulado mesmo com o culpado certo', () => {
+    let estado = visitarLocal(caso, criarEstadoInicial(caso), 'cartorio_detran').estado
+    estado = escolherAcao(caso, estado, 'cartorio_detran', 'fofoca')
+    estado = visitar(estado, 'ex_funcionario')
+    const final = acusar(caso, estado, 'ricardo', ['cartorio_detran', 'ex_funcionario'])
+    expect(final.resultado?.tipo).toBe('auto_anulado')
+    const e = explicarAcusacao(caso, 'ricardo', ['cartorio_detran', 'ex_funcionario'], estado)
+    expect(e.provas[0].texto).toContain('a abordagem escolhida não revelou o indício')
+  })
+})
+
+describe('locais descobertos e imprevistos', () => {
+  const [, caso002, , caso004] = casos
+
+  it('a casa do sócio só aparece depois da Junta Comercial (caso 002)', () => {
+    let estado = criarEstadoInicial(caso002)
+    expect(localTrancado(caso002, estado, 'casa_socio')).toBe(true)
+    expect(podeVisitar(caso002, estado, 'casa_socio')).toBe(false)
+    estado = visitarLocal(caso002, estado, 'junta_comercial').estado
+    expect(localTrancado(caso002, estado, 'casa_socio')).toBe(false)
+    expect(podeVisitar(caso002, estado, 'casa_socio')).toBe(true)
+  })
+
+  it('local fechado num dia reabre no dia seguinte', () => {
+    let estado = criarEstadoInicial(caso, { cartorio_detran: { dia: 1, motivo: 'está em greve hoje' } })
+    expect(diaAtual(caso, estado)).toBe(1)
+    expect(fechadoHoje(caso, estado, 'cartorio_detran')?.motivo).toBe('está em greve hoje')
+    expect(podeVisitar(caso, estado, 'cartorio_detran')).toBe(false)
+    expect(() => visitarLocal(caso, estado, 'cartorio_detran')).toThrow(RegraError)
+    estado = visitar(estado, 'portal_transparencia') // grátis: o dia não passa
+    expect(podeVisitar(caso, estado, 'cartorio_detran')).toBe(false)
+    estado = visitar(estado, 'operadora_cartao')
+    expect(diaAtual(caso, estado)).toBe(2)
+    expect(podeVisitar(caso, estado, 'cartorio_detran')).toBe(true)
+  })
+
+  it('o sorteio fecha um local pago por dia, menos no último, e nunca o Portal nem local escondido', () => {
+    for (const r of [0, 0.3, 0.6, 0.99]) {
+      for (const c of casos) {
+        const fechados = sortearImprevistos(c, () => r)
+        const dias = Object.values(fechados).map((f) => f.dia).sort()
+        expect(dias).toEqual([1, 2])
+        for (const id of Object.keys(fechados)) {
+          const local = c.locais.find((l) => l.id === id)!
+          expect(local.custoDias ?? c.custoVisitaDias).toBeGreaterThan(0)
+          expect(local.liberadoPor).toBeUndefined()
+        }
+      }
+    }
+    expect(caso004.locais.some((l) => l.liberadoPor)).toBe(true)
+  })
+})
+
+describe('os quatro casos da campanha', () => {
+  it('todos carregam sem erro, com 9 locais, 3 moradores e 3 perguntas', () => {
+    expect(casos.map((c) => c.id)).toEqual(['caso-001', 'caso-002', 'caso-003', 'caso-004'])
+    for (const c of casos) {
+      expect(validarCaso(c)).toEqual([])
+      expect(c.locais).toHaveLength(9)
+      expect(c.moradores).toHaveLength(3)
+      expect(c.quiz).toHaveLength(3)
+      expect(c.marco).toBeDefined()
+    }
+  })
+
+  it('em todos, todo local tem escolhas e exatamente uma revela a pista', () => {
+    for (const c of casos) {
+      for (const l of c.locais) expect(l.acoes?.filter((a) => a.revela)).toHaveLength(1)
+    }
+  })
+
+  it('em todos, há mais de uma dupla de provas que resolve o caso (e todas passam pela armadilha certa)', () => {
+    for (const c of casos) {
+      const ids = c.locais.map((l) => l.id)
+      let validas = 0
+      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) if (provasValidas(c, [ids[i], ids[j]])) validas++
+      expect(validas).toBeGreaterThanOrEqual(4)
+    }
+  })
+
+  it('o modo desafio funciona em todos os casos', () => {
+    for (const c of casos) {
+      for (const r of [0, 0.5, 0.99]) expect(validarCaso(sortearCaso(c, () => r))).toEqual([])
+    }
+  })
+
+  it('boatos falsos continuam falsos no modo desafio: {inocente} nunca é o culpado', () => {
+    for (const c of casos) {
+      for (const r of [0, 0.5, 0.99]) {
+        const sorteado = sortearCaso(c, () => r)
+        const culpado = sorteado.suspeitos.find((s) => s.id === sorteado.culpadoId)!
+        sorteado.moradores!.forEach((m, i) => {
+          if (!m.verdadeira) expect(preencherTexto(sorteado, m.fala, i)).not.toContain(culpado.nome)
+        })
+      }
+    }
+  })
+
+  it('nenhuma pista ou ação cita o nome de um suspeito', () => {
+    for (const c of casos) {
+      const nomes = c.suspeitos.flatMap((s) => [s.nome, s.empresa])
+      for (const l of c.locais) {
+        const textos = [...versoesDaPista(l), ...(l.acoes ?? []).map((a) => `${a.rotulo} ${a.texto ?? ''}`)]
+        for (const t of textos) for (const n of nomes) expect(t).not.toContain(n)
+      }
+    }
   })
 })

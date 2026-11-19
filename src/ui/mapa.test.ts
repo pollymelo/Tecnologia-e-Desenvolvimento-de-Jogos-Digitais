@@ -20,12 +20,13 @@ function segurar(p: Ponto, dx: number, dy: number, n: number, passo = 2): Ponto 
 }
 
 const [ruaA, ruaB, ruaC] = RUAS.horizontais
+const transversal = RUAS.verticais[1]
 
 describe('mapa: onde dá para andar', () => {
   it('ruas e portas são andáveis; grama e prédios não', () => {
     expect(andavel({ x: 200, y: ruaC })).toBe(true)
     expect(andavel(LOTE_PARTIDA.porta)).toBe(true)
-    expect(andavel({ x: 200, y: 260 })).toBe(false) // dentro do prédio da Auditoria
+    expect(andavel({ x: LOTE_PARTIDA.porta.x, y: LOTE_PARTIDA.porta.y - 30 })).toBe(false) // dentro do prédio da Auditoria
     expect(andavel({ x: 75, y: 150 })).toBe(false) // lote do meio
   })
 
@@ -45,21 +46,21 @@ describe('mapa: onde dá para andar', () => {
   })
 
   it('ajuda na curva: segurar "cima" perto de uma esquina puxa o peão para a rua transversal', () => {
-    const quaseNaEsquina = { x: 137.5 + 11 + 6, y: ruaC } // 6 unidades depois da borda da transversal
+    const quaseNaEsquina = { x: transversal + 11 + 6, y: ruaC } // 6 unidades depois da borda da transversal
     const p = segurar(quaseNaEsquina, 0, -1, 80)
     expect(p.y).toBeLessThan(ruaB) // subiu pela transversal
-    expect(Math.abs(p.x - 137.5)).toBeLessThanOrEqual(11)
+    expect(Math.abs(p.x - transversal)).toBeLessThanOrEqual(11)
   })
 
   it('subindo pela calçada, chega à porta e ela fica ao alcance', () => {
-    const lote = LOTES_LOCAIS[5] // canto de baixo à esquerda
+    const lote = LOTES_LOCAIS[7] // canto de baixo à esquerda
     const p = segurar({ x: lote.porta.x + 4, y: ruaC }, 0, -1, 20)
-    expect(portaProxima(p, 6)).toBe(5)
-    expect(portaProxima({ x: 200, y: ruaC }, 6)).toBeNull()
+    expect(portaProxima(p, 9)).toBe(7)
+    expect(portaProxima({ x: 200, y: ruaC }, 9)).toBeNull()
   })
 
   it('não entra em lote de local que o caso não tem', () => {
-    expect(portaProxima(LOTES_LOCAIS[6].porta, 6)).toBeNull()
+    expect(portaProxima(LOTES_LOCAIS[9].porta, 9)).toBeNull()
   })
 })
 

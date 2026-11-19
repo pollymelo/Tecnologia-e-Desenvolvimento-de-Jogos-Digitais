@@ -1,0 +1,52 @@
+[
+  {
+    "id": "tributo",
+    "termo": "Tributo",
+    "definicao": "Valor obrigatório que pessoas e empresas pagam ao governo. Inclui impostos, taxas e contribuições, e é ele que financia escolas, hospitais e ruas."
+  },
+  {
+    "id": "funcao_social",
+    "termo": "Função social do tributo",
+    "definicao": "A ideia de que o tributo volta para a sociedade em forma de serviços públicos, como saúde, educação e segurança."
+  },
+  {
+    "id": "sonegacao",
+    "termo": "Sonegação",
+    "definicao": "Deixar de pagar um tributo devido escondendo informações do governo. Exemplo: vender sem emitir nota fiscal."
+  },
+  {
+    "id": "nota_fiscal",
+    "termo": "Nota fiscal",
+    "definicao": "Documento que registra uma venda ou um serviço. É com base nela que o tributo é calculado. Pedir a nota é um direito de quem compra."
+  },
+  {
+    "id": "auditor",
+    "termo": "Auditor(a) fiscal",
+    "definicao": "Servidor(a) público(a) que fiscaliza se pessoas e empresas pagam os tributos corretamente."
+  },
+  {
+    "id": "indicio",
+    "termo": "Indício",
+    "definicao": "Sinal que aponta para uma irregularidade, mas que sozinho não prova nada. Vários indícios combinados podem virar prova."
+  },
+  {
+    "id": "prova",
+    "termo": "Prova",
+    "definicao": "Informação que sustenta uma acusação. No jogo, as provas precisam diferenciar o culpado de todos os outros suspeitos."
+  },
+  {
+    "id": "auto",
+    "termo": "Auto de infração",
+    "definicao": "Documento em que a fiscalização registra a irregularidade, as provas encontradas e a cobrança do tributo devido. Sem provas suficientes, ele pode ser anulado."
+  },
+  {
+    "id": "portal",
+    "termo": "Portal da Transparência",
+    "definicao": "Site público onde qualquer pessoa pode ver quanto o governo arrecada e como gasta o dinheiro."
+  },
+  {
+    "id": "sigilo_bancario",
+    "termo": "Sigilo bancário",
+    "definicao": "Regra que protege os dados de quem tem conta em banco. O banco só entrega informações à fiscalização pelos caminhos previstos em lei; prova obtida fora disso pode ser anulada."
+  }
+]

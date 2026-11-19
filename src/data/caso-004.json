@@ -1,0 +1,273 @@
+{
+  "id": "caso-004",
+  "titulo": "A nota que ninguém pede",
+  "tema": "O consumidor e a nota fiscal",
+  "marco": { "nome": "Biblioteca Pública", "icone": "biblioteca", "tag": "Sem livros novos" },
+  "abertura": "Os alunos da Escola Estadual de Vila Aurora lançaram a campanha \"Pediu nota? A cidade agradece.\" Com um aplicativo oficial, eles conferem se o papel que recebem no caixa é mesmo uma nota fiscal. Em uma semana, descobriram algo estranho: muitos 'cupons' não aparecem em sistema nenhum.",
+  "briefing": "A Biblioteca Pública está sem livros novos há anos. Os alunos da campanha desconfiam que um comerciante entrega papéis que parecem nota fiscal, mas não são. Quatro comerciantes foram citados. Você tem 3 dias para descobrir quem engana os consumidores.",
+  "diasIniciais": 3,
+  "custoVisitaDias": 1,
+  "provasExigidas": 2,
+  "culpadoId": "bruno",
+  "indicios": [
+    { "id": "cupom_falso", "nome": "Entrega 'cupom' que não é documento fiscal", "termo": "nota_fiscal" },
+    { "id": "maquininha_alheia", "nome": "Maquininha de cartão em nome de outra empresa", "termo": "maquininha" },
+    { "id": "compra_sem_nota", "nome": "Compra mercadoria do fornecedor sem nota", "termo": "cadeia_nota" }
+  ],
+  "suspeitos": [
+    {
+      "id": "bruno",
+      "nome": "Bruno",
+      "empresa": "Lanchonete Mordida",
+      "perfil": "A lanchonete preferida dos estudantes. Tem promoção de lanche com refrigerante todo dia depois da aula.",
+      "aparencia": { "pele": "#e0ac69", "cabelo": "#5a3825", "estiloCabelo": "bone", "camisa": "#e5675d", "calca": "#2c5aa0", "acessorios": ["avental"] },
+      "indicios": ["cupom_falso", "maquininha_alheia", "compra_sem_nota"]
+    },
+    {
+      "id": "claudia",
+      "nome": "Cláudia",
+      "empresa": "Loja de Roupas Estilo",
+      "perfil": "Loja de roupas da moda, com liquidação toda semana e vitrine sempre nova.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#8e6c8a", "calca": "#2b2b2b", "acessorios": ["oculos"] },
+      "indicios": ["cupom_falso", "compra_sem_nota"]
+    },
+    {
+      "id": "wagner",
+      "nome": "Wagner",
+      "empresa": "Açougue Bom Corte",
+      "perfil": "Açougue de família, aberto há 30 anos. Sabe o ponto da carne preferido de cada cliente.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#3a3a3a", "acessorios": ["avental"] },
+      "indicios": ["maquininha_alheia"]
+    },
+    {
+      "id": "yara",
+      "nome": "Yara",
+      "empresa": "Sorveteria Gelato",
+      "perfil": "Sorveteria artesanal que abriu no verão. Lança um sabor novo toda semana.",
+      "aparencia": { "pele": "#c68642", "cabelo": "#e07a5f", "estiloCabelo": "coque", "camisa": "#5cc28a", "calca": "#6b4f6b", "acessorios": [] },
+      "indicios": ["compra_sem_nota"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "escola",
+      "nome": "Escola Estadual (campanha)",
+      "pista": "Kauã mostra a planilha da campanha: 37 'cupons' da empresa denunciada foram conferidos no aplicativo oficial, e nenhum existe no sistema. Parecem nota fiscal, mas são só papel impresso.",
+      "variacoes": [
+        "Os alunos conferiram os cupons de quatro lojas. Os da empresa denunciada não têm código válido: o aplicativo diz \"documento não encontrado\" em todos."
+      ],
+      "indicio": "cupom_falso",
+      "forca": "forte",
+      "icone": "escola",
+      "testemunha": { "nome": "Kauã, aluno da campanha", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "aplicativo", "rotulo": "Ver os cupons conferidos no aplicativo", "revela": true },
+        { "id": "palpite", "rotulo": "Perguntar qual loja eles acham suspeita", "texto": "Cada aluno tem um palpite diferente. A campanha é ótima, mas palpite não é prova." },
+        { "id": "cartazes", "rotulo": "Ajudar a colar os cartazes da campanha", "texto": "Os cartazes ficaram lindos! Mas a investigação não andou." }
+      ]
+    },
+    {
+      "id": "procon",
+      "nome": "Procon",
+      "pista": "Há várias reclamações iguais: clientes da empresa denunciada tentaram trocar produtos e descobriram que o 'cupom' que receberam não vale como nota fiscal.",
+      "indicio": "cupom_falso",
+      "forca": "fraca",
+      "icone": "junta",
+      "testemunha": { "nome": "Dona Sônia, atendente do Procon", "aparencia": { "pele": "#e0ac69", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#4a90d9", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "reclamacoes", "rotulo": "Ler as reclamações dos consumidores", "revela": true },
+        { "id": "direitos", "rotulo": "Perguntar sobre os direitos do consumidor", "texto": "Dona Sônia explica que todo consumidor tem direito à nota fiscal. Lição importante, mas não aponta ninguém." },
+        { "id": "reclamar", "rotulo": "Registrar uma reclamação você mesmo", "texto": "Você registra uma reclamação... sobre o café do Procon. Foco no caso!" }
+      ]
+    },
+    {
+      "id": "operadora",
+      "nome": "Operadora de cartão",
+      "pista": "A maquininha usada no balcão da empresa denunciada está em nome de outra empresa, de outra cidade. Assim, as vendas no cartão não aparecem como dela.",
+      "indicio": "maquininha_alheia",
+      "forca": "forte",
+      "icone": "operadora",
+      "testemunha": { "nome": "Bia, analista da operadora", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#d64545", "calca": "#2b2b2b", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "cadastro", "rotulo": "Consultar o cadastro da maquininha", "revela": true },
+        { "id": "total", "rotulo": "Pedir o total de vendas da cidade", "texto": "É um número gigante, sem o nome de ninguém. Não ajuda." },
+        { "id": "emprestar", "rotulo": "Perguntar se maquininha pode ser emprestada", "texto": "Bia explica que cada maquininha é ligada a uma empresa, e emprestar é irregular. Boa informação, mas falta saber quem fez isso." }
+      ]
+    },
+    {
+      "id": "ex_atendente",
+      "nome": "Conversa com ex-atendente",
+      "pista": "\"Lá tinha duas maquininhas: uma ficava escondida e era de outra empresa. O patrão mandava usar essa quando o cliente não pedia nota\", conta Júlia sobre a empresa denunciada.",
+      "indicio": "maquininha_alheia",
+      "forca": "fraca",
+      "icone": "casa",
+      "testemunha": { "nome": "Júlia, ex-atendente", "aparencia": { "pele": "#f1c27d", "cabelo": "#8a5a44", "estiloCabelo": "coque", "camisa": "#5cc28a", "calca": "#3d5a80", "acessorios": [] } },
+      "acoes": [
+        { "id": "calma", "rotulo": "Conversar com calma", "revela": true },
+        { "id": "video", "rotulo": "Pedir que ela grave um vídeo denunciando", "texto": "Júlia fica com medo e encerra a conversa. Testemunha precisa de confiança e proteção." },
+        { "id": "salario", "rotulo": "Perguntar quanto ela ganhava", "texto": "Ela conta do salário, mas isso não tem a ver com o caso." }
+      ]
+    },
+    {
+      "id": "atacado",
+      "nome": "Atacado Central",
+      "pista": "Nas notas de venda do Atacado Central não aparece nenhuma compra da empresa denunciada. Mas o gerente lembra que ela compra muito, sempre \"em dinheiro e sem nota\".",
+      "indicio": "compra_sem_nota",
+      "forca": "forte",
+      "icone": "atacado",
+      "testemunha": { "nome": "Seu Rubens, gerente do atacado", "aparencia": { "pele": "#e0ac69", "cabelo": "#3b2a1a", "estiloCabelo": "curto", "camisa": "#4a90d9", "calca": "#2b2b2b", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "notas", "rotulo": "Conferir as notas de venda do atacado", "revela": true },
+        { "id": "precos", "rotulo": "Perguntar os preços no atacado", "texto": "Os preços estão ótimos, mas isso não é investigação." },
+        { "id": "olhar", "rotulo": "Observar quem carrega mercadoria", "texto": "Vários comerciantes carregam caixas. Sem documento, não dá para saber quem comprou com nota." }
+      ]
+    },
+    {
+      "id": "contabilidade",
+      "nome": "Escritório Contábil Soma",
+      "pista": "Dr. Paulo explica a cadeia da nota: o fornecedor emite nota para a loja, e a loja emite nota para o consumidor. \"Quem compra sem nota depois vende sem nota. A sonegação passa de mão em mão.\"",
+      "indicio": null,
+      "icone": "contabilidade",
+      "testemunha": { "nome": "Dr. Paulo, contador", "aparencia": { "pele": "#f1c27d", "cabelo": "#5a3825", "estiloCabelo": "curto", "camisa": "#a3b18a", "calca": "#3a3a3a", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "cadeia", "rotulo": "Perguntar como funciona a cadeia da nota", "revela": true },
+        { "id": "clientes", "rotulo": "Pedir os documentos dos clientes", "texto": "Dr. Paulo não pode entregar documentos dos clientes sem autorização. É ética profissional." },
+        { "id": "suspeita", "rotulo": "Perguntar se ele desconfia de alguém", "texto": "\"Não aponto cliente\", ele responde. Desconfiança não é prova." }
+      ]
+    },
+    {
+      "id": "radio",
+      "nome": "Rádio Aurora FM",
+      "pista": "Na rádio, a campanha dos alunos virou programa. \"Desde que a campanha começou, as lojas que dão nota de verdade venderam mais!\", conta o locutor. Consumidor atento muda a cidade.",
+      "indicio": null,
+      "icone": "radio",
+      "testemunha": { "nome": "Fábio, locutor", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#f3722c", "calca": "#3a3a3a", "acessorios": [] } },
+      "acoes": [
+        { "id": "campanha", "rotulo": "Perguntar sobre a campanha no ar", "revela": true },
+        { "id": "musica", "rotulo": "Pedir uma música", "texto": "Tocou sua música favorita! A investigação, porém, ficou parada." },
+        { "id": "ouvintes", "rotulo": "Ler as mensagens dos ouvintes", "texto": "Muitas mensagens com palpites e nenhuma prova. Boato também corre pelo rádio." }
+      ]
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "O portal mostra que a Biblioteca Pública não recebe verba para livros novos há quatro anos. O que se perde com vendas sem nota chega a R$ 120.000 (valor fictício). O portal é público: consultar não gastou nenhum dia.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true,
+      "custoDias": 0,
+      "icone": "portal",
+      "acoes": [
+        { "id": "biblioteca", "rotulo": "Ver a verba da biblioteca", "revela": true },
+        { "id": "salarios", "rotulo": "Ver os salários dos servidores", "texto": "Tudo público, como deve ser. Mas não é isso que você procura." },
+        { "id": "contratos", "rotulo": "Ver os contratos da prefeitura", "texto": "São centenas de contratos. Interessante, mas não é o caso de hoje." }
+      ]
+    },
+    {
+      "id": "deposito",
+      "nome": "Depósito dos fundos",
+      "pista": "No depósito da empresa denunciada há caixas de mercadoria sem nenhuma nota de entrada. Sem nota de compra, não há como provar de onde elas vieram.",
+      "indicio": "compra_sem_nota",
+      "forca": "forte",
+      "icone": "deposito",
+      "liberadoPor": "atacado",
+      "acoes": [
+        { "id": "conferir", "rotulo": "Conferir as caixas e as notas de entrada", "revela": true },
+        { "id": "contar", "rotulo": "Contar as caixas", "texto": "São 120 caixas. Contar não diz se elas vieram com nota." },
+        { "id": "foto", "rotulo": "Fotografar a porta", "texto": "Uma foto da porta não mostra nada do que importa." }
+      ]
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 120000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O valor recuperado volta ao orçamento do município e reabastece a Biblioteca Pública.",
+    "detalhes": [
+      "R$ 60.000 para livros novos, inclusive os de vestibular.",
+      "R$ 40.000 para computadores com internet para pesquisa.",
+      "R$ 20.000 para um programa de leitura com as escolas."
+    ]
+  },
+  "gancho": "Com os quatro casos resolvidos, Dona Helena se aposenta e deixa um bilhete na sua mesa: \"Os fantasmas da Aurora só existem quando ninguém olha. Agora a cidade inteira aprendeu a olhar.\" Fim da primeira temporada da Rota Fantasma.",
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "O comerciante foi autuado, a maquininha irregular foi cancelada e os consumidores enganados foram avisados. A campanha dos alunos ajudou a resolver o caso.",
+      "ensina": "Pedir e conferir a nota fiscal é um ato de cidadania: garante os seus direitos e faz o imposto que você já paga chegar aos cofres da cidade.",
+      "perguntasDebate": [
+        "Você costuma pedir nota fiscal? O que muda quando a cidade inteira pede?",
+        "Como a campanha dos alunos ajudou a fiscalização?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a pessoa certa, mas as provas não a diferenciam das outras lojas citadas. O auto foi anulado.",
+      "ensina": "Mais de uma loja pode ter um problema parecido. A prova precisa mostrar o que só o responsável fez.",
+      "perguntasDebate": [
+        "Que dupla de provas teria fundamentado a acusação?",
+        "Por que reclamação de consumidor, sozinha, não basta para punir uma loja?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Você autuou uma loja que não era a denunciada. Os consumidores seguem recebendo papéis sem valor.",
+      "ensina": "A campanha dos alunos levantou suspeitas, mas suspeita não é prova. Acusar errado prejudica quem trabalha certo.",
+      "perguntasDebate": [
+        "Que indício faltava à loja que você acusou?",
+        "Como garantir que uma campanha não vire 'caça às bruxas'?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem auto de infração. Os 'cupons' falsos continuam circulando.",
+      "ensina": "Investigar exige escolher bem onde gastar o tempo, e fazer a pergunta certa em cada lugar.",
+      "perguntasDebate": [
+        "Em que locais a abordagem que você escolheu não trouxe prova?",
+        "O que você faria diferente na próxima vez?"
+      ]
+    }
+  },
+  "moradores": [
+    { "nome": "Mel, aluna da campanha", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] }, "fala": "Conferi três cupons da {empresa} no aplicativo e nenhum apareceu! Será que o app está com defeito?", "verdadeira": true },
+    { "nome": "Seu Osvaldo, taxista", "aparencia": { "pele": "#f1c27d", "cabelo": "#d6d6d6", "estiloCabelo": "bone", "camisa": "#a3b18a", "calca": "#3a3a3a" }, "fala": "Aposto que quem não dá nota é {inocente}! Bom... faz tempo que não passo lá, mas aposto.", "verdadeira": false },
+    { "nome": "Professora Irene", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2b2b2b", "acessorios": ["oculos"] }, "fala": "Quando você pede nota, o imposto que já está no preço chega aos cofres da cidade. É cidadania em cada compra!", "verdadeira": true }
+  ],
+  "quiz": [
+    {
+      "id": "conferir",
+      "pergunta": "Como saber se o papel que você recebeu no caixa é uma nota fiscal de verdade?",
+      "opcoes": [
+        "Pela cor do papel.",
+        "Consultando o código ou o QR code no site ou no aplicativo oficial.",
+        "Perguntando ao vendedor."
+      ],
+      "correta": 1,
+      "explicacao": "Nota fiscal de verdade fica registrada no sistema do governo. O código ou o QR code permite conferir em segundos."
+    },
+    {
+      "id": "pedir",
+      "pergunta": "Por que vale a pena pedir a nota fiscal?",
+      "opcoes": [
+        "Só para poder trocar o produto.",
+        "Porque é proibido sair da loja sem ela.",
+        "Ela garante os seus direitos e ajuda o imposto já pago a chegar aos cofres públicos."
+      ],
+      "correta": 2,
+      "explicacao": "O imposto já está embutido no preço. A nota garante que ele seja registrado e chegue à cidade, além de proteger o consumidor em trocas e garantias."
+    },
+    {
+      "id": "cadeia",
+      "pergunta": "O que quer dizer \"cadeia da nota fiscal\"?",
+      "opcoes": [
+        "Cada etapa, do fornecedor ao consumidor, deve ter nota: se uma etapa falha, a sonegação passa adiante.",
+        "Que quem não emite nota vai direto para a cadeia.",
+        "Que só a última loja precisa emitir nota."
+      ],
+      "correta": 0,
+      "explicacao": "O fornecedor emite nota para a loja, e a loja para o consumidor. Quem compra sem nota costuma vender sem nota, e o imposto se perde no caminho."
+    }
+  ],
+  "glossario": [
+    { "id": "maquininha", "termo": "Maquininha de cartão", "definicao": "Aparelho de pagamento ligado a uma empresa. As vendas feitas nele ficam registradas no nome dessa empresa; usar a maquininha de outra empresa esconde as vendas." },
+    { "id": "cadeia_nota", "termo": "Cadeia da nota fiscal", "definicao": "Cada etapa da venda tem nota: do fabricante ao fornecedor, do fornecedor à loja, da loja ao consumidor. Se uma etapa fica sem nota, o imposto se perde." }
+  ]
+}

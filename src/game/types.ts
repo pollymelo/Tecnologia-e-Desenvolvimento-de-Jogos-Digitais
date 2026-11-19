@@ -65,6 +65,42 @@ export interface Local {
   icone?: string
   /** Quem conta a pista. Sem testemunha, o próprio auditor lê a informação. */
   testemunha?: Testemunha
+  /**
+   * O que dá para fazer dentro do local (conversar, pedir documento, observar...).
+   * O jogador escolhe uma só. Exatamente uma tem `revela: true` e mostra a `pista` (com o indício);
+   * as outras mostram o próprio `texto` e não rendem prova.
+   */
+  acoes?: Acao[]
+  /** O local só aparece no mapa depois que este outro local for visitado (ex.: um endereço descoberto). */
+  liberadoPor?: LocalId
+}
+
+/** Uma abordagem dentro do local. */
+export interface Acao {
+  id: string
+  /** Texto do botão, ex.: "Pedir a certidão de imóveis". */
+  rotulo: string
+  /** O que acontece quando esta abordagem não revela a pista. */
+  texto?: string
+  /** true: esta é a abordagem que revela a pista do local. */
+  revela?: boolean
+}
+
+/** Morador que anda pelas ruas e conta uma dica de graça. Pode ser verdade ou boato. */
+export interface Morador {
+  nome: string
+  aparencia?: Aparencia
+  /** Pode usar {culpado}, {empresa} e {inocente} (trocados conforme o caso sorteado). */
+  fala: string
+  verdadeira: boolean
+}
+
+/** Prédio que marca o caso no meio do mapa (não dá para entrar). */
+export interface Marco {
+  nome: string
+  icone: string
+  /** Etiqueta curta, ex.: "Verba em falta". */
+  tag: string
 }
 
 export type TipoResultado =
@@ -118,6 +154,12 @@ export interface Caso {
   glossario?: Termo[]
   /** Teste rápido de antes e depois da partida (opcional). */
   quiz?: PerguntaQuiz[]
+  /** Tema fiscal do caso, mostrado no arquivo de casos. */
+  tema?: string
+  /** Prédio do meio do mapa. Sem ele, é o Hospital Municipal. */
+  marco?: Marco
+  /** Moradores que andam pelas ruas (até 4). */
+  moradores?: Morador[]
   resultados: Record<TipoResultado, TextoResultado>
 }
 

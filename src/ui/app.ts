@@ -16,10 +16,18 @@ import {
   sortearPistas,
   explicarAcusacao,
   pontuarQuiz,
+  escolherAcao,
+  precisaEscolher,
+  indicioObtido,
+  textoObtido,
+  localTrancado,
+  fechadoHoje,
+  diaAtual,
+  sortearImprevistos,
   type Aleatorio,
   type LinhaExplicacao,
 } from '../game/rules.ts'
-import type { Caso, IndicioId, Local, LocalId, PerguntaQuiz, TipoResultado } from '../game/types.ts'
+import type { Caso, IndicioId, Local, LocalId, Marco, PerguntaQuiz, TipoResultado } from '../game/types.ts'
 import { AUDITOR, boneco, ceuNoturno, DONA_HELENA, fundoTabuleiro, predio } from './arte.ts'
 import {
   duracaoDoCaminho,
@@ -31,7 +39,8 @@ import {
 } from './animacao.ts'
 import {
   caminho,
-  LOTE_HOSPITAL,
+  LOTE_MARCO,
+  posicaoDoMorador,
   LOTE_PARTIDA,
   LOTES_LOCAIS,
   MAPA,
@@ -57,7 +66,40 @@ const TECLAS_DE_DIRECAO: Record<string, Direcao> = {
   d: 'direita',
 }
 
-type Tela = 'briefing' | 'quiz-antes' | 'mapa' | 'caderno' | 'acusacao' | 'resultado' | 'quiz-depois'
+type Tela = 'arquivo' | 'briefing' | 'quiz-antes' | 'mapa' | 'caderno' | 'acusacao' | 'resultado' | 'quiz-depois'
+
+/** Prédio do meio do mapa quando o caso não define outro. */
+const MARCO_PADRAO: Marco = { nome: 'Hospital Municipal', icone: 'hospital', tag: 'Verba em falta' }
+
+/** Progresso da campanha, salvo no navegador. */
+interface Progresso {
+  /** Melhor número de estrelas em cada caso. */
+  estrelas: Record<string, number>
+  /** Casos já resolvidos (cada um destrava o seguinte). */
+  resolvidos: string[]
+}
+
+const CHAVE_PROGRESSO = 'rota-fantasma:progresso'
+
+function lerProgresso(): Progresso {
+  try {
+    const salvo = JSON.parse(globalThis.localStorage?.getItem(CHAVE_PROGRESSO) ?? 'null')
+    if (salvo && typeof salvo === 'object') {
+      return { estrelas: salvo.estrelas ?? {}, resolvidos: Array.isArray(salvo.resolvidos) ? salvo.resolvidos : [] }
+    }
+  } catch {
+    // armazenamento bloqueado ou corrompido: começa do zero
+  }
+  return { estrelas: {}, resolvidos: [] }
+}
+
+function salvarProgresso(progresso: Progresso): void {
+  try {
+    globalThis.localStorage?.setItem(CHAVE_PROGRESSO, JSON.stringify(progresso))
+  } catch {
+    // sem armazenamento: o progresso vale só nesta sessão
+  }
+}
 
 /** Estado só da interface (o estado do jogo fica em EstadoJogo). */
 interface Ui {
@@ -90,6 +132,10 @@ interface Ui {
   respostas: (number | null)[]
   /** Passo do tutorial da Dona Helena (null = fechado). */
   tutorialPasso: number | null
+  /** Morador cuja fala está aberta no mapa (null = nenhum). */
+  falaAberta: number | null
+  /** Moradores que já falaram com o jogador nesta partida (índices). */
+  boatos: number[]
 }
 
 type Modo = 'historia' | 'desafio'
@@ -105,6 +151,8 @@ export interface OpcoesApp {
   tutorial?: boolean
   /** false deixa o jogo mudo. */
   som?: boolean
+  /** false desliga os imprevistos (locais fechados em dias sorteados). Usado nos testes. */
+  imprevistos?: boolean
 }
 
 const reais = (valor: number) =>
@@ -119,7 +167,13 @@ function esc(texto: string): string {
     .replaceAll('"', '&quot;')
 }
 
-export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp = {}): void {
+export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes: OpcoesApp = {}): void {
+  /** Casos da campanha, na ordem de desbloqueio. Com um caso só, o jogo abre direto no briefing. */
+  const lista = Array.isArray(casosDoJogo) ? casosDoJogo : [casosDoJogo]
+  const temArquivo = lista.length > 1
+  let progresso = lerProgresso()
+  /** Caso escolhido no arquivo (sem sorteio). */
+  let casoBase: Caso = lista[0]
   /** Caso em jogo: o da história ou uma versão sorteada (modo desafio). */
   let caso: Caso = casoBase
   let modo: Modo = 'historia'
@@ -129,15 +183,15 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
    * Teste rápido: feito na primeira partida da sessão (antes) e depois do primeiro resultado.
    * null = ainda não respondido; [] = a pessoa pulou o teste.
    */
-  let quizAntes: (number | null)[] | null = null
-  let quizDepois: (number | null)[] | null = null
+  const quizAntes = new Map<string, (number | null)[]>()
+  const quizDepois = new Map<string, (number | null)[]>()
   /** O tutorial aparece sozinho só na primeira vez que o tabuleiro abre na sessão. */
   let tutorialVisto = opcoes.tutorial === false
   let ui: Ui = estadoUiInicial()
 
   function estadoUiInicial(): Ui {
     return {
-      tela: 'briefing',
+      tela: temArquivo ? 'arquivo' : 'briefing',
       estado: criarEstadoInicial(caso),
       ultimaPista: null,
       pistasNovas: 0,
@@ -154,8 +208,13 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       focoAntesDoGlossario: null,
       respostas: [],
       tutorialPasso: null,
+      falaAberta: null,
+      boatos: [],
     }
   }
+
+  const casoDestravado = (i: number) => i === 0 || progresso.resolvidos.includes(lista[i - 1].id)
+  const marco = () => caso.marco ?? MARCO_PADRAO
 
   const perguntas = (): PerguntaQuiz[] => (opcoes.quiz === false ? [] : (casoBase.quiz ?? []))
 
@@ -222,6 +281,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
           <span class="pips">${pips}</span>
           <span><strong>${diasRestantes}</strong> ${diasRestantes === 1 ? 'dia restante' : 'dias restantes'}</span>
         </div>
+        <div class="hud-info">Dia <strong>${diaAtual(caso, ui.estado)}</strong> de ${caso.diasIniciais}</div>
         <div class="hud-info">Pistas: <strong>${ui.estado.locaisVisitados.length}</strong></div>
         <div class="hud-info">Riscados: <strong>${riscados}/${caso.suspeitos.length}</strong></div>
         ${modo === 'desafio' ? '<span class="tag tag-desafio">Modo desafio</span>' : ''}
@@ -263,11 +323,12 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
     return `
       <section class="tela briefing">
-        <p class="rotulo">Auditoria Fiscal · ${esc(caso.titulo)}</p>
+        ${temArquivo ? '<p class="voltar-arquivo"><button type="button" class="secundario pequeno" data-acao="ir-arquivo">← Arquivo de casos</button></p>' : ''}
+        <p class="rotulo">Auditoria Fiscal · Caso ${numeroDoCaso(casoBase)} · ${esc(caso.titulo)}</p>
         <h1 tabindex="-1">Rota Fantasma</h1>
         ${caso.abertura ? `<p class="abertura">${esc(caso.abertura)}</p>` : ''}
         <div class="cena cena-briefing">
-          ${predio('hospital', 'cena-predio')}
+          ${predio(marco().icone, 'cena-predio')}
           <div class="cena-personagem">
             ${boneco(AUDITOR, { expressao: 'feliz', classe: 'grande', rotulo: 'Você, auditor(a) fiscal' })}
             <span class="nome-personagem">Você, auditor(a) fiscal</span>
@@ -279,7 +340,9 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         <div class="cartao">
           <h2>Como jogar</h2>
           <ol>
-            <li>No tabuleiro, escolha um local: seu peão anda até lá. Cada visita custa <strong>1 dia</strong> e revela uma pista.${temLocalGratis() ? ' Locais marcados como <strong>grátis</strong> não gastam dia.' : ''}</li>
+            <li>Ande pelo mapa e entre num local. Cada visita custa <strong>1 dia</strong>.${temLocalGratis() ? ' Locais marcados como <strong>grátis</strong> não gastam dia.' : ''}</li>
+            <li>Lá dentro, <strong>escolha o que fazer</strong>: só a abordagem certa (o documento certo, a conversa certa) rende prova.</li>
+            <li>Na rua, <strong>moradores</strong> contam dicas de graça, mas <strong>boato não é prova</strong>. Fique de olho nos <strong>imprevistos</strong>: um local pode estar fechado no dia.</li>
             <li>No <strong>caderno</strong>, veja quais comerciantes têm cada ${termo('indicio', 'indício')} e <strong>risque</strong> quem você descartou.</li>
             <li>Emita o ${termo('auto', '<strong>auto de infração</strong>')}: escolha o suspeito e <strong>${caso.provasExigidas} ${termo('prova', 'provas')}</strong> que o diferenciem dos outros.</li>
             <li>Ganhe até <strong>3 estrelas</strong>: resolva o caso, termine com tempo sobrando e deixe o caderno certo.</li>
@@ -308,18 +371,30 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     const semDias = ui.estado.diasRestantes === 0
     const casas = caso.locais
       .map((local) => {
+        if (localTrancado(caso, ui.estado, local.id)) {
+          return `
+          <div class="casa trancada" style="${estiloPonto(loteDe(local.id).porta)}" data-id="${esc(local.id)}">
+            <span class="casa-nome">Endereço desconhecido</span>
+            ${predio('generico')}
+            <span class="tag tag-trancado">?</span>
+          </div>`
+        }
         const visitado = ui.estado.locaisVisitados.includes(local.id)
         const disponivel = podeVisitar(caso, ui.estado, local.id)
         const custo = custoDoLocal(caso, local)
+        const fechado = fechadoHoje(caso, ui.estado, local.id)
+        const novo = local.liberadoPor !== undefined && !visitado
         const tag = visitado
           ? '<span class="tag tag-visitado">✔ Visitado</span>'
-          : custo === 0
-            ? '<span class="tag tag-gratis">Grátis</span>'
-            : `<span class="tag tag-custo">${custo} ${custo === 1 ? 'dia' : 'dias'}</span>`
+          : fechado
+            ? '<span class="tag tag-fechado">Fechado hoje</span>'
+            : custo === 0
+              ? '<span class="tag tag-gratis">Grátis</span>'
+              : `<span class="tag tag-custo">${novo ? 'Novo · ' : ''}${custo} ${custo === 1 ? 'dia' : 'dias'}</span>`
         const dentro = ui.cardAberto === local.id
         const perto = !dentro && !ui.andando && portaProxima(ui.posicaoPeao, caso.locais.length) === caso.locais.indexOf(local)
         return `
-          <button type="button" class="casa ${visitado ? 'visitado' : ''} ${dentro ? 'iluminada' : ''} ${perto ? 'perto' : ''}" style="${estiloPonto(loteDe(local.id).porta)}"
+          <button type="button" class="casa ${visitado ? 'visitado' : ''} ${fechado ? 'fechado' : ''} ${dentro ? 'iluminada' : ''} ${perto ? 'perto' : ''}" style="${estiloPonto(loteDe(local.id).porta)}"
             data-acao="visitar" data-id="${esc(local.id)}" ${disponivel ? '' : 'disabled'}>
             <span class="casa-nome">${esc(local.nome)}</span>
             ${predio(local.icone, dentro ? 'porta-aberta' : '')}
@@ -343,14 +418,15 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       <section class="tela">
         <h1 tabindex="-1">Para onde investigar?</h1>
         <p class="dica">Escolha bem: são ${caso.locais.length} locais e só ${caso.diasIniciais} dias.${temLocalGratis() ? ' Locais grátis não gastam dia.' : ''}</p>
+        ${avisoImprevistos()}
         ${aviso}
         <div class="tabuleiro-rolagem">
           <div class="tabuleiro ${ui.andando ? 'andando' : ''}" aria-describedby="como-andar">
             ${fundoTabuleiro(caso.locais.length)}
-            <div class="casa casa-hospital" style="${estiloPonto(LOTE_HOSPITAL.porta)}">
-              <span class="casa-nome">Hospital Municipal</span>
-              ${predio('hospital')}
-              <span class="tag tag-falta">Verba em falta</span>
+            <div class="casa casa-marco" style="${estiloPonto(LOTE_MARCO.porta)}">
+              <span class="casa-nome">${esc(marco().nome)}</span>
+              ${predio(marco().icone)}
+              <span class="tag tag-falta">${esc(marco().tag)}</span>
             </div>
             <div class="casa partida" style="${estiloPonto(LOTE_PARTIDA.porta)}">
               <span class="casa-nome">Auditoria</span>
@@ -361,7 +437,9 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
             <div class="peao ${ui.cardAberto ? 'dentro' : ''} ${ui.peaoSaindo ? 'saindo' : ''}" style="${estiloPonto(ui.posicaoPeao)}">
               <div class="peao-corpo">${boneco(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}</div>
             </div>
+            ${moradores()}
             ${avisoPorta()}
+            ${falaMorador()}
             <div class="ceu ceu-noite" aria-hidden="true">${ceuNoturno()}</div>
             <div class="ceu ceu-amanhecer" aria-hidden="true"></div>
           </div>
@@ -393,25 +471,45 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     const local = caso.locais[i]
     const custo = custoDoLocal(caso, local)
     const preco = custo === 0 ? 'grátis' : `${custo} ${custo === 1 ? 'dia' : 'dias'}`
+    const fechado = fechadoHoje(caso, ui.estado, local.id)
+    const motivo = localTrancado(caso, ui.estado, local.id)
+      ? 'Este endereço ainda não foi descoberto.'
+      : ui.estado.locaisVisitados.includes(local.id)
+        ? 'Você já visitou este local.'
+        : fechado
+          ? `Fechado: ${esc(local.nome)} ${esc(fechado.motivo)}. Volte outro dia.`
+          : 'Não há dias para esta visita.'
     const conteudo = podeVisitar(caso, ui.estado, local.id)
       ? `<button type="button" data-acao="entrar" data-id="${esc(local.id)}">Entrar <kbd class="so-teclado">Espaço</kbd></button>
          <span class="nota">${esc(local.nome)} · ${preco}</span>`
-      : `<span class="nota">${ui.estado.locaisVisitados.includes(local.id) ? 'Você já visitou este local.' : 'Não há dias para esta visita.'}</span>`
-    const lado = ['esquerda', 'meio', 'direita'][LOTES_LOCAIS[i].coluna]
+      : `<span class="nota">${motivo}</span>`
+    const lado = ['esquerda', 'meio', 'meio', 'direita'][LOTES_LOCAIS[i].coluna]
     return `<div class="aviso-porta lado-${lado}" style="${estiloPonto(LOTES_LOCAIS[i].porta)}" role="status">${conteudo}</div>`
   }
 
   /** Card da pista, aberto sobre o tabuleiro quando o auditor entra na casa. */
   function cardPista(): string {
     if (ui.cardAberto === null) return ''
-    const local = buscarLocal(caso, ui.cardAberto)
+    const original = buscarLocal(caso, ui.cardAberto)
+    const escolhendo = precisaEscolher(caso, ui.estado, original.id)
+    const acaoEscolhida = original.acoes?.find((a) => a.id === ui.estado.escolhas[original.id])
+    // o card mostra o que a abordagem escolhida rendeu (ou a pista, em locais sem escolhas)
+    const local = { ...original, indicio: indicioObtido(caso, ui.estado, original.id), pista: textoObtido(caso, ui.estado, original.id) }
     const testemunha = local.testemunha
     const quemFala = testemunha
       ? boneco(testemunha.aparencia, { classe: 'grande', rotulo: testemunha.nome })
       : boneco(AUDITOR, { classe: 'grande', rotulo: 'Você' })
     const nomeQuemFala = testemunha ? esc(testemunha.nome) : 'Você descobre'
 
-    const destaque = local.indicio
+    const semProva = original.indicio !== null && local.indicio === null
+    const destaque = escolhendo
+      ? ''
+      : semProva
+        ? `<div class="sem-indicio" role="status">
+             <span class="rotulo">Sem prova</span>
+             <span class="nota">Esta abordagem não revelou o indício. Na fiscalização, prova vem de documento ou de testemunho direto.</span>
+           </div>`
+        : local.indicio
       ? `<div class="nova-pista" role="status">
            <span class="rotulo">Nova pista</span>
            <strong>${termo(caso.indicios.find((i) => i.id === local.indicio)?.termo, esc(nomeIndicio(local.indicio)))}</strong>
@@ -439,13 +537,27 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
               ${quemFala}
               <span class="nome-personagem">${nomeQuemFala}</span>
             </div>
-            ${balao(`<blockquote class="pista">${esc(local.pista)}</blockquote>`)}
+            ${
+              escolhendo
+                ? balao(`<p class="pista">${testemunha ? `${esc(testemunha.nome)} está aqui.` : 'Você está no local.'} O que você faz?</p>`)
+                : balao(`<blockquote class="pista">${esc(local.pista)}</blockquote>`)
+            }
           </div>
-          ${destaque}
-          <div class="acoes">
-            <button type="button" data-acao="guardar-pista">Guardar no caderno</button>
-            <button type="button" class="secundario" data-acao="guardar-abrir-caderno">Guardar e abrir o caderno</button>
-          </div>
+          ${
+            escolhendo
+              ? `<fieldset class="escolhas">
+                   <legend>Escolha uma abordagem (só uma)</legend>
+                   ${(original.acoes ?? [])
+                     .map((a) => `<button type="button" class="escolha" data-acao="escolher" data-id="${esc(a.id)}">${esc(a.rotulo)}</button>`)
+                     .join('')}
+                 </fieldset>`
+              : `${acaoEscolhida ? `<p class="abordagem">Você escolheu: <strong>${esc(acaoEscolhida.rotulo)}</strong></p>` : ''}
+                 ${destaque}
+                 <div class="acoes">
+                   <button type="button" data-acao="guardar-pista">Guardar no caderno</button>
+                   <button type="button" class="secundario" data-acao="guardar-abrir-caderno">Guardar e abrir o caderno</button>
+                 </div>`
+          }
         </article>
       </div>`
   }
@@ -498,7 +610,13 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       ? pistas
           .map(
             (l) =>
-              `<li><strong>${esc(l.nome)}:</strong> ${l.indicio ? esc(nomeIndicio(l.indicio)) : '<em>sem indício (contexto)</em>'}</li>`,
+              `<li><strong>${esc(l.nome)}:</strong> ${
+                l.indicio
+                  ? esc(nomeIndicio(l.indicio))
+                  : buscarLocal(caso, l.id).indicio
+                    ? '<em>sem prova (a abordagem escolhida não revelou o indício)</em>'
+                    : '<em>sem indício (contexto)</em>'
+              }</li>`,
           )
           .join('')
       : '<li><em>Nenhuma pista ainda. Visite um local no tabuleiro.</em></li>'
@@ -516,6 +634,13 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         </div>
         <h2>Pistas coletadas</h2>
         <ul class="pistas-coletadas">${listaPistas}</ul>
+        ${
+          ui.boatos.length
+            ? `<h2>Conversas na rua</h2>
+               <p class="dica">Boato não vale como prova: pode ser verdade ou não. Use só para decidir onde investigar.</p>
+               <ul class="boatos">${ui.boatos.map((i) => `<li><strong>${esc(caso.moradores![i].nome)}:</strong> "${esc(preencherTexto(caso, caso.moradores![i].fala, i))}"</li>`).join('')}</ul>`
+            : ''
+        }
         <div class="acoes">
           <button type="button" class="secundario" data-acao="voltar-caderno">Voltar</button>
           <button type="button" data-acao="ir-acusacao" ${podeAcusar(caso, ui.estado) ? '' : 'disabled'}>Emitir auto de infração</button>
@@ -623,8 +748,10 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   /** Cartão do resultado: convite para o teste final ou a comparação antes × depois. */
   function cartaoQuiz(): string {
     const qs = perguntas()
-    if (!qs.length || !quizAntes || quizAntes.length === 0) return ''
-    if (!quizDepois) {
+    const antesDoCaso = quizAntes.get(casoBase.id)
+    const depoisDoCaso = quizDepois.get(casoBase.id)
+    if (!qs.length || !antesDoCaso || antesDoCaso.length === 0) return ''
+    if (!depoisDoCaso) {
       return `
         <div class="cartao cartao-quiz">
           <h2>Teste rápido: e agora?</h2>
@@ -632,8 +759,8 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
           <button type="button" data-acao="ir-quiz-depois">Responder de novo</button>
         </div>`
     }
-    const antes = pontuarQuiz(qs, quizAntes)
-    const depois = pontuarQuiz(qs, quizDepois)
+    const antes = pontuarQuiz(qs, antesDoCaso)
+    const depois = pontuarQuiz(qs, depoisDoCaso)
     const frase =
       depois > antes
         ? 'Você acertou mais depois de jogar!'
@@ -648,7 +775,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         (q, i) => `
         <li>
           <strong>${esc(q.pergunta)}</strong>
-          <span class="marcas">Antes: ${marca(quizAntes![i] === q.correta)} · Depois: ${marca(quizDepois![i] === q.correta)}</span>
+          <span class="marcas">Antes: ${marca(antesDoCaso[i] === q.correta)} · Depois: ${marca(depoisDoCaso[i] === q.correta)}</span>
           <span>Resposta certa: <em>${esc(q.opcoes[q.correta])}</em></span>
           <span class="nota">${esc(q.explicacao)}</span>
         </li>`,
@@ -671,7 +798,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
   function cartaoExplicacao(): string {
     const r = ui.estado.resultado
     if (!r || r.suspeitoAcusadoId === null) return ''
-    const e = explicarAcusacao(caso, r.suspeitoAcusadoId, r.provas)
+    const e = explicarAcusacao(caso, r.suspeitoAcusadoId, r.provas, ui.estado)
     const linha = (l: LinhaExplicacao) =>
       `<li class="${l.ok ? 'ok' : 'falhou'}"><span aria-hidden="true">${l.ok ? '✔' : '✘'}</span><span class="sr">${l.ok ? 'Certo:' : 'Problema:'}</span> ${esc(l.texto)}</li>`
     return `
@@ -693,7 +820,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       {
         alvo: '.tabuleiro',
         texto:
-          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Esta é Vila Aurora: ande pelas ruas com as setas (ou W A S D), chegue à porta de um local e aperte Espaço para entrar e ouvir a testemunha. No celular, use as setas da tela. Também dá para clicar num local.',
+          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Esta é Vila Aurora: ande pelas ruas com as setas (ou W A S D), chegue à porta de um local e aperte Espaço para entrar. Lá dentro, escolha o que fazer: só a abordagem certa rende prova. No celular, use as setas da tela. Também dá para clicar num local.',
       },
       {
         alvo: '.hud .dias',
@@ -748,6 +875,226 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     else render()
   }
 
+  // ---------- Campanha: arquivo de casos e progresso ----------
+
+  /** Número do caso na campanha, com três dígitos (001, 002...). */
+  const numeroDoCaso = (c: Caso) => String(Math.max(0, lista.indexOf(c)) + 1).padStart(3, '0')
+
+  function telaArquivo(): string {
+    const fichas = lista
+      .map((c, i) => {
+        const aberto = casoDestravado(i)
+        const resolvido = progresso.resolvidos.includes(c.id)
+        const estrelas = progresso.estrelas[c.id] ?? 0
+        return `
+          <li class="ficha-caso ${aberto ? '' : 'trancado'} ${resolvido ? 'resolvido' : ''}">
+            <div class="ficha-predio">${predio((c.marco ?? MARCO_PADRAO).icone)}</div>
+            <div class="ficha-texto">
+              <span class="rotulo">Caso ${numeroDoCaso(c)}${resolvido ? ' · resolvido' : ''}</span>
+              <h2>${aberto ? esc(c.titulo) : 'Caso trancado'}</h2>
+              <p>${aberto ? esc(c.tema ?? '') : `Resolva o caso ${numeroDoCaso(lista[i - 1])} para abrir.`}</p>
+              <span class="estrelas-ficha" role="img" aria-label="${estrelas} de 3 estrelas">
+                ${[0, 1, 2].map((k) => `<span class="${k < estrelas ? 'ganha' : ''}" aria-hidden="true">★</span>`).join('')}
+              </span>
+            </div>
+            <button type="button" data-acao="abrir-caso" data-id="${esc(c.id)}" ${aberto ? '' : 'disabled'}>
+              ${!aberto ? 'Trancado' : resolvido ? 'Jogar de novo' : 'Investigar'}
+            </button>
+          </li>`
+      })
+      .join('')
+
+    return `
+      <section class="tela arquivo">
+        <p class="rotulo">Auditoria Fiscal de Vila Aurora</p>
+        <h1 tabindex="-1">Rota Fantasma</h1>
+        <div class="cena cena-briefing">
+          <div class="cena-personagem">
+            ${boneco(DONA_HELENA, { expressao: 'feliz', classe: 'grande', rotulo: 'Dona Helena' })}
+            <span class="nome-personagem">Dona Helena</span>
+          </div>
+          ${balao('<strong>Bem-vindo(a) à Auditoria!</strong> Os "fantasmas da Aurora" são o dinheiro de tributo que some antes de chegar à cidade. Cada caso resolvido abre o próximo arquivo.')}
+        </div>
+        <h2>Arquivo de casos</h2>
+        <ol class="arquivo-casos">${fichas}</ol>
+        <p class="nota">${progresso.resolvidos.length} de ${lista.length} casos resolvidos. O progresso fica salvo neste navegador.</p>
+        <p class="nota">${botaoSom()}</p>
+      </section>`
+  }
+
+  /** Guarda as estrelas e, se o caso foi resolvido, destrava o próximo. */
+  function registrarProgresso(): void {
+    const r = ui.estado.resultado
+    if (!r) return
+    const { estrelas } = avaliarDesempenho(caso, ui.estado)
+    const resolvidos =
+      r.tipo === 'resolvido' && !progresso.resolvidos.includes(casoBase.id)
+        ? [...progresso.resolvidos, casoBase.id]
+        : progresso.resolvidos
+    progresso = {
+      estrelas: { ...progresso.estrelas, [casoBase.id]: Math.max(progresso.estrelas[casoBase.id] ?? 0, estrelas) },
+      resolvidos,
+    }
+    salvarProgresso(progresso)
+  }
+
+  /** Caso seguinte da campanha, se este foi resolvido agora. */
+  function proximoCaso(): Caso | null {
+    if (!temArquivo || ui.estado.resultado?.tipo !== 'resolvido') return null
+    return lista[lista.indexOf(casoBase) + 1] ?? null
+  }
+
+  // ---------- Imprevistos ----------
+
+  function avisoImprevistos(): string {
+    const hoje = caso.locais
+      .map((l) => ({ l, f: fechadoHoje(caso, ui.estado, l.id) }))
+      .filter(({ l, f }) => f !== null && !ui.estado.locaisVisitados.includes(l.id))
+    const novos = caso.locais.filter(
+      (l) => l.liberadoPor !== undefined && !localTrancado(caso, ui.estado, l.id) && !ui.estado.locaisVisitados.includes(l.id),
+    )
+    if (!hoje.length && !novos.length) return ''
+    return `
+      <div class="imprevistos" role="status">
+        <span class="rotulo">Dia ${diaAtual(caso, ui.estado)} de ${caso.diasIniciais}</span>
+        ${hoje.map(({ l, f }) => `<p><strong>Imprevisto:</strong> ${esc(l.nome)} ${esc(f!.motivo)}. Amanhã reabre.</p>`).join('')}
+        ${novos.map((l) => `<p><strong>Novo endereço no mapa:</strong> ${esc(l.nome)}.</p>`).join('')}
+      </div>`
+  }
+
+  // ---------- Moradores ----------
+
+  /** Tempo de caminhada dos moradores (segundos); só anda com o mapa livre. */
+  let tempoMoradores = 0
+  let loopMoradores = false
+  /** Onde a fala aberta apareceu (ela fecha quando o peão se afasta dali). */
+  let falaPonto: Ponto | null = null
+
+  function moradores(): string {
+    return (caso.moradores ?? [])
+      .map(
+        (m, i) => `
+        <button type="button" class="morador ${ui.boatos.includes(i) ? 'ouvido' : ''}" data-acao="conversar" data-id="${i}"
+          style="${estiloPonto(posicaoDoMorador(i, tempoMoradores))}" aria-label="Conversar com ${esc(m.nome)}">
+          ${boneco(m.aparencia, { expressao: 'feliz' })}
+          <span class="balaozinho" aria-hidden="true">${ui.boatos.includes(i) ? '✓' : '!'}</span>
+        </button>`,
+      )
+      .join('')
+  }
+
+  function falaMorador(): string {
+    const i = ui.falaAberta
+    const m = i === null ? undefined : caso.moradores?.[i]
+    if (i === null || !m) return '<div class="fala-morador" hidden></div>'
+    const p = falaPonto ?? posicaoDoMorador(i, tempoMoradores)
+    const lado = p.x < MAPA.largura * 0.25 ? 'esquerda' : p.x > MAPA.largura * 0.75 ? 'direita' : 'meio'
+    return `
+      <div class="fala-morador lado-${lado}" style="${estiloPonto(p)}" role="status">
+        <strong>${esc(m.nome)}</strong>
+        <span>"${esc(preencherTexto(caso, m.fala, i))}"</span>
+        <span class="nota">Anotado no caderno. Boato não vale como prova.</span>
+      </div>`
+  }
+
+  function cartaoBoatos(): string {
+    if (!ui.boatos.length || !caso.moradores) return ''
+    const itens = ui.boatos
+      .map((i) => {
+        const m = caso.moradores![i]
+        return `<li class="${m.verdadeira ? 'ok' : 'falhou'}"><span aria-hidden="true">${m.verdadeira ? '✔' : '✘'}</span><span class="sr">${m.verdadeira ? 'Verdade:' : 'Boato falso:'}</span>
+          <span><strong>${esc(m.nome)}:</strong> "${esc(preencherTexto(caso, m.fala, i))}" ${m.verdadeira ? 'Era verdade.' : 'Era só boato.'}</span></li>`
+      })
+      .join('')
+    return `
+      <div class="cartao">
+        <h2>Conversas na rua: era verdade?</h2>
+        <ul class="lista-explicacao">${itens}</ul>
+        <p class="nota">Mesmo um boato verdadeiro não serve como prova: ele só aponta onde procurar.</p>
+      </div>`
+  }
+
+  function atualizarMoradores(): void {
+    raiz.querySelectorAll<HTMLElement>('.morador').forEach((el, i) => {
+      posicionarPeao(el, posicaoDoMorador(i, tempoMoradores))
+      const ouvido = ui.boatos.includes(i)
+      el.classList.toggle('ouvido', ouvido)
+      const marca = el.querySelector('.balaozinho')
+      if (marca) marca.textContent = ouvido ? '✓' : '!'
+    })
+  }
+
+  function abrirFala(i: number): void {
+    if (ui.falaAberta === i || !caso.moradores?.[i]) return
+    ui.falaAberta = i
+    falaPonto = posicaoDoMorador(i, tempoMoradores)
+    if (!ui.boatos.includes(i)) ui.boatos = [...ui.boatos, i]
+    som.tocar('conversa')
+    raiz.querySelector('.fala-morador')?.replaceWith(htmlParaElemento(falaMorador()))
+    atualizarMoradores()
+  }
+
+  function fecharFala(): void {
+    if (ui.falaAberta === null) return
+    ui.falaAberta = null
+    falaPonto = null
+    raiz.querySelector('.fala-morador')?.replaceWith(htmlParaElemento(falaMorador()))
+  }
+
+  /** O peão encostou num morador? Ele conta a dica. Afastou-se? A fala fecha. */
+  function verificarEncontros(): void {
+    if (!caso.moradores?.length || ui.tela !== 'mapa') return
+    const p = ui.posicaoPeao
+    const distancia = (q: Ponto) => Math.hypot(p.x - q.x, p.y - q.y)
+    if (ui.falaAberta !== null && falaPonto && distancia(falaPonto) > 40) fecharFala()
+    if (ui.cardAberto !== null || ui.tutorialPasso !== null || ui.termoAberto !== null) return
+    caso.moradores.forEach((_, i) => {
+      if (ui.falaAberta !== i && distancia(posicaoDoMorador(i, tempoMoradores)) < 14) abrirFala(i)
+    })
+  }
+
+  /** Clique num morador: o peão vai até ele e conversa. */
+  async function conversarCom(i: number): Promise<void> {
+    if (!caso.moradores?.[i] || !podeAndarLivre()) return
+    if (animar()) await andarAte(posicaoDoMorador(i, tempoMoradores))
+    abrirFala(i)
+  }
+
+  /** requestAnimationFrame com setTimeout de reserva. */
+  function agendarQuadro(fn: () => void): void {
+    let feito = false
+    const uma = () => {
+      if (feito) return
+      feito = true
+      fn()
+    }
+    requestAnimationFrame(uma)
+    setTimeout(uma, 40)
+  }
+
+  /** Os moradores andam em volta dos quarteirões enquanto o mapa está aberto. */
+  function animarMoradores(): void {
+    if (loopMoradores || !animar() || !caso.moradores?.length) return
+    loopMoradores = true
+    let ultimo = performance.now()
+    const quadro = () => {
+      if (!raiz.isConnected || ui.tela !== 'mapa') {
+        loopMoradores = false
+        return
+      }
+      const agora = performance.now()
+      const dt = Math.min(0.1, Math.max(0, (agora - ultimo) / 1000))
+      ultimo = agora
+      if (ui.cardAberto === null && ui.termoAberto === null && ui.tutorialPasso === null) {
+        tempoMoradores += dt
+        atualizarMoradores()
+        verificarEncontros()
+      }
+      agendarQuadro(quadro)
+    }
+    agendarQuadro(quadro)
+  }
+
   function cenaResultado(tipo: TipoResultado, acusadoId: string | null): string {
     const acusado = acusadoId ? buscarSuspeito(caso, acusadoId) : null
     const bonecoAcusado = (expressao: 'feliz' | 'neutro' | 'triste') =>
@@ -757,7 +1104,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       resolvido: `
         <div class="cena-personagem">${boneco(AUDITOR, { expressao: 'feliz', classe: 'grande' })}</div>
         <div class="cena-personagem com-carimbo">${bonecoAcusado('triste')}${carimbo('Autuado', 'ok')}</div>
-        ${predio('hospital', 'cena-predio')}`,
+        ${predio(marco().icone, 'cena-predio')}`,
       auto_anulado: `
         <div class="cena-personagem">${boneco(AUDITOR, { expressao: 'triste', classe: 'grande' })}</div>
         <div class="cena-personagem com-carimbo">${bonecoAcusado('feliz')}${carimbo('Anulado', 'falha')}</div>`,
@@ -766,7 +1113,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         <div class="cena-personagem com-carimbo">${bonecoAcusado('triste')}${carimbo('Inocente', 'falha')}</div>`,
       prazo_encerrado: `
         <div class="cena-personagem com-carimbo">${boneco(AUDITOR, { expressao: 'triste', classe: 'grande' })}${carimbo('Prazo encerrado', 'falha')}</div>
-        ${predio('hospital', 'cena-predio')}`,
+        ${predio(marco().icone, 'cena-predio')}`,
     }
     return `<div class="cena cena-resultado">${cenas[tipo]}</div>`
   }
@@ -825,6 +1172,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
           <h2>O que este resultado ensina</h2>
           <p>${esc(texto.ensina)}</p>
         </div>
+        ${cartaoBoatos()}
         ${cartaoQuiz()}
         <div class="cartao">
           <h2>Para debater</h2>
@@ -836,13 +1184,18 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
             : ''
         }
         <p class="nota">${esc(impacto.aviso)}</p>
-        <button type="button" data-acao="jogar-novamente">Jogar novamente</button>
+        <div class="acoes acoes-centro">
+          ${proximoCaso() ? `<button type="button" data-acao="abrir-caso" data-id="${esc(proximoCaso()!.id)}">Próximo caso: ${esc(proximoCaso()!.titulo)}</button>` : ''}
+          <button type="button" class="${proximoCaso() ? 'secundario' : ''}" data-acao="jogar-novamente">Jogar este caso de novo</button>
+          ${temArquivo ? '<button type="button" class="secundario" data-acao="ir-arquivo">Arquivo de casos</button>' : ''}
+        </div>
       </section>`
   }
 
   // ---------- Render e eventos ----------
 
   const telas: Record<Tela, () => string> = {
+    arquivo: telaArquivo,
     briefing: telaBriefing,
     'quiz-antes': () => telaQuiz('antes'),
     mapa: telaMapa,
@@ -893,6 +1246,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
     const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null || ui.tutorialPasso !== null
     raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${tutorial()}${glossario()}`
     ultimoAviso = ui.tela === 'mapa' ? avisoPorta() : ''
+    if (ui.tela === 'mapa') animarMoradores()
     if (ui.tutorialPasso !== null) {
       const alvo = raiz.querySelector(passosTutorial()[ui.tutorialPasso].alvo)
       alvo?.classList.add('alvo-tutorial')
@@ -933,7 +1287,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       animarCard: animou,
     }
     render(false)
-    som.tocar('pista')
+    if (!precisaEscolher(caso, ui.estado, localId)) som.tocar('pista')
     raiz.querySelector<HTMLElement>('.card-pista')?.focus()
   }
 
@@ -1038,6 +1392,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       som.tocar('passo')
     }
     atualizarPorta()
+    verificarEncontros()
     seguirPeao(peao)
     proximoQuadro()
   }
@@ -1183,7 +1538,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
 
     // Clique na rua ou na grama do tabuleiro (fora das casas): o peão anda até lá.
     const tabuleiro = (evento.target as HTMLElement).closest<HTMLElement>('.tabuleiro')
-    if (tabuleiro && !(evento.target as HTMLElement).closest('.casa, .aviso-porta')) {
+    if (tabuleiro && !(evento.target as HTMLElement).closest('.casa, .aviso-porta, .morador, .fala-morador')) {
       const ponto = pontoDoClique(tabuleiro, evento)
       if (ponto) void andarAte(ponto)
       return
@@ -1205,8 +1560,11 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       case 'comecar':
         modo = id === 'desafio' ? 'desafio' : 'historia'
         caso = sortearPistas(modo === 'desafio' ? sortearCaso(casoBase, aleatorio) : casoBase, aleatorio)
-        ui = estadoUiInicial()
-        if (quizAntes === null && perguntas().length > 0) {
+        ui = {
+          ...estadoUiInicial(),
+          estado: criarEstadoInicial(caso, opcoes.imprevistos === false ? {} : sortearImprevistos(caso, aleatorio)),
+        }
+        if (!quizAntes.has(casoBase.id) && perguntas().length > 0) {
           ui = { ...ui, tela: 'quiz-antes', respostas: perguntas().map(() => null) }
           render()
         } else {
@@ -1215,17 +1573,17 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         break
       case 'concluir-quiz':
         if (ui.tela === 'quiz-antes') {
-          quizAntes = [...ui.respostas]
+          quizAntes.set(casoBase.id, [...ui.respostas])
           entrarNoMapa()
         } else {
-          quizDepois = [...ui.respostas]
+          quizDepois.set(casoBase.id, [...ui.respostas])
           ui = { ...ui, tela: 'resultado', respostas: [] }
           render(false)
           raiz.querySelector<HTMLElement>('#comparacao-quiz')?.focus()
         }
         break
       case 'pular-quiz':
-        quizAntes = []
+        quizAntes.set(casoBase.id, [])
         entrarNoMapa()
         break
       case 'ir-quiz-depois':
@@ -1293,6 +1651,7 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
         break
       case 'emitir-auto':
         ui = { ...ui, estado: acusar(caso, ui.estado, ui.acusado!, ui.provas) }
+        registrarProgresso()
         irPara('resultado')
         somDoResultado()
         break
@@ -1304,8 +1663,37 @@ export function iniciarApp(raiz: HTMLElement, casoBase: Caso, opcoes: OpcoesApp 
       case 'jogar-novamente':
         caso = casoBase
         modo = 'historia'
-        ui = estadoUiInicial()
+        ui = { ...estadoUiInicial(), tela: 'briefing' }
         render()
+        break
+      case 'ir-arquivo':
+        caso = casoBase
+        modo = 'historia'
+        ui = { ...estadoUiInicial(), tela: 'arquivo' }
+        render()
+        break
+      case 'abrir-caso': {
+        const escolhido = lista.find((c) => c.id === id)
+        if (!escolhido || !casoDestravado(lista.indexOf(escolhido))) break
+        casoBase = escolhido
+        caso = escolhido
+        modo = 'historia'
+        ui = { ...estadoUiInicial(), tela: 'briefing' }
+        render()
+        break
+      }
+      case 'escolher': {
+        const dentroDe = ui.cardAberto
+        if (dentroDe === null) break
+        ui = { ...ui, estado: escolherAcao(caso, ui.estado, dentroDe, id) }
+        if (indicioObtido(caso, ui.estado, dentroDe)) som.tocar('pista')
+        else som.tocar('risco')
+        render(false)
+        raiz.querySelector<HTMLElement>('.card-pista')?.focus()
+        break
+      }
+      case 'conversar':
+        void conversarCom(Number(id))
         break
     }
   })
