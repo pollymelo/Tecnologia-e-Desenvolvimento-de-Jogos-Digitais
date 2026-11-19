@@ -81,7 +81,7 @@
 `| Internet | Para abrir o link | Depois de carregado, o jogo roda no navegador. **Recarregar a página precisa de internet de novo** |
 `| Som | Opcional | Há botão para desligar; em sala, o ideal é sem som ou com fones |
 `| Projetor | Recomendado | Para a abertura e o debate final |
-`| Sem internet na escola | Um computador com o projeto serve o jogo na rede local (\`npm run build\` e um servidor local) | Exige apoio técnico do grupo |
+`| Sem internet na escola | Um computador com o projeto serve o jogo na rede local (`npm run build` e um servidor local) | Exige apoio técnico do grupo |
 `
 `**Acessibilidade:** dá para jogar só com o teclado. Botões e personagens têm descrição para leitor
 `de tela. Quando o sistema pede menos movimento, o jogo usa animações suaves (há também um botão para
@@ -150,7 +150,7 @@
 `
 `O NAF pode **criar casos novos sem programar**, só editando um arquivo de texto (JSON):
 `
-`1. Copiar um caso existente (\`src/data/caso-00X.json\`) e trocar suspeitos, locais, falas,
+`1. Copiar um caso existente (`src/data/caso-00X.json`) e trocar suspeitos, locais, falas,
 `   perguntas do teste e textos do resultado.
 `2. **Regras que o arquivo precisa seguir:**
 `   - até 10 locais e 4 moradores;
@@ -158,8 +158,8 @@
 `   - nenhuma pista pode citar o nome do suspeito.
 `
 `   Se algo estiver errado, o jogo **mostra o erro ao carregar** e não abre um caso sem solução.
-`3. Registrar o caso na lista \`src/game/caso.ts\`, rodar \`npm test\` e
-`   \`node scripts/gerar-fichas.mjs\` (gera a ficha de solução do caso novo).
+`3. Registrar o caso na lista `src/game/caso.ts`, rodar `npm test` e
+`   `node scripts/gerar-fichas.mjs` (gera a ficha de solução do caso novo).
 `4. Ao enviar para o GitHub, o jogo é **testado e publicado sozinho** no mesmo link.
 `
 `**Ideias de adaptação:**
