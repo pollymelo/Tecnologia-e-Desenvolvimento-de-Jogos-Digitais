@@ -5,7 +5,7 @@ Como auditor(a) fiscal, você anda pelo mapa de Vila Aurora, entra nos locais, e
 
 **▶ Jogar online:** https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/
 
-- Documento de design (GDD): [docs/GDD.md](docs/GDD.md) · versão de entrega em [DOCX](docs/GDD-Rota-Fantasma.docx) e [PDF](docs/GDD-Rota-Fantasma.pdf) (gerar de novo com `npm run gdd`; o PDF é exportado pelo Word)
+- Documento de design (GDD): [docs/GDD.md](docs/GDD.md) · versão de entrega em [DOCX](docs/GDD-Rota-Fantasma.docx) (gerar de novo com `npm run gdd`; para PDF, abrir no Word e usar Arquivo → Exportar → PDF)
 - [Lore: Vila Aurora e os fantasmas da Aurora](docs/lore.md)
 - [Fichas de solução dos 4 casos (para o mediador)](docs/fichas-de-solucao.md): geradas com `node scripts/gerar-fichas.mjs`
 - Caso 001: [perfis dos suspeitos](docs/caso-001-suspeitos.md)

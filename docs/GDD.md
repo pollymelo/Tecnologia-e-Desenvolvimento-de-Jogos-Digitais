@@ -9,8 +9,9 @@
 | Campo | Informação |
 |---|---|
 | Projeto | **Rota Fantasma**: jogo de investigação fiscal |
-| Integrante | **Pollyanna [sobrenome]** (trabalho individual) |
-| Disciplina | Tecnologia e Desenvolvimento de Jogos Digitais, Sistemas de Informação, 2026.2 |
+| Integrante | **Pollyanna Melo** (trabalho individual) |
+| Curso | Sistemas de Informação |
+| Disciplina | Tecnologia e Desenvolvimento de Jogos Digitais, 2026.2 |
 | Projeto de extensão | EducaJogo Fiscal, com o NAF da Unichristus e a Receita Federal do Brasil |
 | Jogo publicado | <https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/> |
 | Código-fonte e histórico | <https://github.com/pollymelo/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais> |
@@ -321,40 +322,168 @@ terceiros. O som pode ser desligado.
   autorização". Na vida real, o acesso da fiscalização segue regras legais específicas.
 - **Valores:** todos são fictícios.
 
+### 15.2 Alinhamento com as referências oficiais
+
+O conteúdo do jogo foi conferido com a apostila *Cidadania e Educação Fiscal no Currículo Escolar*
+(Receita Federal, 2ª edição, 2025) e com o *Relatório Nacional de Cidadania Fiscal de 2025* (Receita
+Federal).
+
+**Conceito de Cidadania Fiscal.** A apostila adota a definição da Portaria RFB nº 214/2022: iniciativas
+que ampliam a conscientização sobre a **função socioeconômica dos tributos** e promovem a compreensão
+dos **direitos e deveres ligados à tributação** e a **participação ativa do cidadão**. Esse é o eixo do
+jogo:
+- o dinheiro sonegado aparece como um serviço público que deixou de existir;
+- o jogador exerce o papel de quem fiscaliza, com direitos e limites (prova, sigilo bancário).
+
+**Os 15 temas da Matriz Curricular de Educação Fiscal (Receita Federal) no jogo:**
+
+| Tema da Matriz | Como aparece no Rota Fantasma |
+|---|---|
+| 2. Patrimônio Público | Os prédios-marco (hospital, creche, praça, biblioteca) e o destino do valor recuperado |
+| 3. Origem dos Recursos Públicos | O tributo embutido no preço: abertura dos casos e teste rápido |
+| 4. Nota Fiscal e Cupom Fiscal | Casos 001 (venda sem nota) e 004 ("cupom" que não é documento fiscal, conferido pelo aplicativo) |
+| 7. Direito à Informação | Portal da Transparência grátis e glossário com linguagem simples |
+| 10. Controle Social | Portal da Transparência e a campanha dos alunos no caso 004 |
+| 13. Sonegação Fiscal | Tema central dos quatro casos (venda sem nota, nota fria, empresa de fachada, IPTU) |
+| 5. Tributos e Constituição · 6. Estado Democrático de Direito | De forma indireta: a fiscalização só pune com prova obtida pelo caminho legal |
+| 8. Orçamento Público · 9. Políticas Públicas | Parcial: o resultado mostra para onde vai o dinheiro, mas o jogador ainda não decide o orçamento (proposta na seção 17.2) |
+
+Temas **ainda não trabalhados**, que estão nas propostas da seção 17.2:
+- 11. Impactos da Corrupção;
+- 12. Consumo Consciente (produto pirata);
+- 14. CPF;
+- 15. Aduana.
+
+**BNCC.** A apostila destaca as competências gerais 1, 6, 7 e 10 para a Educação Fiscal. O jogo mobiliza:
+- **competência 1 (conhecimento):** a função social do tributo;
+- **competência 2 (pensamento científico):** investigar causas, elaborar e testar hipóteses, no
+  caderno e na investigação;
+- **competência 7 (argumentação com base em fatos e informações confiáveis):** o auto de infração só
+  vale com provas;
+- **competência 10 (responsabilidade e cidadania, decisões com princípios éticos):** a acusação
+  injusta tem consequência.
+
+Habilidades do Ensino Médio citadas na apostila e ligadas diretamente às mecânicas:
+
+| Habilidade (BNCC) | Mecânica relacionada |
+|---|---|
+| **EM13CHS103**: elaborar hipóteses, selecionar evidências e compor argumentos | Escolher as duas provas que fundamentam o auto |
+| **EM13LP40**: analisar a pós-verdade e as *fake news* e rever crenças quando os fatos as contradisserem | Boatos dos moradores, um deles falso, revelado no resultado |
+| **EM13LP27**: engajar-se na solução de problemas da coletividade, participando de campanhas e debates | A campanha "Pediu nota? A cidade agradece" no caso 004 e as perguntas para debate |
+
+Além disso, as Diretrizes Curriculares do Ensino Médio (Resolução CNE/CEB nº 2/2024, citada na
+apostila) incluem a educação fiscal entre os temas contemporâneos transversais.
+
+**Metodologias e extensão.** A apostila recomenda:
+- **metodologias ativas:** gamificação (cita o jogo de tabuleiro "Pago ou Não?" e as dinâmicas
+  "A Ilha" e "O Bairro") e aprendizagem baseada em problemas;
+- **concursos escolares de redação, desenhos, vídeos, memes e jogos digitais**;
+- a integração escola–universidade **pela parceria com o NAF e projetos de extensão** (Resolução
+  CNE/CES nº 7/2018).
+
+O Rota Fantasma é um jogo digital de **aprendizagem baseada em problema** (resolver um caso) pensado
+para ser mediado pelo NAF (seção 19).
+
+**O NAF.** Segundo a apostila, o NAF é um programa de Cidadania Fiscal da Receita Federal em
+cooperação com instituições de ensino. Ele leva assistência fiscal gratuita a quem precisa e atua em
+projetos de educação fiscal e dinâmicas de conscientização tributária. O Relatório 2025 registra:
+- cerca de **460 NAF** no país;
+- o projeto *Cidadania Fiscal na Extensão Universitária e no Currículo Escolar* no **mapa estratégico
+  da Receita Federal de 2024 a 2027**.
+
+Isso sustenta a proposta de aplicação da seção 19.
+
 ## 16. Referências pesquisadas
 
-> **[Confirmar]:** manter só o que foi de fato lido e acrescentar o que mais tiver sido consultado.
+BRASIL. Ministério da Educação. **Base Nacional Comum Curricular**. Brasília, DF: MEC, 2018.
+Disponível em: <https://basenacionalcomum.mec.gov.br/>. Competências e habilidades citadas conforme
+RECEITA FEDERAL DO BRASIL (2025a).
 
-- RECEITA FEDERAL DO BRASIL. **Cidadania Fiscal no currículo escolar**. Disponível em:
-  <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/revistas/cidadania-fiscal/cidadania-fiscal-no-curriculo-escolar.pdf/@@download/file>.
-- RECEITA FEDERAL DO BRASIL. **Relatório 2024: Cidadania Fiscal na extensão universitária e no
-  currículo escolar**. Cita as dinâmicas "A Ilha", "O Bairro" e o jogo "Pago ou Não?". Disponível em:
-  <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/relatorios/cidadania-fiscal/extensao-universitaria-e-curriculo-escolar/relatorio-2024>.
-- RECEITA FEDERAL DO BRASIL. **Relatório de Cidadania Fiscal 2025**. Disponível em:
-  <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/relatorios/cidadania-fiscal/relatorios-cidadania-fiscal/2025-relatorio-cidadania-fiscal>.
-- Materiais indicados no enunciado da NP2 (seção 4): Materiais Pedagógicos de Cidadania Fiscal,
-  Metodologias Ativas, Planos de Aula, Fundamentação e Diretrizes, Programa de Extensão Universitária
-  e "O que é o NAF". **[Confirmar quais foram consultados.]**
-- Referência de gênero: a série de jogos *Where in the World Is Carmen Sandiego?*, jogos de
-  investigação com pistas.
+RECEITA FEDERAL DO BRASIL. **Cidadania e Educação Fiscal no currículo escolar**: conexão à BNCC,
+modelos curriculares possíveis (componente, projeto integrador, itinerário formativo, abordagem intra e
+transdisciplinar) e modelo de resolução. 2. ed. Brasília, DF: Receita Federal, out. 2025a. Elaboração:
+Ana Paula Sacchi Kuhar e Marirone Carvalho Ferreira de Lima. Disponível em:
+<https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/revistas/cidadania-fiscal/cidadania-fiscal-no-curriculo-escolar.pdf/@@download/file>.
+
+RECEITA FEDERAL DO BRASIL. Gestão Nacional de Cidadania Fiscal. **Relatório Nacional de Cidadania
+Fiscal de 2025**: Plano Operacional 2025, execução. Brasília, DF: Receita Federal, 2025b. Disponível em:
+<https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/relatorios/cidadania-fiscal/relatorios-cidadania-fiscal/2025-relatorio-cidadania-fiscal>.
+
+**[Instituição].** **Trabalho NP2: Projeto de Extensão EducaJogo Fiscal**: jogos digitais para educação
+fiscal e cidadania. Disciplina Tecnologia e Desenvolvimento de Jogos Digitais, 2026.2. Enunciado do
+trabalho.
+
+**[Professor(a)].** **Aulas da disciplina Tecnologia e Desenvolvimento de Jogos Digitais**.
+[Instituição], 2026.2. Notas de aula. **[Completar com o nome do(a) professor(a) e os títulos das aulas
+usadas no projeto.]**
+
+**Referência de gênero:** BRØDERBUND SOFTWARE. *Where in the World Is Carmen Sandiego?* Jogo eletrônico,
+1985. Inspiração para a investigação por pistas; nenhum personagem, nome ou arte foi reproduzido.
 
 ## 17. Escopo da NP2
 
-**Implementado e funcionando no protótipo:**
+### 17.1 Escopo inicial (implementado e funcionando no protótipo)
+
 - 4 casos completos e jogáveis do início ao resultado, destravados em sequência;
 - mapa com movimentação do boneco, escolhas dentro dos locais, moradores e imprevistos;
 - caderno, auto de infração, 4 desfechos com explicação, estrelas, modo desafio e glossário;
 - tutorial, teste rápido antes e depois, som e animações;
 - publicação Web automática.
 
-**Fora do escopo (decisões conscientes):**
-- **Ranking ou login:** exigiria servidor e dados de estudantes menores de idade.
-- **Câmera que segue o boneco no celular:** o mapa inteiro cabe na tela.
-- **"Horas do dia" ao andar:** adicionaria uma regra sem ganho pedagógico claro.
-- **Painel para o professor:** o placar do teste é anotado à mão.
-- **Funcionar sem internet:** depende de um servidor local (seção 19.5).
+### 17.2 Propostas futuras de melhoria
 
-**Pendente antes da entrega:**
+O protótipo da NP2 é um escopo inicial. Para as próximas versões, pretende-se incluir:
+
+**Aplicação em sala e uso pelo NAF**
+- **Painel do mediador:** reunir o placar do teste rápido de todas as duplas da turma, sem identificar
+  os estudantes, no lugar da anotação à mão.
+- **Funcionar sem internet:** transformar o jogo em aplicativo instalável (PWA), para escolas sem
+  conexão. Hoje isso depende de um servidor local (seção 19.5).
+- **Editor de casos para o NAF:** um formulário para criar casos novos sem editar o arquivo JSON à mão.
+- **Ranking e contas de jogador:** exigem servidor e cuidado com dados de estudantes menores de
+  idade (LGPD).
+
+**Experiência de jogo**
+- **Câmera que acompanha o boneco no celular:** ampliar o mapa e rolar junto com o personagem,
+  para os nomes dos prédios ficarem legíveis em telas pequenas.
+- **"Horas do dia" ao andar:** caminhadas longas gastariam parte do dia, como desafio opcional para
+  quem já domina o jogo.
+- **Leitura dos textos em voz alta:** acessibilidade para estudantes com dificuldade de leitura ou
+  baixa visão.
+
+**Conteúdo de educação fiscal**
+- **Orçamento público:** depois de resolver o caso, o jogador decide como distribuir o valor
+  recuperado entre hospital, escola e praça, e vê as consequências. Isso cobriria a linha temática
+  "Orçamento público e prioridades" do enunciado, que o protótipo ainda não trabalha.
+- **Nível avançado com a esfera correta de cada tributo** (ICMS estadual, Imposto de Renda federal,
+  ISS e IPTU municipais), retirando a simplificação da seção 15.1.
+
+**Mais locais de investigação (órgãos públicos)**
+
+| Ideia | Esforço | O que muda |
+|---|---|---|
+| Renomear locais para órgãos reais (Sefaz, Receita Federal, Procon etc.) | Baixo | Só os textos no JSON. Alguns já existem: Secretaria da Fazenda, Procon, Junta Comercial e Prefeitura |
+| Força-tarefa entre órgãos como enredo | Baixo | Briefing e textos das pistas |
+| Novos locais: Detran, Secretaria Municipal de Finanças, Tribunal de Contas, unidade da Receita Federal | Baixo | Novas entradas no JSON. A lógica de visitar, escolher a abordagem e coletar a pista já funciona para qualquer local. Acima de 10 locais por caso, o mapa precisa crescer (esforço médio) |
+| Explicação de cada órgão ao visitar: o que ele fiscaliza e de que esfera é (municipal, estadual ou federal) | Baixo | Um campo de texto a mais por local. Também reduz a simplificação da seção 15.1 |
+| Suspeito prestador de serviço (ISS e nota fiscal de serviço) | Médio | Novo tipo de indício. A validação da acusação continua igual, porque compara indícios genéricos |
+| Casos com dificuldade crescente (mais suspeitos, menos dias, mais provas exigidas) | Médio | Parâmetros que já existem no JSON (dias, suspeitos, provas exigidas). O arquivo de casos já destrava em sequência |
+
+**Ampliação dos casos (segunda temporada)**
+
+Os casos propostos cobrem temas da Matriz de Educação Fiscal que o protótipo ainda não trabalha
+(seção 15.2) e aumentam a dificuldade aos poucos.
+
+| Caso proposto | Tema da Matriz | Ideia | Locais e órgãos | Dificuldade |
+|---|---|---|---|---|
+| 005: O barato que sai caro | 12. Consumo Consciente (produto pirata) · 15. Aduana | Uma loja vende eletrônicos falsificados e contrabandeados, com prejuízo à arrecadação e risco ao consumidor | Unidade da Receita Federal (aduana), Procon, transportadora, rodoviária, Portal da Transparência | 4 suspeitos, 3 dias |
+| 006: Serviço sem nota | ISS e nota fiscal de serviço | Um prestador de serviço (academia, oficina, salão) não emite nota e declara faturamento menor | Secretaria Municipal de Finanças, Prefeitura (cadastro do ISS), clientes, contador | 5 suspeitos, 3 dias |
+| 007: A obra que nunca terminou | 11. Impactos da Corrupção · 10. Controle Social | A verba de uma obra pública some; o jogador cruza contrato, medições e pagamentos | Tribunal de Contas, Portal da Transparência, Câmara Municipal, fiscal de obras, empreiteira | 5 suspeitos, 3 provas exigidas |
+| 008: O orçamento da cidade | 8. Orçamento Público · 9. Políticas Públicas | Depois de recuperar os valores dos casos anteriores, o jogador decide como distribuí-los em audiência pública e vê as consequências | Prefeitura, Câmara, conselho municipal, associação de moradores | Encerramento da temporada |
+| Temporada em outra cidade | Todos | Os mesmos tipos de caso numa cidade portuária ou rural, com outros serviços públicos em jogo | Novo mapa e novos marcos | Variável |
+
+### 17.3 Pendente antes da entrega
+
 - aplicar o jogo com estudantes usando o roteiro de teste e registrar os ajustes;
 - gravar o vídeo de contingência.
 
@@ -367,8 +496,8 @@ Trabalho **individual**. Todas as decisões, testes e entregas são de responsab
 | Ideia, tema (educação fiscal), público e gênero (investigação inspirada em Carmen Sandiego) | Pollyanna | Concepção própria, com ideação apoiada por IA (seção 18.2) |
 | Decisões de design | Pollyanna | Escolheu entre as alternativas propostas e pediu mudanças (lista na seção 18.2) |
 | Programação, arte em SVG, testes e publicação | Pollyanna, com IA como assistente de código | Código gerado com IA a partir dos pedidos da autora e conferido por testes automáticos e jogando no navegador |
-| Conteúdo dos casos (textos, perguntas, glossário) | Pollyanna, com IA na redação | **[Descrever a revisão feita pela autora]** |
-| Teste com jogadores e ajustes | Pollyanna | **[Pendente]** |
+| Conteúdo dos casos (textos, perguntas, glossário) | Pollyanna, com IA na redação | A autora deu à IA a base e a inspiração do conteúdo: trouxe o design inicial do jogo (mecânicas, caso 001, suspeitos, locais, desfechos e continuidade pelo NAF); fixou a **educação fiscal** como ideia central e o público do Ensino Médio; indicou a referência de *Carmen Sandiego* e o visual de **bonecos de blocos** para aproximar os jovens; pediu a lore depois da orientação do professor; pediu textos que variassem a cada partida; e pediu mais casos e mais opções de visita, escolhendo os temas sugeridos na lore. A IA redigiu os textos a partir dessas diretrizes |
+| Teste com jogadores e ajustes | Pollyanna | Ainda precisa de ajustes |
 | GDD, ficha de aplicação e apresentação | Pollyanna, com IA na redação | Revisão e adaptação pela autora |
 
 ### 18.1 Organização do código (para análise e continuidade)
@@ -408,14 +537,12 @@ inicial e o GDD até a campanha com 4 casos.
 
 > Como o Rota Fantasma pode ser usado numa ação educativa mediada pelo **NAF da Unichristus**, nas
 > iniciativas de Cidadania Fiscal da Receita Federal. Os itens seguem a seção 6.1 do enunciado da NP2.
-> Campos **[preencher]** só podem ser completados pela equipe ou depois da aplicação.
 
 | Campo | Informação |
 |---|---|
 | Jogo | Rota Fantasma: <https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/> |
 | Código-fonte | <https://github.com/pollymelo/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais> |
-| Mediação | Extensionista do NAF da Unichristus ou professor(a) da turma |
-| Escola ou turma da primeira aplicação | **[preencher]** |
+| Mediação | Extensionista do NAF da Unichristus ou professor(a) Tiago Sombra |
 
 ### 19.1 Público esperado e faixa etária
 
@@ -552,16 +679,10 @@ mesma pergunta "que provas vocês usaram?", costuma render o melhor debate.
 | **Testado só no Edge** (computador e celular simulado) | Testar o navegador da escola antes da aula |
 | No celular, o mapa fica pequeno | Preferir computador ou tablet; no celular, usar a tela deitada |
 | O progresso fica salvo no aparelho | Usar aba anônima entre duplas (item 19.7) |
-| O placar do teste rápido não é registrado automaticamente | O mediador anota à mão (tabela abaixo) |
+| O placar do teste rápido não é registrado automaticamente | O mediador anota à mão o placar antes → depois de cada dupla |
 | Duplas podem copiar a solução umas das outras | Usar o modo desafio, em que o culpado muda a cada partida |
 | Estudantes podem associar comerciantes reais à sonegação | Todos os nomes, empresas e valores são fictícios; reforçar isso na abertura |
 | Ainda **não foi aplicado com estudantes** | Primeira aplicação com observação (roteiro em [docs/roteiro-teste-jogador.md](roteiro-teste-jogador.md)) e ajustes registrados |
-
-**Registro da aplicação** **[preencher]:**
-
-| Data | Escola/turma | Nº de duplas | Média do teste antes | Média do teste depois | Casos resolvidos | Observações |
-|---|---|---|---|---|---|---|
-| | | | | | | |
 
 ### 19.10 Potencial de uso e adaptação pelo NAF
 
