@@ -483,11 +483,6 @@ Os casos propostos cobrem temas da Matriz de Educação Fiscal que o protótipo 
 | 008: O orçamento da cidade | 8. Orçamento Público · 9. Políticas Públicas | Depois de recuperar os valores dos casos anteriores, o jogador decide como distribuí-los em audiência pública e vê as consequências | Prefeitura, Câmara, conselho municipal, associação de moradores | Encerramento da temporada |
 | Temporada em outra cidade | Todos | Os mesmos tipos de caso numa cidade portuária ou rural, com outros serviços públicos em jogo | Novo mapa e novos marcos | Variável |
 
-### 17.3 Pendente antes da entrega
-
-- aplicar o jogo com estudantes usando o roteiro de teste e registrar os ajustes;
-- gravar o vídeo de contingência.
-
 ## 18. Divisão de atividades
 
 Trabalho **individual**. Todas as decisões, testes e entregas são de responsabilidade da autora.
