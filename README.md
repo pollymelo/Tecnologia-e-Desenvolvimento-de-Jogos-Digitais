@@ -9,7 +9,7 @@ Como auditor(a) fiscal, você anda pelo mapa de Vila Aurora, entra nos locais, e
 - [Lore: Vila Aurora e os fantasmas da Aurora](docs/lore.md)
 - [Fichas de solução dos 4 casos (para o mediador)](docs/fichas-de-solucao.md): geradas com `node scripts/gerar-fichas.mjs`
 - Caso 001: [perfis dos suspeitos](docs/caso-001-suspeitos.md)
-- [Ficha de Aplicação Extensionista (rascunho)](docs/ficha-aplicacao-extensionista.md)
+- [Ficha de Aplicação Extensionista](docs/GDD.md#9-ficha-de-aplicação-extensionista) (seção 9 do GDD)
 - [Roteiro de teste com jogador de fora](docs/roteiro-teste-jogador.md)
 
 ## Como rodar

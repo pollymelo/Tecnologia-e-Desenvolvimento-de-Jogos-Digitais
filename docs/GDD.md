@@ -348,3 +348,183 @@ apenas o JSON, sem mexer no código.
 - HTML + CSS
 - Git/GitHub para versionamento
 - **GitHub Pages** para publicar: cada push na `main` testa, gera o build e publica (GitHub Actions)
+
+## 9. Ficha de Aplicação Extensionista
+
+> Como o Rota Fantasma pode ser usado numa ação educativa mediada pelo **NAF da Unichristus**, nas
+> iniciativas de Cidadania Fiscal da Receita Federal. Os itens seguem a seção 6.1 do enunciado da NP2.
+> Campos **[preencher]** só podem ser completados pela equipe ou depois da aplicação.
+
+| Campo | Informação |
+|---|---|
+| Jogo | Rota Fantasma: <https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/> |
+| Código-fonte | <https://github.com/pollymelo/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais> |
+| Mediação | Extensionista do NAF da Unichristus ou professor(a) da turma |
+| Escola ou turma da primeira aplicação | **[preencher]** |
+
+### 9.1 Público esperado e faixa etária
+
+- **Estudantes do Ensino Médio, de 15 a 18 anos** (1ª a 3ª série), sem conhecimento prévio de tributos.
+- Linguagem do dia a dia (lanche, loja, celular, praça). Termos técnicos (auto de infração, indício,
+  nota fria, IPTU, dívida ativa) aparecem sublinhados e abrem um **glossário**.
+- Jogo em **duplas**: um controla o boneco e o outro cuida do caderno, e os dois decidem juntos a acusação.
+
+### 9.2 Objetivo educativo da atividade
+
+Levar o estudante a perceber que **o tributo já está no preço do que ele compra** e que a sonegação
+tira dinheiro de serviços que ele usa (hospital, creche, iluminação, biblioteca). Ao final, ele deve
+conseguir:
+
+1. ligar a arrecadação aos serviços públicos (**função social do tributo**);
+2. diferenciar **indício, prova e boato**, e explicar por que punir alguém exige prova;
+3. reconhecer práticas de sonegação: venda sem nota, nota fria, empresa de fachada, "laranja" e
+   imóvel declarado menor que o real;
+4. reconhecer a **nota fiscal como direito do consumidor** e saber conferi-la;
+5. saber que os gastos públicos podem ser consultados no **Portal da Transparência** (controle social).
+
+O jogo cobre quatro linhas temáticas do enunciado: função social dos tributos, sonegação e suas
+consequências, cidadania fiscal e controle social, e consumo consciente e documentos fiscais.
+
+### 9.3 Duração aproximada
+
+| Formato | Duração | Conteúdo |
+|---|---|---|
+| **Uma aula** (recomendado para a primeira aplicação) | **50 min** | Caso 001, com teste rápido antes e depois e debate |
+| **Duas aulas** | **100 min** | Caso 001 na primeira aula; casos 002 a 004 e debate comparando os temas na segunda |
+| Partida de um caso | 15 a 25 min | Varia com a leitura e as escolhas da dupla |
+
+**Roteiro da aula de 50 minutos:**
+
+| Tempo | Atividade |
+|---|---|
+| 0–5 min | Abertura com a pergunta disparadora: "No preço de um lanche, quanto é imposto? Para onde ele vai?" |
+| 5–8 min | As duplas abrem o link e respondem o **teste rápido (antes)**, com 3 perguntas |
+| 8–33 min | Jogam o caso 001. O mediador circula e observa, sem dar respostas |
+| 33–43 min | **Debate** com as perguntas da tela de resultado (item 9.8) |
+| 43–48 min | **Teste rápido (depois)**. O mediador anota o placar antes → depois de cada dupla |
+| 48–50 min | Fechamento: "O que você vai fazer diferente na próxima compra?" |
+
+### 9.4 Equipamentos necessários
+
+- **1 aparelho por dupla:** computador, notebook, tablet ou celular. No computador, joga-se com
+  teclado (setas ou W A S D) ou mouse; no celular, com toque e um direcional na tela. Computador ou
+  tablet é melhor, porque no celular o mapa fica pequeno.
+- **Navegador atualizado** (Chrome, Edge, Firefox ou Safari).
+- **Projetor** (recomendado) para a abertura e o debate.
+- **Som:** opcional. O jogo tem botão para desligar; em sala, o ideal é jogar sem som ou com fones.
+
+### 9.5 Necessidade de conexão com a Internet
+
+- **Sim, para abrir o jogo.** Ele é um site e carrega pelo link.
+- Depois de carregado, o jogo roda inteiro no navegador. Se a internet cair durante a partida, dá para
+  continuar, mas **recarregar a página exige conexão de novo**.
+- **Sem internet na escola:** um computador com o projeto pode servir o jogo na rede local
+  (`npm run build` e um servidor local). Isso exige alguém da equipe e não é uma opção para o mediador
+  fazer sozinho.
+
+### 9.6 Contas, licenças, instalações ou dependências
+
+| Para quem | O que precisa |
+|---|---|
+| **Estudantes e mediador** | **Nada:** sem conta, sem login, sem instalação e sem licença paga. Só o navegador e o link |
+| **NAF, para criar ou editar casos** | Editor de texto para os arquivos JSON. Para testar e publicar: Node.js 20 ou mais recente, `npm install` (bibliotecas abertas e gratuitas: Vite, TypeScript, Vitest) e uma conta no GitHub para enviar as alterações; a publicação no link é automática |
+
+**Dados pessoais:** o jogo **não coleta nem envia nenhum dado**. O progresso (casos destravados e
+estrelas) fica só no navegador do aparelho. O placar do teste rápido aparece na tela, e o mediador
+anota à mão. Isso facilita a aplicação com menores de idade.
+
+### 9.7 Instruções básicas para o mediador
+
+**Antes da aula**
+1. Abrir o link no aparelho da escola e testar (conexão, tela, som).
+2. Jogar o caso 001 uma vez, de 15 a 20 minutos.
+3. Ler a ficha de solução ([docs/fichas-de-solucao.md](fichas-de-solucao.md)). Ela traz o culpado,
+   a abordagem certa em cada local, as duplas de provas válidas e quais moradores mentem.
+   **Não mostrar aos estudantes.**
+
+**Para iniciar**
+1. Cada dupla abre o link. Na tela **Arquivo de casos**, clica em **Investigar** no caso 001 e depois
+   em **Começar investigação**.
+2. As duplas respondem as 3 perguntas do teste rápido. Dá para pular, mas aí não há placar.
+3. A Dona Helena dá 4 dicas de como jogar. Se precisar, o botão **Dicas** reabre o tutorial.
+
+**Durante a partida**
+- Não dizer quem é o culpado. Se uma dupla travar por mais de 2 minutos, perguntar: "Quem do caderno
+  tem **todos** os indícios que vocês encontraram?"
+- Lembrar que **boato de morador não é prova** e que, dentro de cada local, a abordagem escolhida importa.
+- Duplas que terminarem antes podem jogar o **modo desafio** (culpado sorteado) ou seguir para o
+  caso 002, que se abre ao resolver o 001.
+
+**Entre turmas ou duplas no mesmo aparelho**
+- Usar uma **aba anônima** ou limpar os dados do site. Assim o teste rápido e as dicas aparecem de
+  novo, e o progresso de uma dupla não abre casos para a próxima.
+
+### 9.8 Questões para discussão depois do uso
+
+**Gerais (servem para qualquer caso):**
+1. Quais serviços públicos da sua cidade são pagos com tributos? Qual deles você usou esta semana?
+2. Por que uma suspeita, mesmo correta, não basta para punir alguém?
+3. Que diferença faz pedir a nota fiscal, para você e para a cidade?
+4. Algum morador contou um boato falso? Como vocês decidiram em quem acreditar?
+5. O que pode acontecer com um comerciante acusado injustamente?
+
+**Por desfecho:** a tela de resultado mostra duas perguntas específicas. Exemplo do caso 001:
+
+| Desfecho | Perguntas |
+|---|---|
+| Caso resolvido | Quais serviços públicos da sua cidade são pagos com tributos? Por que pedir nota fiscal ajuda a evitar a sonegação? |
+| Auto anulado | Que dupla de provas teria fundamentado a acusação? Por que uma suspeita, mesmo correta, não basta para punir alguém? |
+| Acusação injusta | Que consequências uma acusação injusta pode trazer para um comerciante? Que indício faltava para descartar o suspeito acusado? |
+| Prazo encerrado | Quais locais trouxeram informação útil e quais não? Como vocês escolheriam os locais se jogassem de novo? |
+
+**Por tema:**
+
+| Caso | Pergunta |
+|---|---|
+| 002 | O que pode acontecer com quem empresta o nome para abrir uma empresa para outra pessoa? |
+| 003 | É justo um imóvel grande pagar o mesmo IPTU que uma casa pequena? |
+| 004 | Como garantir que uma campanha de cidadania não vire "caça às bruxas"? |
+
+**Dica de condução:** comparar uma dupla que resolveu o caso com uma que teve o auto anulado, com a
+mesma pergunta "que provas vocês usaram?", costuma render o melhor debate.
+
+### 9.9 Limitações conhecidas e cuidados para aplicação
+
+| Limitação ou risco | Cuidado |
+|---|---|
+| **Simplificação conceitual:** o jogo reúne tributos de esferas diferentes sob um "auditor fiscal". Na vida real, venda sem nota envolve ICMS (estadual), renda incompatível envolve Imposto de Renda (federal) e IPTU é municipal; "funcionário sem carteira" é irregularidade trabalhista | Comentar no debate (seção 6 deste GDD) |
+| Precisa de internet para abrir | Testar o link antes; ter a versão local como reserva (item 9.5) |
+| **Testado só no Edge** (computador e celular simulado) | Testar o navegador da escola antes da aula |
+| No celular, o mapa fica pequeno | Preferir computador ou tablet; no celular, usar a tela deitada |
+| O progresso fica salvo no aparelho | Usar aba anônima entre duplas (item 9.7) |
+| O placar do teste rápido não é registrado automaticamente | O mediador anota à mão (tabela abaixo) |
+| Duplas podem copiar a solução umas das outras | Usar o modo desafio, em que o culpado muda a cada partida |
+| Estudantes podem associar comerciantes reais à sonegação | Todos os nomes, empresas e valores são fictícios; reforçar isso na abertura |
+| Ainda **não foi aplicado com estudantes** | Primeira aplicação com observação (roteiro em [docs/roteiro-teste-jogador.md](roteiro-teste-jogador.md)) e ajustes registrados |
+
+**Registro da aplicação** **[preencher]:**
+
+| Data | Escola/turma | Nº de duplas | Média do teste antes | Média do teste depois | Casos resolvidos | Observações |
+|---|---|---|---|---|---|---|
+| | | | | | | |
+
+### 9.10 Potencial de uso e adaptação pelo NAF
+
+O NAF pode **criar casos novos sem programar**, editando um arquivo JSON:
+
+1. Copiar um caso existente (`src/data/caso-00X.json`) e trocar suspeitos, locais, falas, perguntas
+   e textos do resultado.
+2. **Regras que o arquivo precisa seguir:**
+   - até 10 locais e 4 moradores;
+   - cada local com uma única abordagem que revela a pista;
+   - nenhuma pista pode citar o nome de um suspeito.
+
+   Se algo estiver errado, o jogo mostra o erro ao carregar e não abre um caso sem solução.
+3. Incluir o caso na lista `src/game/caso.ts`, rodar `npm test` e
+   `node scripts/gerar-fichas.mjs` (gera a ficha de solução do caso novo).
+4. Ao enviar para o GitHub, o jogo é testado e publicado sozinho no mesmo link.
+
+**Ideias de casos:**
+- o ISS de um prestador de serviço;
+- contrabando e pirataria;
+- um caso baseado numa notícia da cidade da escola, com nomes e valores fictícios.
