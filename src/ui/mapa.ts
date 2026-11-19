@@ -164,13 +164,26 @@ function alinhar(p: Ponto, eixo: 'x' | 'y', sentido: number, passo: number): Pon
 
 // ---------- Portas ----------
 
-/** Índice do lote de local cuja porta está ao alcance do peão (ou null). */
+/**
+ * Índice do lote de local que o peão pode usar agora (ou null). Vale a calçada inteira
+ * e o trecho de rua bem em frente a ela: não é preciso subir até a porta para entrar.
+ */
 export function portaProxima(p: Ponto, quantidadeLocais: number): number | null {
   for (let i = 0; i < Math.min(quantidadeLocais, LOTES_LOCAIS.length); i++) {
-    const porta = LOTES_LOCAIS[i].porta
-    if (Math.abs(p.x - porta.x) <= LARGURA_CALCADA / 2 + 1 && p.y >= porta.y - 1 && p.y <= porta.y + 8) return i
+    const { porta, rua } = LOTES_LOCAIS[i]
+    const naFrente = Math.abs(p.x - porta.x) <= LARGURA_CALCADA / 2 + 4
+    if (naFrente && p.y >= porta.y - 1 && p.y <= rua.y + LARGURA_RUA / 2 + 1) return i
   }
   return null
+}
+
+/** Para onde o boneco olha andando nessa direção. */
+export type Olhar = 'baixo' | 'cima' | 'esquerda' | 'direita'
+
+export function olharPara(dx: number, dy: number, atual: Olhar = 'baixo'): Olhar {
+  if (Math.abs(dx) < 0.01 && Math.abs(dy) < 0.01) return atual
+  if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? 'direita' : 'esquerda'
+  return dy > 0 ? 'baixo' : 'cima'
 }
 
 // ---------- Caminho mais curto (clique para andar) ----------

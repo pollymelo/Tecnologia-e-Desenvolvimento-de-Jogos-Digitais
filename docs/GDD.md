@@ -195,15 +195,21 @@ O jogador **anda com o boneco** pelas ruas de Vila Aurora:
 
 | Entrada | Como funciona |
 |---|---|
-| **Teclado** | Setas ou **W A S D**. Segurar a tecla anda; soltar para. Na diagonal, o peão desliza pela borda da rua |
-| **Celular** | **Direcional na tela** (fixo no canto, em telas de toque): segurar a seta anda |
+| **Teclado** | Setas ou **W A S D**. Segurar a tecla anda; soltar para. **Shift** corre (1,75× mais rápido, passos mais curtos e corpo inclinado). Na diagonal, o peão desliza pela borda da rua |
+| **Celular** | **Direcional na tela** (fixo no canto, em telas de toque): segurar a seta anda; o botão **»** do meio liga e desliga a corrida |
 | **Mouse / toque no mapa** | Clicar na rua (ou na grama) faz o peão ir andando até ali, **pelo caminho mais curto pelas ruas** |
 | **Clicar num local** | O peão vai sozinho até a porta e entra (atalho e acessibilidade: cada local é um botão) |
 
-**Entrar num local:** ao chegar à porta (fim da calçada), aparece o aviso **"Entrar"** com o custo
+**Entrar num local:** parado na rua em frente ao prédio (ou na calçada), aparece o aviso **"Entrar"** acima da cabeça do boneco, com o custo
 (1 dia ou grátis) e a casa ganha contorno dourado. **Espaço**, **Enter** ou **E** (ou tocar em
 "Entrar") faz o peão entrar. Andar não gasta dia; só **entrar** gasta. Local já visitado ou sem dias
 suficientes mostra o motivo no aviso.
+
+**Para parecer um personagem:**
+- o boneco **vira para onde anda**: de lado indo para os lados (espelhado à esquerda), de costas subindo, de frente descendo;
+- **partida e parada suaves**: a velocidade sobe e desce em cerca de 0,1 s, sem arranque seco;
+- **as setas tiram o controle da caminhada automática**: se o jogador clicou num local e se arrependeu, uma seta cancela a visita no meio do caminho, sem gastar dia;
+- o **morador chamado para e espera**; na conversa, os dois ficam frente a frente e se olham.
 
 **Para ser natural de andar** (`src/ui/mapa.ts`):
 - o peão só anda em ruas e calçadas; nunca atravessa prédio nem grama;

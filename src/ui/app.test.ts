@@ -552,6 +552,7 @@ describe('andar com o teclado e o direcional', () => {
     seta('baixo').dispatchEvent(new Event('pointerdown', { bubbles: true, cancelable: true }))
     await vi.advanceTimersByTimeAsync(300)
     document.dispatchEvent(new Event('pointerup', { bubbles: true }))
+    await vi.advanceTimersByTimeAsync(400) // desliza um pouquinho até parar
     const depois = peao().style.top
     await vi.advanceTimersByTimeAsync(300)
     expect(peao().style.top).toBe(depois) // soltou, parou
@@ -664,5 +665,97 @@ describe('campanha: arquivo de casos, escolhas, moradores e imprevistos', () => 
     acusarCom('ricardo', ['cartorio_detran', 'ex_funcionario'])
     expect(texto()).toContain('Conversas na rua: era verdade?')
     expect(texto()).toContain('Era só boato.')
+  })
+})
+
+describe('movimento: direção, corrida, entrar pela rua e retomar o controle', () => {
+  const tecla = (tipo: 'keydown' | 'keyup', key: string, shiftKey = false) =>
+    document.dispatchEvent(new KeyboardEvent(tipo, { key, shiftKey, bubbles: true, cancelable: true }))
+
+  async function segurar(key: string, ms: number, shiftKey = false): Promise<void> {
+    tecla('keydown', key, shiftKey)
+    await vi.advanceTimersByTimeAsync(ms)
+    tecla('keyup', key)
+    await vi.advanceTimersByTimeAsync(400) // até parar de deslizar
+  }
+
+  function iniciar(animacoes: boolean): void {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame', 'cancelAnimationFrame', 'performance', 'Date'] })
+    document.body.innerHTML = '<div id="app9"></div>'
+    raiz = document.querySelector<HTMLElement>('#app9')!
+    iniciarApp(raiz, caso, { animacoes, aleatorio: () => 0, ...SEM_EXTRAS })
+    clicar('comecar')
+  }
+
+  afterEach(() => vi.useRealTimers())
+
+  const peao = () => raiz.querySelector<HTMLElement>('.peao')!
+  const x = () => parseFloat(peao().style.left)
+
+  it('o boneco vira: de lado andando para os lados, de costas subindo', async () => {
+    iniciar(false)
+    expect(peao().dataset.olhar).toBe('baixo')
+    expect(peao().querySelectorAll('.boneco')).toHaveLength(3) // frente, costas e lado
+    await segurar('ArrowDown', 250)
+    await segurar('ArrowLeft', 300)
+    expect(peao().dataset.olhar).toBe('esquerda')
+    await segurar('ArrowRight', 300)
+    expect(peao().dataset.olhar).toBe('direita')
+    await segurar('ArrowUp', 100)
+    expect(peao().dataset.olhar).toBe('cima')
+  })
+
+  it('com Shift o peão corre: anda mais no mesmo tempo', async () => {
+    iniciar(false)
+    await segurar('ArrowDown', 250)
+    const inicio = x()
+    await segurar('ArrowLeft', 500)
+    const andando = inicio - x()
+    const meio = x()
+    await segurar('ArrowLeft', 500, true)
+    const correndo = meio - x()
+    expect(correndo).toBeGreaterThan(andando * 1.4)
+  })
+
+  it('na rua, em frente ao local, Espaço já entra (sem subir a calçada)', async () => {
+    iniciar(false)
+    await segurar('ArrowDown', 250)
+    await segurar('ArrowLeft', 1250) // para na rua em frente ao Escritório Contábil Soma
+    expect(raiz.querySelector('.aviso-porta')?.textContent).toContain('Escritório Contábil Soma')
+    tecla('keydown', ' ')
+    expect(tituloCard()).toBe('Escritório Contábil Soma')
+  })
+
+  it('apertar uma seta durante a caminhada automática cancela a visita, sem gastar dia', async () => {
+    iniciar(true)
+    clicar('visitar', 'operadora_cartao') // do outro lado do mapa
+    await vi.advanceTimersByTimeAsync(500)
+    tecla('keydown', 'ArrowDown')
+    await vi.advanceTimersByTimeAsync(300)
+    tecla('keyup', 'ArrowDown')
+    await vi.advanceTimersByTimeAsync(3000)
+    expect(raiz.querySelector('.card-pista')).toBeNull()
+    expect(texto()).toContain('3 dias restantes')
+    expect(peao().dataset.olhar).toBe('baixo')
+  })
+
+  it('o morador para e olha para o peão enquanto conversa', async () => {
+    iniciar(true)
+    const morador = () => raiz.querySelector<HTMLElement>('.morador[data-id="0"]')!
+    clicar('conversar', '0')
+    await vi.advanceTimersByTimeAsync(6000) // o peão vai até ele
+    expect(raiz.querySelector('.fala-morador')?.textContent).toContain('Seu Nonato')
+    const parado = morador().style.left + morador().style.top
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(morador().style.left + morador().style.top).toBe(parado)
+    // os dois se olham: se o peão está à esquerda do morador, o morador olha para a esquerda
+    const px = parseFloat(peao().style.left)
+    const mx = parseFloat(morador().style.left)
+    const py = parseFloat(peao().style.top)
+    const my = parseFloat(morador().style.top)
+    if (Math.abs(px - mx) * 520 >= Math.abs(py - my) * 340) {
+      expect(morador().dataset.olhar).toBe(px < mx ? 'esquerda' : 'direita')
+      expect(peao().dataset.olhar).toBe(px < mx ? 'direita' : 'esquerda')
+    }
   })
 })

@@ -9,6 +9,7 @@ import {
   pontoNaRua,
   pontoNoCaminho,
   portaProxima,
+  olharPara,
   RUAS,
   type Ponto,
 } from './mapa.ts'
@@ -56,7 +57,7 @@ describe('mapa: onde dá para andar', () => {
     const lote = LOTES_LOCAIS[7] // canto de baixo à esquerda
     const p = segurar({ x: lote.porta.x + 4, y: ruaC }, 0, -1, 20)
     expect(portaProxima(p, 9)).toBe(7)
-    expect(portaProxima({ x: 200, y: ruaC }, 9)).toBeNull()
+    expect(portaProxima({ x: RUAS.verticais[2], y: ruaC }, 9)).toBeNull() // na esquina, longe das calçadas
   })
 
   it('não entra em lote de local que o caso não tem', () => {
@@ -86,5 +87,22 @@ describe('mapa: caminho mais curto (clique para andar)', () => {
   it('no mesmo trecho, o caminho é direto', () => {
     const rota = caminho({ x: 150, y: ruaC }, { x: 190, y: ruaC })
     expect(comprimento(rota)).toBeCloseTo(40)
+  })
+})
+
+describe('mapa: entrar a partir da rua e direção do boneco', () => {
+  it('parado na rua em frente ao prédio, a porta já fica ao alcance', () => {
+    const lote = LOTES_LOCAIS[7]
+    expect(portaProxima(lote.rua, 9)).toBe(7) // no meio da rua, em frente à calçada
+    expect(portaProxima({ x: lote.rua.x + 8, y: lote.rua.y + 8 }, 9)).toBe(7) // quase na borda de baixo
+    expect(portaProxima({ x: lote.rua.x + 20, y: lote.rua.y }, 9)).toBeNull() // já passou do prédio
+  })
+
+  it('o boneco olha para onde anda (e mantém a direção parado)', () => {
+    expect(olharPara(1, 0)).toBe('direita')
+    expect(olharPara(-1, 0.2)).toBe('esquerda')
+    expect(olharPara(0, -1)).toBe('cima')
+    expect(olharPara(0.1, 1)).toBe('baixo')
+    expect(olharPara(0, 0, 'esquerda')).toBe('esquerda')
   })
 })

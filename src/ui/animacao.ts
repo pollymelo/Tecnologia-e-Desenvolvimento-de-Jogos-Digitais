@@ -5,8 +5,11 @@ import { comprimento, MAPA, pontoNoCaminho, type Ponto } from './mapa.ts'
 
 export const esperar = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))
 
-/** Chama `aoQuadro(t)` com t de 0 a 1 ao longo de `duracao` ms, um quadro por vez. */
-export function interpolar(duracao: number, aoQuadro: (t: number) => void): Promise<void> {
+/**
+ * Chama `aoQuadro(t)` com t de 0 a 1 ao longo de `duracao` ms, um quadro por vez.
+ * Se `aoQuadro` devolver `false`, a animação para ali mesmo.
+ */
+export function interpolar(duracao: number, aoQuadro: (t: number) => void | boolean): Promise<void> {
   return new Promise((resolve) => {
     const inicio = performance.now()
     let terminou = false
@@ -25,8 +28,8 @@ export function interpolar(duracao: number, aoQuadro: (t: number) => void): Prom
     const passo = () => {
       if (terminou) return
       const t = Math.min(1, (performance.now() - inicio) / duracao)
-      aoQuadro(t)
-      if (t < 1) agendar()
+      const continuar = aoQuadro(t) !== false
+      if (t < 1 && continuar) agendar()
       else {
         terminou = true
         resolve()
@@ -66,17 +69,34 @@ export function duracaoDoCaminho(pontos: Ponto[]): number {
   return Math.min(3200, Math.max(200, (comprimento(pontos) / VELOCIDADE_CLIQUE) * 1000))
 }
 
-/** O peão anda pelo caminho, em velocidade constante, com o ciclo de passos. */
-export async function percorrer(peao: HTMLElement, pontos: Ponto[], aoMover?: (p: Ponto) => void): Promise<void> {
+/**
+ * O peão anda pelo caminho, em velocidade constante, com o ciclo de passos.
+ * `parar` é consultado a cada quadro: se devolver true, a caminhada é interrompida.
+ * Devolve true se chegou ao fim do caminho.
+ */
+export async function percorrer(
+  peao: HTMLElement,
+  pontos: Ponto[],
+  aoMover?: (p: Ponto, anterior: Ponto) => void,
+  parar?: () => boolean,
+): Promise<boolean> {
   const total = comprimento(pontos)
-  if (total < 0.5) return
+  if (total < 0.5) return true
+  let anterior = pontos[0]
+  let interrompido = false
   peao.classList.add('caminhando')
   await interpolar(duracaoDoCaminho(pontos), (t) => {
+    if (parar?.()) {
+      interrompido = true
+      return false
+    }
     const p = pontoNoCaminho(pontos, total * t)
     posicionarPeao(peao, p)
-    aoMover?.(p)
+    aoMover?.(p, anterior)
+    anterior = p
   })
   peao.classList.remove('caminhando')
+  return !interrompido
 }
 
 /** Com o peão na porta: a porta abre, a casa acende e o peão entra. */

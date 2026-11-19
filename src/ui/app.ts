@@ -28,7 +28,7 @@ import {
   type LinhaExplicacao,
 } from '../game/rules.ts'
 import type { Caso, IndicioId, Local, LocalId, Marco, PerguntaQuiz, TipoResultado } from '../game/types.ts'
-import { AUDITOR, boneco, ceuNoturno, DONA_HELENA, fundoTabuleiro, predio } from './arte.ts'
+import { AUDITOR, boneco, bonecoQueVira, ceuNoturno, DONA_HELENA, fundoTabuleiro, predio } from './arte.ts'
 import {
   duracaoDoCaminho,
   entrarNaCasa,
@@ -48,9 +48,18 @@ import {
   pontoNaRua,
   portaProxima,
   VELOCIDADE,
+  olharPara,
+  comprimento,
+  pontoNoCaminho,
   type Lote,
+  type Olhar,
   type Ponto,
 } from './mapa.ts'
+
+/** Quanto mais rápido o peão anda correndo (Shift ou botão » do direcional). */
+const FATOR_CORRIDA = 1.75
+/** Rapidez com que o peão chega à velocidade e para (maior = mais seco). */
+const ACELERACAO = 14
 import { criarSom } from './som.ts'
 
 type Direcao = 'cima' | 'baixo' | 'esquerda' | 'direita'
@@ -116,6 +125,8 @@ interface Ui {
   provas: string[]
   /** Onde estão os pés do peão, em unidades do mapa (começa na porta da Auditoria). */
   posicaoPeao: Ponto
+  /** Para onde o peão está olhando (muda a vista do boneco). */
+  olhar: Olhar
   /** true enquanto uma animação roda (bloqueia novos cliques). */
   andando: boolean
   /** Local cuja pista está aberta no card sobre o tabuleiro (o auditor está dentro da casa). */
@@ -200,6 +211,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       acusado: null,
       provas: [],
       posicaoPeao: LOTE_PARTIDA.porta,
+      olhar: 'baixo',
       andando: false,
       cardAberto: null,
       animarCard: false,
@@ -434,8 +446,8 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
               <span class="tag tag-partida">Partida</span>
             </div>
             ${casas}
-            <div class="peao ${ui.cardAberto ? 'dentro' : ''} ${ui.peaoSaindo ? 'saindo' : ''}" style="${estiloPonto(ui.posicaoPeao)}">
-              <div class="peao-corpo">${boneco(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}</div>
+            <div class="peao ${ui.cardAberto ? 'dentro' : ''} ${ui.peaoSaindo ? 'saindo' : ''}" data-olhar="${ui.olhar}" style="${estiloPonto(ui.posicaoPeao)}">
+              <div class="peao-corpo">${bonecoQueVira(AUDITOR, { expressao: 'feliz', rotulo: 'Seu peão' })}</div>
             </div>
             ${moradores()}
             ${avisoPorta()}
@@ -446,13 +458,14 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
         </div>
         <div class="controles">
           <p class="como-andar" id="como-andar">
-            <span class="so-teclado">Ande com as <kbd>setas</kbd> ou <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>.
-            Na porta de um local, aperte <kbd>Espaço</kbd> para entrar.</span>
-            <span class="so-toque">Segure as setas da tela para andar. Na porta de um local, toque em <strong>Entrar</strong>.</span>
+            <span class="so-teclado">Ande com as <kbd>setas</kbd> ou <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> (segure <kbd>Shift</kbd> para correr).
+            Em frente a um local, aperte <kbd>Espaço</kbd> para entrar.</span>
+            <span class="so-toque">Segure as setas da tela para andar (» corre). Em frente a um local, toque em <strong>Entrar</strong>.</span>
             Também dá para tocar ou clicar na rua ou num local.
           </p>
           <div class="dpad" aria-hidden="true">
             ${seta('cima', '▲', 'Andar para cima')}${seta('esquerda', '◀', 'Andar para a esquerda')}
+            <button type="button" class="dpad-correr ${correrToque ? 'ativo' : ''}" data-correr tabindex="-1" aria-label="Correr" aria-pressed="${correrToque}">»</button>
             ${seta('direita', '▶', 'Andar para a direita')}${seta('baixo', '▼', 'Andar para baixo')}
           </div>
         </div>
@@ -483,8 +496,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       ? `<button type="button" data-acao="entrar" data-id="${esc(local.id)}">Entrar <kbd class="so-teclado">Espaço</kbd></button>
          <span class="nota">${esc(local.nome)} · ${preco}</span>`
       : `<span class="nota">${motivo}</span>`
-    const lado = ['esquerda', 'meio', 'meio', 'direita'][LOTES_LOCAIS[i].coluna]
-    return `<div class="aviso-porta lado-${lado}" style="${estiloPonto(LOTES_LOCAIS[i].porta)}" role="status">${conteudo}</div>`
+    return `<div class="aviso-porta" role="status">${conteudo}</div>`
   }
 
   /** Card da pista, aberto sobre o tabuleiro quando o auditor entra na casa. */
@@ -820,7 +832,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       {
         alvo: '.tabuleiro',
         texto:
-          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Esta é Vila Aurora: ande pelas ruas com as setas (ou W A S D), chegue à porta de um local e aperte Espaço para entrar. Lá dentro, escolha o que fazer: só a abordagem certa rende prova. No celular, use as setas da tela. Também dá para clicar num local.',
+          'Bem-vindo(a) à Auditoria! Eu sou a Dona Helena, sua chefe. Esta é Vila Aurora: ande pelas ruas com as setas (ou W A S D; Shift corre), pare em frente a um local e aperte Espaço para entrar. Lá dentro, escolha o que fazer: só a abordagem certa rende prova. No celular, use as setas da tela. Também dá para clicar num local.',
       },
       {
         alvo: '.hud .dias',
@@ -964,8 +976,20 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
 
   // ---------- Moradores ----------
 
-  /** Tempo de caminhada dos moradores (segundos); só anda com o mapa livre. */
-  let tempoMoradores = 0
+  /** Tempo de caminhada de cada morador (segundos). Quem está conversando fica parado. */
+  const temposMoradores: number[] = []
+  /** Morador que o jogador chamou com um clique: ele espera parado o peão chegar. */
+  let moradorChamado: number | null = null
+  const posMorador = (i: number) => posicaoDoMorador(i, temposMoradores[i] ?? 0)
+
+  /** Andando, o morador olha para onde vai; conversando, olha para o peão. */
+  function olharDoMorador(i: number): Olhar {
+    const aqui = posMorador(i)
+    if (ui.falaAberta === i || moradorChamado === i) return olharPara(ui.posicaoPeao.x - aqui.x, ui.posicaoPeao.y - aqui.y)
+    if (!animar()) return 'baixo'
+    const adiante = posicaoDoMorador(i, (temposMoradores[i] ?? 0) + 0.3)
+    return olharPara(adiante.x - aqui.x, adiante.y - aqui.y)
+  }
   let loopMoradores = false
   /** Onde a fala aberta apareceu (ela fecha quando o peão se afasta dali). */
   let falaPonto: Ponto | null = null
@@ -975,8 +999,8 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       .map(
         (m, i) => `
         <button type="button" class="morador ${ui.boatos.includes(i) ? 'ouvido' : ''}" data-acao="conversar" data-id="${i}"
-          style="${estiloPonto(posicaoDoMorador(i, tempoMoradores))}" aria-label="Conversar com ${esc(m.nome)}">
-          ${boneco(m.aparencia, { expressao: 'feliz' })}
+          data-olhar="${olharDoMorador(i)}" style="${estiloPonto(posMorador(i))}" aria-label="Conversar com ${esc(m.nome)}">
+          ${bonecoQueVira(m.aparencia, { expressao: 'feliz' })}
           <span class="balaozinho" aria-hidden="true">${ui.boatos.includes(i) ? '✓' : '!'}</span>
         </button>`,
       )
@@ -987,7 +1011,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const i = ui.falaAberta
     const m = i === null ? undefined : caso.moradores?.[i]
     if (i === null || !m) return '<div class="fala-morador" hidden></div>'
-    const p = falaPonto ?? posicaoDoMorador(i, tempoMoradores)
+    const p = falaPonto ?? posMorador(i)
     const lado = p.x < MAPA.largura * 0.25 ? 'esquerda' : p.x > MAPA.largura * 0.75 ? 'direita' : 'meio'
     return `
       <div class="fala-morador lado-${lado}" style="${estiloPonto(p)}" role="status">
@@ -1016,7 +1040,8 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
 
   function atualizarMoradores(): void {
     raiz.querySelectorAll<HTMLElement>('.morador').forEach((el, i) => {
-      posicionarPeao(el, posicaoDoMorador(i, tempoMoradores))
+      posicionarPeao(el, posMorador(i))
+      el.dataset.olhar = olharDoMorador(i)
       const ouvido = ui.boatos.includes(i)
       el.classList.toggle('ouvido', ouvido)
       const marca = el.querySelector('.balaozinho')
@@ -1027,7 +1052,9 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
   function abrirFala(i: number): void {
     if (ui.falaAberta === i || !caso.moradores?.[i]) return
     ui.falaAberta = i
-    falaPonto = posicaoDoMorador(i, tempoMoradores)
+    falaPonto = posMorador(i)
+    // os dois se olham
+    virarPeao(falaPonto.x - ui.posicaoPeao.x, falaPonto.y - ui.posicaoPeao.y)
     if (!ui.boatos.includes(i)) ui.boatos = [...ui.boatos, i]
     som.tocar('conversa')
     raiz.querySelector('.fala-morador')?.replaceWith(htmlParaElemento(falaMorador()))
@@ -1039,6 +1066,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     ui.falaAberta = null
     falaPonto = null
     raiz.querySelector('.fala-morador')?.replaceWith(htmlParaElemento(falaMorador()))
+    atualizarMoradores()
   }
 
   /** O peão encostou num morador? Ele conta a dica. Afastou-se? A fala fecha. */
@@ -1049,15 +1077,21 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     if (ui.falaAberta !== null && falaPonto && distancia(falaPonto) > 40) fecharFala()
     if (ui.cardAberto !== null || ui.tutorialPasso !== null || ui.termoAberto !== null) return
     caso.moradores.forEach((_, i) => {
-      if (ui.falaAberta !== i && distancia(posicaoDoMorador(i, tempoMoradores)) < 14) abrirFala(i)
+      if (ui.falaAberta !== i && distancia(posMorador(i)) < 14) abrirFala(i)
     })
   }
 
   /** Clique num morador: o peão vai até ele e conversa. */
   async function conversarCom(i: number): Promise<void> {
     if (!caso.moradores?.[i] || !podeAndarLivre()) return
-    if (animar()) await andarAte(posicaoDoMorador(i, tempoMoradores))
-    abrirFala(i)
+    moradorChamado = i
+    // para um passo antes do morador, para os dois ficarem frente a frente
+    const rota = caminho(ui.posicaoPeao, posMorador(i))
+    const total = comprimento(rota)
+    const pertinho = total > 14 ? pontoNoCaminho(rota, total - 12) : ui.posicaoPeao
+    const chegou = !animar() || (await andarAte(pertinho))
+    moradorChamado = null
+    if (chegou) abrirFala(i)
   }
 
   /** requestAnimationFrame com setTimeout de reserva. */
@@ -1086,7 +1120,9 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       const dt = Math.min(0.1, Math.max(0, (agora - ultimo) / 1000))
       ultimo = agora
       if (ui.cardAberto === null && ui.termoAberto === null && ui.tutorialPasso === null) {
-        tempoMoradores += dt
+        ;(caso.moradores ?? []).forEach((_, i) => {
+          if (ui.falaAberta !== i && moradorChamado !== i) temposMoradores[i] = (temposMoradores[i] ?? 0) + dt
+        })
         atualizarMoradores()
         verificarEncontros()
       }
@@ -1246,6 +1282,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null || ui.tutorialPasso !== null
     raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${tutorial()}${glossario()}`
     ultimoAviso = ui.tela === 'mapa' ? avisoPorta() : ''
+    posicionarAviso()
     if (ui.tela === 'mapa') animarMoradores()
     if (ui.tutorialPasso !== null) {
       const alvo = raiz.querySelector(passosTutorial()[ui.tutorialPasso].alvo)
@@ -1309,10 +1346,18 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const porta = loteDe(localId).porta
     const rota = caminho(ui.posicaoPeao, porta)
     som.passos(duracaoDoCaminho(rota))
-    await percorrer(peao, rota, (p) => {
-      ui.posicaoPeao = p
-      seguirPeao(peao)
-    })
+    caminhadaCancelavel = true
+    const chegou = await percorrer(peao, rota, aoAndarSozinho(peao), () => teclas.size > 0)
+    caminhadaCancelavel = false
+    if (!chegou) {
+      // o jogador pegou o controle no meio do caminho: a visita é cancelada, sem gastar dia
+      ui.andando = false
+      tabuleiro.classList.remove('andando')
+      atualizarPorta()
+      comecarAAndar()
+      return
+    }
+    virarPeao(0, -1) // de costas, entrando pela porta
     ui.posicaoPeao = porta
     posicionarPeao(peao, porta)
     som.tocar('porta')
@@ -1333,6 +1378,21 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
   let ultimoQuadro = 0
   let andadoDesdeUltimoPasso = 0
   let ultimoAviso = ''
+  /** Velocidade atual do peão (unidades por segundo): sobe e desce suave. */
+  let velocidade = { x: 0, y: 0 }
+  /** Shift segurado ou o botão » do direcional ligado. */
+  let correndoTecla = false
+  let correrToque = false
+  /** true durante uma caminhada automática que o jogador pode interromper com as setas. */
+  let caminhadaCancelavel = false
+
+  /** Atualiza a posição e a direção do peão durante uma caminhada automática. */
+  const aoAndarSozinho = (peao: HTMLElement) => (p: Ponto, anterior: Ponto) => {
+    ui.posicaoPeao = p
+    virarPeao(p.x - anterior.x, p.y - anterior.y)
+    verificarEncontros()
+    seguirPeao(peao)
+  }
 
   /** O peão só anda livre no tabuleiro, sem nada aberto por cima e fora de outra animação. */
   const podeAndarLivre = () =>
@@ -1375,17 +1435,32 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     ultimoQuadro = agora
     const { dx, dy } = direcaoSegurada()
     const peao = raiz.querySelector<HTMLElement>('.peao')
-    if (!raiz.isConnected || !peao || (dx === 0 && dy === 0) || !podeAndarLivre()) {
+    if (!raiz.isConnected || !peao || !podeAndarLivre()) {
       andandoLivre = false
-      peao?.classList.remove('caminhando')
+      velocidade = { x: 0, y: 0 }
+      peao?.classList.remove('caminhando', 'correndo')
       return
     }
+    // aceleração: a velocidade se aproxima da desejada aos poucos (partida e parada suaves)
+    const correr = correndoTecla || correrToque
+    const desejada = { x: dx * VELOCIDADE * (correr ? FATOR_CORRIDA : 1), y: dy * VELOCIDADE * (correr ? FATOR_CORRIDA : 1) }
+    const k = Math.min(1, dt * ACELERACAO)
+    velocidade = { x: velocidade.x + (desejada.x - velocidade.x) * k, y: velocidade.y + (desejada.y - velocidade.y) * k }
+    if (dx === 0 && dy === 0 && Math.hypot(velocidade.x, velocidade.y) < 6) {
+      andandoLivre = false
+      velocidade = { x: 0, y: 0 }
+      peao.classList.remove('caminhando', 'correndo')
+      return
+    }
+    if (dx !== 0 || dy !== 0) virarPeao(dx, dy)
     const antes = ui.posicaoPeao
-    const depois = mover(antes, dx * VELOCIDADE * dt, dy * VELOCIDADE * dt)
+    const depois = mover(antes, velocidade.x * dt, velocidade.y * dt)
     const andou = Math.hypot(depois.x - antes.x, depois.y - antes.y)
+    if (andou === 0) velocidade = { x: 0, y: 0 } // bateu: sem "embalo" contra a parede
     ui.posicaoPeao = depois
     posicionarPeao(peao, depois)
     peao.classList.toggle('caminhando', andou > 0)
+    peao.classList.toggle('correndo', andou > 0 && correr)
     andadoDesdeUltimoPasso += andou
     if (andadoDesdeUltimoPasso >= 14) {
       andadoDesdeUltimoPasso = 0
@@ -1400,12 +1475,31 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
   /** Mostra ou esconde o aviso "Entrar" e destaca a casa cuja porta está ao alcance. */
   function atualizarPorta(): void {
     const novo = avisoPorta()
-    if (novo === ultimoAviso) return
+    if (novo === ultimoAviso) {
+      posicionarAviso()
+      return
+    }
     ultimoAviso = novo
     raiz.querySelector('.aviso-porta')?.replaceWith(htmlParaElemento(novo))
     const i = ui.andando || ui.cardAberto !== null ? null : portaProxima(ui.posicaoPeao, caso.locais.length)
     raiz.querySelectorAll('.casa.perto').forEach((c) => c.classList.remove('perto'))
     if (i !== null) raiz.querySelector(`.casa[data-id="${CSS.escape(caso.locais[i].id)}"]`)?.classList.add('perto')
+    posicionarAviso()
+  }
+
+  /** O aviso "Entrar" flutua acima da cabeça do peão. */
+  function posicionarAviso(): void {
+    const aviso = raiz.querySelector<HTMLElement>('.aviso-porta:not([hidden])')
+    if (aviso) posicionarPeao(aviso, { x: ui.posicaoPeao.x, y: ui.posicaoPeao.y - 38 })
+  }
+
+  /** Vira o peão para a direção do movimento. */
+  function virarPeao(dx: number, dy: number): void {
+    const novo = olharPara(dx, dy, ui.olhar)
+    if (novo === ui.olhar) return
+    ui.olhar = novo
+    const peao = raiz.querySelector<HTMLElement>('.peao')
+    if (peao) peao.dataset.olhar = novo
   }
 
   function htmlParaElemento(html: string): Element {
@@ -1430,27 +1524,30 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
   }
 
   /** Clique na rua (ou na grama): o peão vai andando até o ponto de rua mais perto. */
-  async function andarAte(destino: Ponto): Promise<void> {
+  /** Devolve true se o peão chegou (false se o jogador assumiu o controle no caminho). */
+  async function andarAte(destino: Ponto): Promise<boolean> {
     const peao = raiz.querySelector<HTMLElement>('.peao')
-    if (!peao || !podeAndarLivre()) return
+    if (!peao || !podeAndarLivre()) return false
     const alvo = pontoNaRua(destino)
     if (!animar()) {
+      virarPeao(alvo.x - ui.posicaoPeao.x, alvo.y - ui.posicaoPeao.y)
       ui.posicaoPeao = alvo
       posicionarPeao(peao, alvo)
       atualizarPorta()
-      return
+      return true
     }
     ui.andando = true
     atualizarPorta()
     const rota = caminho(ui.posicaoPeao, alvo)
     som.passos(duracaoDoCaminho(rota))
-    await percorrer(peao, rota, (p) => {
-      ui.posicaoPeao = p
-      seguirPeao(peao)
-    })
-    ui.posicaoPeao = alvo
+    caminhadaCancelavel = true
+    const chegou = await percorrer(peao, rota, aoAndarSozinho(peao), () => teclas.size > 0)
+    caminhadaCancelavel = false
+    if (chegou) ui.posicaoPeao = alvo
     ui.andando = false
     atualizarPorta()
+    if (!chegou) comecarAAndar()
+    return chegou
   }
 
   function pontoDoClique(tabuleiro: HTMLElement, evento: MouseEvent): Ponto | null {
@@ -1467,12 +1564,15 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const alvo = evento.target as HTMLElement
     if (alvo.closest?.('input, textarea, select')) return
     const tecla = evento.key.toLowerCase()
+    if (tecla === 'shift') correndoTecla = true
     const direcao = TECLAS_DE_DIRECAO[tecla]
     if (direcao) {
-      if (!podeAndarLivre()) return
+      // durante uma caminhada automática, a seta tira o controle dela
+      if (!podeAndarLivre() && !caminhadaCancelavel) return
       evento.preventDefault() // as setas não rolam a página enquanto o peão anda
+      correndoTecla = evento.shiftKey
       teclas.add(direcao)
-      comecarAAndar()
+      if (podeAndarLivre()) comecarAAndar()
       return
     }
     if (tecla === ' ' || tecla === 'enter' || tecla === 'e') {
@@ -1487,18 +1587,31 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
   })
 
   document.addEventListener('keyup', (evento) => {
-    const direcao = TECLAS_DE_DIRECAO[evento.key.toLowerCase()]
+    const tecla = evento.key.toLowerCase()
+    if (tecla === 'shift') correndoTecla = false
+    const direcao = TECLAS_DE_DIRECAO[tecla]
     if (direcao) teclas.delete(direcao)
   })
-  window.addEventListener('blur', () => teclas.clear())
+  window.addEventListener('blur', () => {
+    teclas.clear()
+    correndoTecla = false
+  })
 
   // Direcional na tela (celular e mouse): segurar o botão faz o peão andar.
   raiz.addEventListener('pointerdown', (evento) => {
+    const correrBotao = (evento.target as HTMLElement).closest<HTMLElement>('[data-correr]')
+    if (correrBotao) {
+      evento.preventDefault()
+      correrToque = !correrToque
+      correrBotao.classList.toggle('ativo', correrToque)
+      correrBotao.setAttribute('aria-pressed', String(correrToque))
+      return
+    }
     const botao = (evento.target as HTMLElement).closest<HTMLElement>('[data-dir]')
-    if (!botao || !podeAndarLivre()) return
+    if (!botao || (!podeAndarLivre() && !caminhadaCancelavel)) return
     evento.preventDefault()
     teclas.add(botao.dataset.dir as Direcao)
-    comecarAAndar()
+    if (podeAndarLivre()) comecarAAndar()
   })
   document.addEventListener('pointerup', () => teclas.clear())
   document.addEventListener('pointercancel', () => teclas.clear())

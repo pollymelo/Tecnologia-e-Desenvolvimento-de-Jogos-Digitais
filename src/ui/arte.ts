@@ -33,9 +33,12 @@ export const DONA_HELENA: Aparencia = {
 
 export type Expressao = 'feliz' | 'neutro' | 'triste'
 
+/** De onde o boneco é visto: de frente, de costas ou de lado (olhando para a direita). */
+export type Vista = 'frente' | 'costas' | 'lado'
+
 export function boneco(
   aparencia: Aparencia = {},
-  opcoes: { expressao?: Expressao; classe?: string; rotulo?: string } = {},
+  opcoes: { expressao?: Expressao; classe?: string; rotulo?: string; vista?: Vista } = {},
 ): string {
   const pele = cor(aparencia.pele, '#e0ac69')
   const cabelo = cor(aparencia.cabelo, '#3b2a20')
@@ -72,6 +75,66 @@ export function boneco(
   const rotulo = opcoes.rotulo
     ? `role="img" aria-label="${opcoes.rotulo.replaceAll('"', '&quot;')}"`
     : 'aria-hidden="true"'
+  const vista = opcoes.vista ?? 'frente'
+  const estilo = aparencia.estiloCabelo ?? 'curto'
+  const sapato = (x: number, largura = 14) =>
+    `<rect x="${x}" y="90" width="${largura}" height="7" rx="1" fill="#2b2b2b" ${s}/>`
+
+  // ----- de costas: sem rosto e sem os acessórios da frente; o cabelo cobre a nuca -----
+  if (vista === 'costas') {
+    const nuca: Record<string, string> = {
+      curto: `<rect x="15" y="3" width="30" height="20" rx="3" fill="${cabelo}" ${s}/>`,
+      longo: `<rect x="13" y="2" width="34" height="36" rx="3" fill="${cabelo}" ${s}/>`,
+      coque: `<rect x="15" y="4" width="30" height="20" rx="3" fill="${cabelo}" ${s}/><rect x="23" y="-1" width="14" height="10" rx="3" fill="${cabelo}" ${s}/>`,
+      careca: `<rect x="15" y="18" width="30" height="7" fill="${cabelo}"/>`,
+      bone: `<rect x="14" y="2" width="32" height="12" rx="3" fill="${cabelo}" ${s}/><rect x="24" y="11" width="12" height="3" fill="${CONTORNO}"/>`,
+    }
+    return `
+  <svg class="boneco ${opcoes.classe ?? ''}" viewBox="0 -8 60 108" ${rotulo}>
+    <g class="perna perna-e"><rect x="17" y="64" width="12" height="28" fill="${calca}" ${s}/>${sapato(16)}</g>
+    <g class="perna perna-d"><rect x="31" y="64" width="12" height="28" fill="${calca}" ${s}/>${sapato(30)}</g>
+    <g class="braco braco-e"><rect x="3" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/><rect x="4" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/></g>
+    <g class="braco braco-d"><rect x="47" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/><rect x="48" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/></g>
+    <rect x="13" y="33" width="34" height="33" rx="2" fill="${camisa}" ${s}/>
+    ${tem('avental') ? `<path d="M18 42 H42" stroke="#f7f4ec" stroke-width="2"/>` : ''}
+    <rect x="15" y="5" width="30" height="28" rx="4" fill="${pele}" ${s}/>
+    ${nuca[estilo] ?? nuca.curto}
+    ${tem('chef') ? `<rect x="16" y="-6" width="28" height="12" rx="5" fill="#fff" ${s}/>` : ''}
+  </svg>`
+  }
+
+  // ----- de lado (olhando para a direita): corpo estreito, um olho, nariz, um braço na frente -----
+  if (vista === 'lado') {
+    const topo: Record<string, string> = {
+      curto: `<rect x="17" y="3" width="26" height="8" rx="2" fill="${cabelo}" ${s}/><rect x="17" y="9" width="9" height="12" fill="${cabelo}"/>`,
+      longo: `<rect x="15" y="2" width="28" height="9" rx="3" fill="${cabelo}" ${s}/><rect x="14" y="8" width="11" height="30" rx="2" fill="${cabelo}" ${s}/>`,
+      coque: `<rect x="17" y="4" width="26" height="7" rx="2" fill="${cabelo}" ${s}/><rect x="11" y="4" width="9" height="10" rx="3" fill="${cabelo}" ${s}/><rect x="17" y="9" width="8" height="10" fill="${cabelo}"/>`,
+      careca: `<rect x="17" y="13" width="6" height="9" fill="${cabelo}" ${s}/>`,
+      bone: `<rect x="16" y="2" width="28" height="9" rx="3" fill="${cabelo}" ${s}/><rect x="40" y="8" width="12" height="4" rx="1" fill="${cabelo}" ${s}/>`,
+    }
+    const bocaLado: Record<Expressao, string> = {
+      feliz: `<path d="M35 24 Q39 27 42 24" fill="none" stroke="${CONTORNO}" stroke-width="2" stroke-linecap="round"/>`,
+      neutro: `<path d="M36 25 H42" stroke="${CONTORNO}" stroke-width="2" stroke-linecap="round"/>`,
+      triste: `<path d="M35 27 Q39 23 42 27" fill="none" stroke="${CONTORNO}" stroke-width="2" stroke-linecap="round"/>`,
+    }
+    return `
+  <svg class="boneco ${opcoes.classe ?? ''}" viewBox="0 -8 60 108" ${rotulo}>
+    <g class="perna perna-e"><rect x="23" y="64" width="12" height="28" fill="${calca}" ${s} opacity="0.8"/>${sapato(23, 17)}</g>
+    <g class="braco braco-e"><rect x="25" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s} opacity="0.8"/></g>
+    <rect x="19" y="33" width="22" height="33" rx="2" fill="${camisa}" ${s}/>
+    ${tem('avental') ? `<rect x="32" y="42" width="9" height="26" fill="#f7f4ec" ${s}/>` : ''}
+    ${tem('gravata') ? `<rect x="37" y="34" width="4" height="18" fill="#c0392b" ${s}/>` : ''}
+    <g class="perna perna-d"><rect x="23" y="64" width="12" height="28" fill="${calca}" ${s}/>${sapato(23, 17)}</g>
+    <g class="braco braco-d"><rect x="25" y="35" width="10" height="23" rx="2" fill="${camisa}" ${s}/><rect x="26" y="57" width="8" height="8" rx="2" fill="${pele}" ${s}/></g>
+    <rect x="17" y="5" width="26" height="28" rx="4" fill="${pele}" ${s}/>
+    <rect x="42" y="16" width="4" height="5" rx="1" fill="${pele}" ${s}/>
+    ${topo[estilo] ?? topo.curto}
+    ${tem('chef') ? `<rect x="17" y="-6" width="26" height="12" rx="5" fill="#fff" ${s}/>` : ''}
+    <rect x="35" y="14" width="4" height="5" rx="1" fill="${CONTORNO}"/>
+    ${tem('oculos') ? `<rect x="32.5" y="12" width="9" height="9" rx="2" fill="none" ${s}/><path d="M32.5 15 H24" ${s}/>` : ''}
+    ${bocaLado[expressao]}
+  </svg>`
+  }
 
   return `
   <svg class="boneco ${opcoes.classe ?? ''}" viewBox="0 -8 60 108" ${rotulo}>
@@ -108,6 +171,19 @@ export function boneco(
     ${tem('oculos') ? `<rect x="19.5" y="13" width="9" height="9" rx="2" fill="none" ${s}/><rect x="31.5" y="13" width="9" height="9" rx="2" fill="none" ${s}/><path d="M28.5 16 H31.5" ${s}/>` : ''}
     ${bocas[expressao]}
   </svg>`
+}
+
+/**
+ * As três vistas do boneco juntas. O CSS mostra só a que combina com o `data-olhar`
+ * do elemento pai (baixo = frente, cima = costas, direita/esquerda = de lado).
+ */
+export function bonecoQueVira(
+  aparencia: Aparencia = {},
+  opcoes: { expressao?: Expressao; classe?: string; rotulo?: string } = {},
+): string {
+  return (['frente', 'costas', 'lado'] as Vista[])
+    .map((vista) => boneco(aparencia, { ...opcoes, vista, classe: `${opcoes.classe ?? ''} vista-${vista}` }))
+    .join('')
 }
 
 // ---------- Prédios ----------

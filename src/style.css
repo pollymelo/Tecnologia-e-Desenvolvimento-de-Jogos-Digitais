@@ -1882,3 +1882,57 @@ kbd {
     grid-column: 1 / -1;
   }
 }
+
+/* ---------- O boneco vira: frente, costas e lado ---------- */
+
+[data-olhar] .boneco.vista-costas,
+[data-olhar] .boneco.vista-lado,
+[data-olhar='cima'] .boneco.vista-frente,
+[data-olhar='direita'] .boneco.vista-frente,
+[data-olhar='esquerda'] .boneco.vista-frente {
+  display: none;
+}
+
+[data-olhar='cima'] .boneco.vista-costas,
+[data-olhar='direita'] .boneco.vista-lado,
+[data-olhar='esquerda'] .boneco.vista-lado {
+  display: block;
+}
+
+/* olhando para a esquerda: a vista de lado espelhada */
+[data-olhar='esquerda'] .boneco.vista-lado {
+  transform: scaleX(-1);
+}
+
+/* correndo: passos mais rápidos e o corpo inclinado para a frente */
+.peao.correndo .peao-corpo,
+.peao.correndo .perna,
+.peao.correndo .braco {
+  animation-duration: 0.18s;
+}
+
+.peao.correndo[data-olhar='direita'] .peao-corpo {
+  rotate: 6deg;
+}
+
+.peao.correndo[data-olhar='esquerda'] .peao-corpo {
+  rotate: -6deg;
+}
+
+/* o aviso "Entrar" flutua acima da cabeça do peão */
+.aviso-porta,
+.aviso-porta.lado-esquerda,
+.aviso-porta.lado-direita {
+  transform: translate(-50%, -100%);
+}
+
+/* botão de correr no meio do direcional */
+.dpad-correr {
+  grid-area: 2 / 2;
+  font-weight: 800;
+}
+
+.dpad .dpad-correr.ativo {
+  background: var(--destaque);
+  color: #1b2430;
+}
