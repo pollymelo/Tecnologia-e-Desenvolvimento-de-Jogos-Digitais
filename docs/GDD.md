@@ -9,10 +9,12 @@
 | Campo | Informação |
 |---|---|
 | Projeto | **Rota Fantasma**: jogo de investigação fiscal |
-| Integrante | **Pollyanna Melo** (trabalho individual) |
+| Integrante | **Pollyanna Melo** |
 | Curso | Sistemas de Informação |
 | Disciplina | Tecnologia e Desenvolvimento de Jogos Digitais, 2026.2 |
+| Instituição | Universidade Christus (Unichristus) |
 | Projeto de extensão | EducaJogo Fiscal, com o NAF da Unichristus e a Receita Federal do Brasil |
+| Proposta de aplicação | Jogo proposto ao **NAF da Unichristus** para que os alunos de **Ciências Contábeis da Universidade Christus**, como extensionistas do NAF, o apliquem em ações de educação fiscal com estudantes do Ensino Médio |
 | Jogo publicado | <https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/> |
 | Código-fonte e histórico | <https://github.com/pollymelo/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais> |
 
@@ -409,13 +411,12 @@ RECEITA FEDERAL DO BRASIL. Gestão Nacional de Cidadania Fiscal. **Relatório Na
 Fiscal de 2025**: Plano Operacional 2025, execução. Brasília, DF: Receita Federal, 2025b. Disponível em:
 <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/relatorios/cidadania-fiscal/relatorios-cidadania-fiscal/2025-relatorio-cidadania-fiscal>.
 
-**[Instituição].** **Trabalho NP2: Projeto de Extensão EducaJogo Fiscal**: jogos digitais para educação
-fiscal e cidadania. Disciplina Tecnologia e Desenvolvimento de Jogos Digitais, 2026.2. Enunciado do
-trabalho.
+SOMBRA, Tiago. **Aulas da disciplina Tecnologia e Desenvolvimento de Jogos Digitais**. Universidade
+Christus, 2026.2. Notas de aula.
 
-**[Professor(a)].** **Aulas da disciplina Tecnologia e Desenvolvimento de Jogos Digitais**.
-[Instituição], 2026.2. Notas de aula. **[Completar com o nome do(a) professor(a) e os títulos das aulas
-usadas no projeto.]**
+UNIVERSIDADE CHRISTUS. **Trabalho NP2: Projeto de Extensão EducaJogo Fiscal**: jogos digitais para
+educação fiscal e cidadania. Disciplina Tecnologia e Desenvolvimento de Jogos Digitais, 2026.2.
+Enunciado do trabalho.
 
 **Referência de gênero:** BRØDERBUND SOFTWARE. *Where in the World Is Carmen Sandiego?* Jogo eletrônico,
 1985. Inspiração para a investigação por pistas; nenhum personagem, nome ou arte foi reproduzido.
@@ -536,13 +537,15 @@ inicial e o GDD até a campanha com 4 casos.
 ## 19. Ficha de Aplicação Extensionista
 
 > Como o Rota Fantasma pode ser usado numa ação educativa mediada pelo **NAF da Unichristus**, nas
-> iniciativas de Cidadania Fiscal da Receita Federal. Os itens seguem a seção 6.1 do enunciado da NP2.
+> iniciativas de Cidadania Fiscal da Receita Federal. O jogo foi proposto ao NAF da Unichristus para que
+> os alunos de Ciências Contábeis da Universidade Christus, como extensionistas, o apliquem com estudantes
+> do Ensino Médio. Os itens seguem a seção 6.1 do enunciado da NP2.
 
 | Campo | Informação |
 |---|---|
 | Jogo | Rota Fantasma: <https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/> |
 | Código-fonte | <https://github.com/pollymelo/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais> |
-| Mediação | Extensionista do NAF da Unichristus ou professor(a) Tiago Sombra |
+| Mediação | Extensionista do NAF da Unichristus (aluno ou aluna de Ciências Contábeis da Universidade Christus) ou professor(a) Tiago Sombra |
 
 ### 19.1 Público esperado e faixa etária
 
