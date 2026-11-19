@@ -1,355 +1,410 @@
-# GDD — Rota Fantasma
+# GDD: Rota Fantasma
 
-> Jogo educativo de **educação fiscal** para o **Ensino Médio**, no estilo investigação
-> detetivesca. Personagens, empresas e valores são **fictícios**.
+> Game Design Document do trabalho da NP2 (T2) de Tecnologia e Desenvolvimento de Jogos Digitais,
+> projeto de extensão **EducaJogo Fiscal**. A estrutura segue a seção 6 do enunciado. Personagens,
+> empresas e valores do jogo são **fictícios**.
 
-## 1. Problema
+## 1. Identificação
 
-Muitos estudantes não relacionam a sonegação com a vida real. Para eles, comprar "sem nota" ou
-deixar de recolher tributos parece um crime sem vítima. Também não percebem que os tributos
-financiam serviços públicos, como o hospital da própria cidade, nem que a fiscalização depende
-de **provas**, e não de suspeitas.
-
-## 2. Objetivo
-
-**Do jogador:** como auditor(a) fiscal, descobrir em **3 dias** qual comerciante está sonegando.
-Para isso, visita locais, coleta indícios, descarta suspeitos no caderno e emite um
-**auto de infração** fundamentado em provas.
-
-**Pedagógico:**
-1. **Função social do tributo:** a arrecadação que falta é a verba que o hospital deixou de receber.
-2. **Raciocínio por evidências:** cruzar indícios para descartar suspeitos.
-3. **Fiscalização exige fundamentação:** acusar sem provas suficientes anula o auto.
-4. **Responsabilidade:** acusar a pessoa errada prejudica um comerciante honesto.
-5. **Priorização:** a fiscalização tem prazo e custo, e nem todo local ajuda a resolver o caso.
-
-## 2.1 Lore (resumo)
-
-O jogo se passa em **Vila Aurora**, uma cidade fictícia que cresceu em volta do comércio. Há três
-anos, a arrecadação cai sem explicação e o Hospital Municipal perde verba. Na cidade, esse dinheiro
-que some é chamado de **"os fantasmas da Aurora"**.
-
-**O título:** todo tributo percorre uma **rota**, do caixa da loja ao hospital. O dinheiro sonegado
-sai dessa rota e vira um **fantasma**: existiu, mas nunca chega ao destino. O(a) jogador(a) é um(a)
-auditor(a) novato(a), nascido(a) no próprio hospital, em seu **primeiro caso**.
-
-O caso termina com um **gancho**: Ricardo comprava de uma **empresa fantasma** (a Distribuidora
-Horizonte), o que abre caminho para novos casos.
-
-Lore completa, com motivações dos personagens e ideias de casos futuros: [lore.md](lore.md).
-
-## 3. Mecânicas
-
-| Mecânica | Descrição |
+| Campo | Informação |
 |---|---|
-| **Andar pelo mapa** | O jogador conduz o boneco pelas ruas (teclado, direcional na tela ou clique). Andar não gasta dia. |
-| **Visitar local** | Entrar custa **1 dia**. Lá dentro, o jogador **escolhe uma abordagem** entre três (pedir documento, conversar, observar...). Só a abordagem certa revela a pista com o indício; as outras gastam a visita e ensinam por que não servem como prova. |
-| **Moradores** | Três moradores andam pelas ruas. Encostar num deles (ou clicar) faz ele contar uma dica de graça, anotada no caderno. Duas falas são verdade e uma é **boato falso**: nenhuma vale como prova. |
-| **Imprevistos** | A cada partida, um local pago fica **fechado** no dia 1 e outro no dia 2 (greve, reforma, falta de luz...). Ele reabre no dia seguinte. Alguns locais só **aparecem no mapa** depois de outra visita (ex.: a casa do sócio-laranja, descoberta na Junta Comercial). |
-| **Caderno de suspeitos** | O jogador marca manualmente quem descartou. **O jogo não elimina ninguém sozinho**: o raciocínio é do jogador, e é aí que acontece a aprendizagem. |
-| **Acusação (auto de infração)** | O jogador escolhe **1 suspeito** e **2 provas coletadas** que justifiquem a escolha. |
-| **Resultado** | Há quatro desfechos diferentes, e cada um explica o acerto ou o erro. Todos terminam com perguntas para debate com o mediador. |
+| Projeto | **Rota Fantasma**: jogo de investigação fiscal |
+| Integrante | **Pollyanna [sobrenome]** (trabalho individual) |
+| Disciplina | Tecnologia e Desenvolvimento de Jogos Digitais, Sistemas de Informação, 2026.2 |
+| Projeto de extensão | EducaJogo Fiscal, com o NAF da Unichristus e a Receita Federal do Brasil |
+| Jogo publicado | <https://pollymelo.github.io/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais/> |
+| Código-fonte e histórico | <https://github.com/pollymelo/Tecnologia-e-Desenvolvimento-de-Jogos-Digitais> |
 
-### Fluxo de telas (HTML + CSS)
+## 2. Problema educativo
+
+Muitos estudantes não relacionam a sonegação com a vida real. Comprar "sem nota" ou deixar de
+recolher tributos parece um crime sem vítima. Eles também não percebem que:
+- **o tributo já está no preço** do lanche, da roupa e do celular;
+- é esse dinheiro que financia o hospital, a creche, a iluminação e a biblioteca da cidade;
+- a fiscalização depende de **provas**, e não de suspeitas: acusar sem prova também causa dano.
+
+**Por que é relevante:** é o desafio central do EducaJogo Fiscal: ajudar jovens a compreender
+tributos, cidadania fiscal, o uso dos recursos públicos e as consequências para a sociedade. O jogo
+trabalha quatro das linhas temáticas do enunciado:
+- função social dos tributos;
+- sonegação e suas consequências;
+- cidadania fiscal e controle social;
+- consumo consciente e documentos fiscais.
+
+## 3. Público-alvo
+
+- **Estudantes do Ensino Médio, de 15 a 18 anos**, sem conhecimento prévio de tributos.
+- **Linguagem:** situações do dia a dia (lanche, loja, celular, praça) e frases curtas. Termos técnicos
+  (auto de infração, indício, nota fria, IPTU, dívida ativa) aparecem sublinhados e abrem um glossário.
+- **Dificuldade:**
+  - o caso 001 é o mais simples e tem tutorial;
+  - os casos seguintes acrescentam temas (nota fria, IPTU, cadeia da nota fiscal) e são destravados
+    em sequência;
+  - o modo desafio sorteia o culpado para quem quer jogar de novo.
+- **Mediação:** pensado para jogar em duplas, com um mediador do NAF ou professor (seção 19).
+
+## 4. Objetivo de aprendizagem
+
+Ao jogar, o estudante deve compreender, perceber ou refletir que:
+
+1. **Função social do tributo:** a arrecadação que falta é a verba que o hospital, a creche, a praça
+   ou a biblioteca deixam de receber.
+2. **Indício, prova e boato são coisas diferentes:** suspeita e boato não autuam ninguém; documento
+   oficial e testemunho direto, sim.
+3. **Fiscalização exige fundamentação:** provas que não diferenciam o responsável anulam o auto.
+4. **Responsabilidade:** acusar a pessoa errada prejudica um inocente e deixa o sonegador impune.
+5. **Práticas de sonegação:** venda sem nota, nota fria, empresa de fachada, "laranja", imóvel
+   declarado menor e maquininha em nome de outra empresa.
+6. **Cidadania fiscal:** o consumidor pode pedir e conferir a nota fiscal, e qualquer pessoa pode
+   consultar o Portal da Transparência.
+7. **Priorização:** a fiscalização tem prazo e custo, e nem todo lugar ajuda a resolver o caso.
+
+## 5. Conceito do jogo
+
+Em **Vila Aurora**, uma cidade fictícia que cresceu em volta do comércio, a arrecadação cai há anos, e
+o dinheiro que deveria chegar aos serviços públicos "some no caminho". A cidade chama isso de
+**"os fantasmas da Aurora"**.
+- O jogador é um(a) **auditor(a) fiscal novato(a)**.
+- Em cada caso, uma denúncia anônima diz que um entre quatro comerciantes sonega, mas não diz qual.
+- Em **3 dias**, o jogador anda pelo mapa, entra nos locais, escolhe como investigar, ouve os
+  moradores, risca suspeitos no caderno e emite um **auto de infração** com duas provas.
+
+**O título:** todo tributo percorre uma **rota**, do caixa da loja ao serviço público. O dinheiro
+sonegado sai dessa rota e vira um **fantasma**: existiu, mas nunca chega ao destino.
+
+**Diferencial:**
+- **O conceito fiscal é a regra do jogo, não um texto ao lado dela.** Para vencer, o jogador precisa
+  agir como a fiscalização age: buscar o documento certo, desconfiar de boatos, separar o
+  responsável dos outros suspeitos e cumprir o prazo.
+- **Errar ensina:** cada um dos quatro desfechos explica o acerto ou o erro.
+- **O resultado mostra para onde vai o dinheiro recuperado:** remédios do hospital, a obra da creche,
+  a luz da praça, os livros da biblioteca.
+
+**Inspiração de gênero:** jogos de detetive e perseguição por pistas, como a série *Carmen Sandiego*:
+o jogador viaja entre locais coletando pistas até identificar o culpado. Todos os personagens, nomes e
+artes do Rota Fantasma são originais.
+
+Lore completa: [lore.md](lore.md).
+
+## 6. Gênero e plataforma
+
+- **Gênero:** investigação e dedução (detetive), com exploração de mapa e tomada de decisão.
+- **Por que esse gênero:** a fiscalização tributária *é* uma investigação: coletar indícios, cruzar
+  informações e fundamentar uma acusação. O gênero põe o jogador no papel de quem decide e arca com
+  as consequências.
+- **Plataforma:** **navegador (Web)**, em computador, tablet ou celular, sem instalação. Joga-se
+  com teclado, mouse ou toque.
+
+## 7. Tecnologia e justificativa técnica
+
+| Item | Escolha |
+|---|---|
+| Linguagem | **TypeScript** (JavaScript com tipos) |
+| Interface | **HTML + CSS** e **SVG** (toda a arte é desenhada em código) |
+| Ferramenta de build | **Vite** (template vanilla-ts), sem engine e sem framework de interface |
+| Animação e som | `requestAnimationFrame`, **Web Animations API** e **Web Audio API** (efeitos sintetizados, sem arquivos de áudio) |
+| Testes | **Vitest** com happy-dom (124 testes automáticos de regras, telas e mapa) |
+| Versionamento e publicação | **Git/GitHub**; **GitHub Actions** testa e publica no **GitHub Pages** a cada envio |
+
+**Justificativa:**
+- **Público e aplicação:** escolas costumam ter computadores antigos, sem permissão para instalar
+  programas. Um jogo Web abre em qualquer navegador, sem conta e sem licença, e o NAF só precisa
+  passar um link.
+- **Escopo:** o jogo é feito de telas, textos, um mapa 2D e decisões. Isso não exige física nem 3D,
+  então HTML, CSS e SVG bastam, e o jogo fica leve (cerca de 50 KB comprimidos, incluindo os 4 casos).
+- **Continuidade pelo NAF:** os casos ficam em **arquivos JSON**, separados do código. Um caso novo
+  é criado editando texto, e a validação automática impede publicar caso sem solução.
+- **Domínio técnico:** as regras são funções puras e testáveis, separadas da interface (seção 18.1).
+
+**Limitações da escolha:**
+- precisa de internet para abrir o jogo;
+- no celular, o mapa fica pequeno;
+- o progresso fica salvo só no navegador de cada aparelho.
+
+As três estão detalhadas na seção 19.9.
+
+## 8. Core gameplay
+
+O que o jogador faz repetidamente, a cada dia da investigação:
 
 ```
-Arquivo de casos → Briefing do caso → (Teste rápido) → Mapa (andar, entrar, escolher a abordagem, ouvir moradores)
-→ Caderno de suspeitos → Acusação → Resultado (explicação, perguntas para debate, próximo caso)
+andar pelo mapa → escolher um local → entrar (gasta 1 dia) → escolher a abordagem lá dentro
+→ ler a pista → cruzar no caderno quem tem o indício → riscar suspeitos → ... → acusar com 2 provas
 ```
 
-### Campanha: arquivo de casos
+A decisão central é **onde gastar cada dia e como investigar em cada lugar**, para juntar duas
+provas que só batam com uma pessoa.
 
-A tela inicial é o **arquivo de casos** da Auditoria. Só o caso 001 começa aberto; **resolver um caso
-destrava o próximo**. As melhores estrelas de cada caso ficam salvas no navegador (`localStorage`),
-então o progresso continua depois de fechar a página. Resumo dos casos em `docs/lore.md` e soluções em
-`docs/fichas-de-solucao.md`.
+## 9. Mecânicas principais
 
-## 4. O caso 001
+| Mecânica | Ação, regra e consequência |
+|---|---|
+| **Andar pelo mapa** | O jogador conduz o boneco pelas ruas (setas ou W A S D, Shift para correr, direcional na tela ou clique). **Andar não gasta dia** |
+| **Entrar num local** | Parado em frente ao prédio, o jogador aperta Espaço ou toca em "Entrar". **Custa 1 dia** (o Portal da Transparência é grátis) |
+| **Escolher a abordagem** | Lá dentro há 3 opções, como pedir o documento, conversar com calma ou fazer fofoca. **Só a certa revela o indício.** A errada gasta a visita e explica por que não serve como prova |
+| **Moradores** | Três moradores andam pelas ruas. Encostar num deles (ou clicar) traz uma dica de graça, anotada no caderno. Duas falas são verdade e **uma é boato falso**; nenhuma vale como prova |
+| **Imprevistos** | A cada partida, um local fica **fechado** no dia 1 e outro no dia 2. Alguns locais só **aparecem no mapa** depois de outra visita (ex.: a casa do sócio-laranja surge depois da Junta Comercial) |
+| **Caderno de suspeitos** | Tabela suspeitos × indícios. Cada coluna começa oculta ("?") e se revela quando o indício é encontrado. **O jogador risca quem descartou; o jogo não elimina ninguém sozinho** |
+| **Auto de infração** | O jogador escolhe 1 suspeito e 2 provas coletadas. **Acusar não gasta dia** |
 
-**Briefing:** o hospital municipal perdeu verba porque a arrecadação caiu. Uma denúncia anônima
-diz que um comerciante da cidade está sonegando. O jogador tem **3 dias** para investigar.
-
-### Suspeitos
-
-| Suspeito | Vendas no cartão sem nota | Patrimônio incompatível com a renda | Funcionários sem carteira |
-|---|:-:|:-:|:-:|
-| Mercadinho Bom Preço (Aurélio) | — | ✔ | — |
-| Oficina Turbo (Célia) | — | — | ✔ |
-| **Eletrônicos TecMais (Ricardo)** | ✔ | ✔ | ✔ |
-| Restaurante Sabor do Mar (Marta) | ✔ | — | ✔ |
-
-**Culpado:** Ricardo, o único com os três indícios. A tabela foi montada para que a escolha dos locais importe:
-- Cartão + patrimônio identifica Ricardo.
-- Patrimônio + funcionários identifica Ricardo.
-- Cartão + funcionários deixa a dúvida entre Ricardo e Marta.
-
-Quem investiga bem resolve o caso em 2 ou 3 dias. Quem investiga mal desperdiça o prazo.
-
-### Locais
-
-| Local | Pista | Indício revelado |
-|---|---|---|
-| Operadora de cartão | As vendas no cartão do suspeito são muito maiores que as notas fiscais emitidas | Cartão sem nota |
-| Cartório de imóveis e Detran | Compras à vista de imóvel e carro incompatíveis com a renda declarada | Patrimônio incompatível |
-| Conversa com ex-funcionário | Trabalhou anos sem carteira assinada e sem FGTS | Funcionários sem carteira |
-| Consumidores na praça | "Pedi nota e me disseram que sairia mais caro" | Cartão sem nota (versão mais fraca, um testemunho) |
-| Junta Comercial | Todas as empresas estão com o registro em dia | Nenhum. Ensina que estar registrado não prova regularidade |
-| Portal da Transparência | Mostra quanto o hospital deixou de receber | Nenhum. Dá contexto e liga o caso à função social do tributo |
-
-A tabela traz o resumo de cada pista. Os textos finais, ajustados para deixar claro que a pista fala
-do comerciante denunciado, estão em `src/data/caso-001.json`.
-
-Os dois últimos locais não servem como prova, mas trazem conteúdo educativo:
-- A **Junta Comercial** custa 1 dia e ensina a priorizar: estar registrado não prova regularidade.
-- O **Portal da Transparência não gasta dia**, porque é um site público. Assim, o conteúdo mais
-  educativo, o impacto no hospital, não vira um "local a evitar". Visitá-lo também deixa o
-  **resultado final mais detalhado**.
-
-## 5. Regras numéricas
+### 9.1 Regras numéricas
 
 | Regra | Valor |
 |---|---|
-| Prazo do caso | **3 dias** (reduzido de 4 para criar pressão: o caso se resolve com 2) |
-| Custo de visitar um local | **1 dia**; o Portal da Transparência é **grátis** (0 dia) |
 | Casos | **4**, destravados em sequência |
-| Locais por caso | **9** (5 com indício, 4 de contexto; até 10 cabem no mapa) |
-| Abordagens por local | **3**, e só **1** revela a pista |
-| Máximo de locais visitados por caso | **3 pagos + o Portal** (dos 9 disponíveis) |
-| Moradores por caso | **3** (2 falas verdadeiras e 1 boato falso) |
-| Imprevistos por partida | **1 local fechado no dia 1** e **1 no dia 2** (sorteados entre os pagos) |
-| Suspeitos | **4** |
-| Tipos de indício | **3** |
-| Provas exigidas na acusação | **2** |
-| Mínimo de visitas para resolver | **2** (com o par de locais certo) |
-| Valores monetários do resultado | **ilustrativos e fictícios**, sinalizados na tela |
+| Prazo de cada caso | **3 dias** |
+| Custo de entrar num local | **1 dia** (o Portal da Transparência custa 0) |
+| Locais por caso | **9** (até 10 cabem no mapa) |
+| Abordagens por local | **3**; só **1** revela a pista |
+| Suspeitos por caso | **4** (o culpado tem 3 indícios, a "armadilha" tem 2 e dois inocentes têm 1 cada) |
+| Tipos de indício por caso | **3** |
+| Provas exigidas no auto | **2** |
+| Moradores por caso | **3** (2 verdades e 1 boato falso) |
+| Imprevistos por partida | **1 local fechado no dia 1** e **1 no dia 2** |
+| Duplas de provas que resolvem | de **6 a 9** por caso (conferido por teste automático) |
+| Valores em reais | **ilustrativos e fictícios**, avisados na tela |
 
-### Estrelas (desempenho)
+### 9.2 Validação da acusação
 
-Só um caso **resolvido** pontua. Cada critério vale 1 estrela:
+As duas provas são válidas se:
+1. as duas forem indícios que o acusado tem, obtidos com a abordagem certa; **e**
+2. juntas, descartarem todos os outros suspeitos.
 
-| Estrela | Critério | O que reforça |
-|:-:|---|---|
-| ★ | Caso resolvido com provas válidas | Fundamentação |
-| ★ | Sobrou pelo menos 1 dia | Priorização (fiscalização tem prazo) |
-| ★ | Caderno em ordem: todos os inocentes riscados e o culpado não | Raciocínio por eliminação |
+Escolher um local só de contexto como prova, ou um local visitado com a abordagem errada, anula o auto.
 
-### Modos de jogo
+### 9.3 Modos de jogo
 
 | Modo | Como funciona | Para quê |
 |---|---|---|
-| **História** (padrão) | Culpado fixo: Ricardo. Segue a lore e a ficha de solução do mediador | Primeira partida e aplicação em sala |
-| **Desafio** | As combinações de indícios são **sorteadas entre os suspeitos** a cada partida. A estrutura (culpado com 3 indícios, armadilha com 2, duas iscas com 1) se mantém, então sempre há solução | Rejogar sem que a resposta "vaze" entre colegas |
+| **História** (padrão) | Culpado fixo em cada caso; segue a lore e as fichas de solução | Primeira partida e aplicação em sala |
+| **Desafio** | As combinações de indícios são **sorteadas entre os suspeitos**, mantendo a estrutura do caso, então sempre há solução | Jogar de novo sem que a resposta "vaze" entre colegas |
 
-### Textos variados das pistas
+Os textos das pistas também variam: os locais principais têm versões alternativas, sorteadas a cada
+partida, sem mudar o indício revelado.
 
-Cada local tem **3 versões** do texto da pista (campo `variacoes` no JSON), e o jogo sorteia uma a cada
-partida, nos dois modos. Todas as versões revelam o **mesmo indício**, só muda a forma como a
-testemunha conta, e **nenhuma cita nome ou empresa de suspeito**, o que um teste automático confere.
-Assim, quem joga de novo não lê sempre as mesmas falas, e a solução do caso não muda.
+## 10. Objetivos e condições
 
-### Glossário
+**Progressão:** a tela inicial é o **Arquivo de casos**. Só o caso 001 começa aberto, e **resolver um
+caso destrava o próximo**. As melhores estrelas de cada caso ficam salvas no navegador.
 
-Termos destacados nas telas (indício, prova, auto de infração e os indícios do caso) abrem uma
-explicação curta. Um botão **Glossário** no topo lista todos os 12 termos. Os verbetes ficam no JSON do
-caso (`glossario`), então novos casos podem incluir novos termos.
-
-### Validação da acusação
-
-As duas provas escolhidas são **válidas** se:
-1. as duas forem indícios que o culpado tem; **e**
-2. juntas, descartarem todos os outros suspeitos.
-
-### Esclarecimentos de regra (definidos na implementação)
-
-- **Acusar não gasta dia.** Mesmo com 0 dias restantes, o jogador ainda pode emitir o auto.
-- **Prazo encerrado** acontece quando os dias acabam e o jogador encerra sem acusar.
-- Para acusar, é preciso ter visitado pelo menos **2 locais**. As provas são escolhidas entre os locais visitados.
-- O **testemunho da praça** vale como prova de "cartão sem nota", igual à operadora. Escolher os dois juntos não diferencia ninguém, então o auto é anulado.
-- Escolher um local **só de contexto** (Junta Comercial ou Portal) como prova anula o auto.
-- Se o suspeito acusado é o errado, o resultado é **acusação injusta**, mesmo que as provas sejam boas.
-- **As pistas falam sempre do comerciante denunciado**, cujo nome a denúncia não revela. O caderno mostra a
-  tabela suspeitos × indícios, mas **cada coluna começa oculta ("?")** e só é revelada quando o jogador
-  coleta uma pista daquele indício. Se a tabela inteira aparecesse no início, o culpado ficaria óbvio
-  (é o único com três ✔). Assim, a pista diz o que o denunciado tem, o caderno mostra quem mais tem
-  isso, e o jogador risca quem não tem.
-
-### Direção de arte
-
-- **Público:** jovens do Ensino Médio. A estética usa **bonecos de blocos** (cabeça quadrada, corpo
-  de peças), um visual de brinquedo de montar que lembra os avatares de jogos populares entre eles.
-  **Todos os personagens são originais**; o jogo não usa marca, logotipo nem personagem de outro jogo.
-- **Mapa de Vila Aurora visto de cima:** 3 ruas e 4 transversais formando quarteirões, com calçada, faixa e faixa de pedestre. Cada prédio fica num lote com a porta virada para a rua; o hospital fica no quarteirão do meio, a Auditoria (partida) embaixo, e lotes vagos viram pracinha
-  ("verba em falta") e a Auditoria como casa de partida. Os 6 locais são prédios desenhados. O
-  **peão do auditor anda** até o local escolhido antes de a pista aparecer.
-- **Personagens:** auditor(a) (jogador), os 4 suspeitos e uma **testemunha por local**, que conta a
-  pista num balão de fala (Bia da operadora, Seu Jorge do cartório, Tião, Dona Lúcia e Rafa da Junta).
-  No Portal da Transparência, quem lê a informação é o próprio auditor.
-- **Resultado:** cena com um carimbo sobre o acusado: "Autuado", "Anulado", "Inocente" ou "Prazo encerrado".
-- Toda a arte é SVG feito em código (`src/ui/arte.ts`), sem imagens externas. A aparência dos
-  personagens e o ícone de cada local ficam no JSON do caso, então novos casos podem ter novos personagens.
-- As animações respeitam a preferência do sistema por **movimento reduzido**.
-
-### Mapa e controle do peão
-
-O jogador **anda com o boneco** pelas ruas de Vila Aurora:
-
-| Entrada | Como funciona |
-|---|---|
-| **Teclado** | Setas ou **W A S D**. Segurar a tecla anda; soltar para. **Shift** corre (1,75× mais rápido, passos mais curtos e corpo inclinado). Na diagonal, o peão desliza pela borda da rua |
-| **Celular** | **Direcional na tela** (fixo no canto, em telas de toque): segurar a seta anda; o botão **»** do meio liga e desliga a corrida |
-| **Mouse / toque no mapa** | Clicar na rua (ou na grama) faz o peão ir andando até ali, **pelo caminho mais curto pelas ruas** |
-| **Clicar num local** | O peão vai sozinho até a porta e entra (atalho e acessibilidade: cada local é um botão) |
-
-**Entrar num local:** parado na rua em frente ao prédio (ou na calçada), aparece o aviso **"Entrar"** acima da cabeça do boneco, com o custo
-(1 dia ou grátis) e a casa ganha contorno dourado. **Espaço**, **Enter** ou **E** (ou tocar em
-"Entrar") faz o peão entrar. Andar não gasta dia; só **entrar** gasta. Local já visitado ou sem dias
-suficientes mostra o motivo no aviso.
-
-**Para parecer um personagem:**
-- o boneco **vira para onde anda**: de lado indo para os lados (espelhado à esquerda), de costas subindo, de frente descendo;
-- **partida e parada suaves**: a velocidade sobe e desce em cerca de 0,1 s, sem arranque seco;
-- **as setas tiram o controle da caminhada automática**: se o jogador clicou num local e se arrependeu, uma seta cancela a visita no meio do caminho, sem gastar dia;
-- o **morador chamado para e espera**; na conversa, os dois ficam frente a frente e se olham.
-
-**Para ser natural de andar** (`src/ui/mapa.ts`):
-- o peão só anda em ruas e calçadas; nunca atravessa prédio nem grama;
-- ao bater na borda, ele **desliza** ao longo da rua em vez de travar;
-- **ajuda na curva:** segurando "cima" a até 11 unidades de uma transversal ou calçada, o peão é
-  puxado para ela, então não é preciso alinhar no pixel para virar a esquina;
-- a página e o mapa rolam sozinhos para o peão não sair de vista.
-
-O mapa tem **10 lotes** para locais, em 4 colunas e 3 linhas (a validação do JSON recusa caso com mais de 10). O prédio do meio muda com o caso: hospital, creche, praça ou biblioteca.
-
-### Animação da visita (sequência)
-
-Ao entrar num local (pela porta ou clicando nele):
-
-| # | Animação | Duração aproximada |
-|:-:|---|---|
-| 1 | Se o jogador clicou no local de longe, o boneco **caminha pelas ruas** até a porta, pelo caminho mais curto, com ciclo de passos (pernas alternadas, braços balançando, corpo quicando) | até 3,2 s, conforme a distância |
-| 2 | Ele vai até a **porta**, que **abre**; ele **entra** e a casa **acende** (janelas amarelas e brilho) | cerca de 1,1 s |
-| 3 | **O dia passa:** o céu escurece, aparecem lua e estrelas, uma **bolinha de dia se apaga** e amanhece. O Portal da Transparência, que é grátis, não tem noite | cerca de 1,7 s |
-| 4 | O **card da pista vira** (efeito 3D) sobre o tabuleiro, com a testemunha e a fala | cerca de 0,65 s |
-| 5 | Em **Guardar no caderno**, o card **voa até o botão do caderno** e o boneco sai da casa | cerca de 0,55 s |
-
-Durante a sequência, novos cliques são ignorados. A animação usa `requestAnimationFrame` e a Web
-Animations API, sem bibliotecas (`src/ui/animacao.ts`).
-
-**Acessibilidade:** se o sistema pede **movimento reduzido** (comum no Windows com "efeitos de
-animação" desligados), o jogo usa **animações suaves**. O boneco ainda anda, mais rápido e sem pulos
-nem balanço, e os giros e zooms viram fades. Na tela inicial, o botão **"Animações: completas / suaves"**
-deixa a pessoa escolher.
-
-### Som
-
-Efeitos curtos, **sintetizados no navegador** com a Web Audio API (`src/ui/som.ts`). Não há
-arquivos de áudio, então não há nada para baixar nem problema de direito autoral.
-
-| Momento | Som |
-|---|---|
-| Caminhada | Passos a cada ~0,28 s |
-| Porta abrindo | Rangido curto |
-| O dia passa | Acorde grave (noite) e dois piados (amanhecer) |
-| Card da pista | Sininho de duas notas |
-| Guardar no caderno | "Vuuush" |
-| Riscar suspeito | Risco de lápis |
-| Resultado | Carimbo, seguido de fanfarra (resolvido) ou duas notas descendo (demais desfechos) |
-
-O botão **"Som: ligado / desligado"** fica na tela inicial e no HUD. A escolha fica salva no navegador.
-
-### Tutorial (Dona Helena)
-
-Na **primeira partida da sessão**, a chefe da Auditoria (ver a lore) dá **4 dicas**, uma por vez, e
-o elemento da dica pisca com um contorno dourado: o tabuleiro, os dias, o caderno e o botão do auto
-de infração. Dá para pular, e o botão **Dicas** no HUD reabre o tutorial. O tutorial não volta
-sozinho em "Jogar novamente".
-
-### Explicação do resultado
-
-Depois de qualquer acusação, a tela de resultado mostra **por que** ela deu certo ou errado:
-- **cada prova:** que indício aponta e se a pessoa acusada tem esse indício (local sem indício
-  aparece como "não serve de prova");
-- **cada outro suspeito:** qual indício o descarta ou, se nenhum descarta, que ele "também tem"
-  os indícios das provas. É assim que o auto é anulado;
-- **acusação injusta:** quem tinha todos os indícios do caso.
-
-A explicação é calculada pelas regras (`explicarAcusacao` em `rules.ts`), então funciona também no
-modo desafio e em novos casos do NAF.
-
-### Teste rápido (antes e depois): medir o aprendizado
-
-São **3 perguntas** de múltipla escolha (campo `quiz` do JSON): **sem nota fiscal**, **patrimônio
-incompatível = indício, não prova** e **Portal da Transparência**.
-
-1. Antes da primeira partida, o jogador responde sem ver as respostas certas (pode pular).
-2. No resultado, o cartão **"Teste rápido: e agora?"** chama para responder **as mesmas perguntas**.
-3. Depois, a tela mostra o placar **Antes X/3 → Depois Y/3**, a resposta certa e uma explicação de
-   cada pergunta.
-
-O teste aparece **uma vez por sessão**. Assim, o placar mede a primeira partida e serve de dado
-para o roteiro de teste com jogadores e para o relatório.
-
-### Escolhas dentro do local: por que só uma abordagem dá prova
-
-Cada local tem três abordagens. A certa costuma ser **pedir o documento oficial** ou **conversar com
-calma com quem viu**; as erradas são fofoca, palpite, pressão ou "dar uma olhada". O texto de cada
-abordagem errada explica a lição: palpite não é prova, sigilo bancário existe, testemunha assustada não
-fala, observar de longe não mostra nada. A visita gasta o dia mesmo com a abordagem errada, então
-escolher bem importa. Em todos os casos, o indício que separa o culpado da armadilha aparece em pelo
-menos dois locais, e há de 6 a 9 duplas de provas válidas: um erro não trava o caso, mas custa tempo.
-
-### Feedback visual
-
-| Elemento | Feedback |
-|---|---|
-| Dias restantes | Bolinhas no topo de todas as telas. A bolinha gasta "apaga" com animação; o contador fica amarelo com 1 dia e vermelho com 0 |
-| Pistas novas | O card voa até o botão do caderno, que ganha o selo "N nova(s)" pulsando até ser aberto; destaque verde "Nova pista" no card |
-| Local sem indício | Caixa tracejada "Sem indício novo", explicando que a informação serve de contexto |
-| Suspeitos riscados | Nome e empresa tachados em vermelho e linha esmaecida; contador "Riscados: N/4" no topo |
-| Locais visitados | Marcados como "✔ Visitado" no mapa; o peão sai pela porta do último local |
-| Resultado | Verde com o valor recuperado (vitória) ou vermelho com o valor que continua faltando ao hospital (derrota) |
-
-### Desfechos
-
-| Situação | Resultado | O que ensina |
+| Caso | Tema fiscal | Serviço afetado (prédio do meio do mapa) |
 |---|---|---|
-| Suspeito certo e duas provas válidas | **Caso resolvido.** O valor recuperado volta ao orçamento e a tela mostra o que ele financia | Função social do tributo |
-| Suspeito certo, mas provas que não o diferenciam | **Auto anulado** por falta de fundamentação | A fiscalização precisa de provas, não de suspeita |
-| Suspeito errado | **Acusação injusta.** Um comerciante honesto foi prejudicado e o sonegador segue impune | Responsabilidade da fiscalização |
+| 001: A verba do hospital | Venda sem nota e sonegação | Hospital Municipal |
+| 002: A empresa fantasma | Nota fria, empresa de fachada e laranja | Obra da Creche Municipal |
+| 003: O IPTU esquecido | IPTU e a função social da cidade | Iluminação da praça do bairro |
+| 004: A nota que ninguém pede | O consumidor e a nota fiscal | Livros da Biblioteca Pública |
+
+**Vitória e derrota:** cada caso termina em um de quatro desfechos.
+
+| Situação | Desfecho | O que ensina |
+|---|---|---|
+| Suspeito certo e duas provas válidas | **Caso resolvido:** o valor recuperado volta ao serviço público | Função social do tributo |
+| Suspeito certo, mas provas que não o diferenciam | **Auto anulado** por falta de fundamentação | Fiscalização precisa de prova, não de suspeita |
+| Suspeito errado | **Acusação injusta:** um inocente é prejudicado e o sonegador segue impune | Responsabilidade de quem fiscaliza |
 | Dias esgotados sem acusação | **Prazo encerrado** | Fiscalização tem custo e prazo |
 
-Os três desfechos ruins são diferentes e explicam o erro, o que atende ao critério de feedback
-ao jogador e rende perguntas para o mediador.
+**Estrelas** (só no caso resolvido):
 
-## 6. Simplificações conceituais (intencionais)
+| Estrela | Critério |
+|:-:|---|
+| ★ | Resolver com provas válidas |
+| ★ | Sobrar pelo menos 1 dia (priorização) |
+| ★ | Caderno em ordem: todos os inocentes riscados e o culpado não (raciocínio por eliminação) |
 
-- **Esfera do tributo:** na vida real, a venda de mercadoria sem nota envolve **ICMS (estadual)**,
-  e a renda incompatível envolve o **Imposto de Renda (federal)**. Para o Ensino Médio, o jogo
-  simplifica para "auditor fiscal" e "tributos". A simplificação é intencional.
-- **Funcionários sem carteira:** é uma irregularidade **trabalhista e previdenciária**
-  (contribuições e FGTS não recolhidos), não sonegação de imposto em sentido estrito. No jogo, ela
-  aparece como **indício de informalidade**. Uma alternativa estritamente tributária seria
-  "notas fiscais com valor abaixo do real".
-- **Valores monetários:** todos são ilustrativos e fictícios.
+## 11. Feedback ao jogador
 
-## 7. Dados e continuidade
+| Momento | Como o jogo comunica |
+|---|---|
+| Dias | Bolinhas no topo e "Dia X de 3". Ao entrar num local, o céu escurece, uma bolinha se apaga e amanhece |
+| Perto de um local | O prédio ganha contorno dourado e aparece "Entrar · Espaço" com o custo; se estiver fechado ou já visitado, o motivo |
+| Abordagem escolhida | **"Nova pista"** em verde, com o indício, ou **"Sem prova"**, explicando por que a abordagem não serve |
+| Pistas novas | O card voa até o botão do caderno, que mostra "N nova(s)" |
+| Caderno | As colunas "?" se revelam; suspeitos riscados ficam tachados; "Riscados: N/4" |
+| Morador | Balão de fala; o "!" sobre ele vira "✓"; a fala vai para o caderno como **boato** |
+| Imprevisto | Faixa "Dia X: imprevisto: [local] [motivo]" e etiqueta "Fechado hoje" no prédio |
+| Resultado | Carimbo ("Autuado", "Anulado", "Inocente", "Prazo encerrado") e valor recuperado ou o que continua faltando |
+| **Por que deu certo ou errado** | Para cada prova, o indício que aponta e se o acusado o tem; para cada outro suspeito, o que o descarta ou "também tem". Na acusação injusta, quem era o culpado |
+| Boatos | No resultado, quais falas dos moradores eram verdade |
+| Teste rápido | Placar **antes X/3 → depois Y/3**, com a resposta certa e uma explicação para cada pergunta |
+| Som | Passos, porta, noite, pista, carimbo e fanfarra ou duas notas descendo (pode ser desligado) |
 
-Todo o caso (briefing, suspeitos, locais, indícios e textos de resultado) fica em **um único
-arquivo JSON**. O núcleo do jogo fica separado:
-- `state.ts`: estado da partida (dias restantes, locais visitados, provas coletadas, descartes do caderno);
-- `rules.ts`: regras (custo de visita, validação da acusação, desfecho).
+## 12. Fluxo de telas
 
-**Potencial de continuidade (para a Ficha de Aplicação):** o NAF pode criar novos casos editando
-apenas o JSON, sem mexer no código.
+```
+Arquivo de casos ──► Briefing do caso ──► Teste rápido (antes, pode pular)
+                                                   │
+                                                   ▼
+                    ┌────────────────────── Mapa de Vila Aurora ◄──────────────┐
+                    │      (andar, moradores, imprevistos; tutorial na 1ª vez)  │
+                    │                          │ entrar num local                │
+                    │                          ▼                                 │
+                    │            Card do local: escolher a abordagem ─► pista ───┘
+                    │
+                    ├──► Caderno de suspeitos (ida e volta)
+                    ▼
+            Auto de infração ──► Resultado ──► Teste rápido (depois) ──► comparação
+                                     │
+                                     └──► Próximo caso · Jogar de novo · Arquivo de casos
+```
 
-## 8. Stack
+Estados principais da partida (`src/game/state.ts`):
+- dias restantes;
+- locais visitados e a abordagem escolhida em cada um;
+- locais fechados por imprevisto;
+- suspeitos riscados;
+- resultado.
 
-- **Vite** com TypeScript (template vanilla-ts)
-- HTML + CSS
-- Git/GitHub para versionamento
-- **GitHub Pages** para publicar: cada push na `main` testa, gera o build e publica (GitHub Actions)
+## 13. Interface
 
-## 9. Ficha de Aplicação Extensionista
+Telas do protótipo implementado (capturas do jogo publicado):
+
+| Tela | Captura |
+|---|---|
+| Arquivo de casos (progressão) | ![Arquivo de casos](imagens/01-arquivo.png) |
+| Briefing do caso | ![Briefing](imagens/02-briefing.png) |
+| Mapa de Vila Aurora, com moradores e imprevisto do dia | ![Mapa](imagens/03-mapa.png) |
+| Dentro do local: escolher a abordagem | ![Escolhas](imagens/04-escolhas.png) |
+| Pista revelada | ![Pista](imagens/05-pista.png) |
+| Caderno de suspeitos | ![Caderno](imagens/06-caderno.png) |
+| Auto de infração | ![Acusação](imagens/07-acusacao.png) |
+| Resultado com a explicação | ![Resultado](imagens/08-resultado.png) |
+
+## 14. Identidade visual e sonora
+
+**Visual:**
+- **Bonecos de blocos** (cabeça quadrada, corpo de peças): um visual de brinquedo de montar, próximo
+  dos avatares de jogos populares entre jovens. **Todos os personagens são originais**; o jogo não usa
+  marca, logotipo nem personagem de outro jogo.
+- O boneco tem três vistas: de frente, de costas e de lado. Ele vira para onde anda e caminha com
+  pernas e braços balançando.
+- **Mapa visto de cima:** ruas com calçada, faixa e faixa de pedestre, e prédios desenhados para cada
+  local (banco, cartório, escola, creche, prefeitura...). O prédio do meio muda com o caso.
+- **Cores:** fundo azul-escuro, destaque amarelo-dourado, verde para acerto e vermelho para erro.
+- **Toda a arte é SVG feito em código** (`src/ui/arte.ts`), sem imagens externas nem direitos de
+  terceiros.
+
+**Sonora:** efeitos curtos sintetizados no navegador (Web Audio API), sem músicas nem arquivos de
+terceiros. O som pode ser desligado.
+
+**Animação e acessibilidade:**
+- Se o sistema pede movimento reduzido, o jogo usa animações suaves, e há um botão para escolher.
+- Dá para jogar só com o teclado.
+- Botões e personagens têm descrição para leitor de tela.
+
+## 15. Relação gameplay × Educação Fiscal
+
+| O que o jogador faz | O que se pretende que compreenda |
+|---|---|
+| Cada visita gasta 1 de 3 dias | Fiscalização tem custo e prazo: é preciso priorizar |
+| Escolher a abordagem certa dentro do local (documento × fofoca × pressão) | Prova vem de documento oficial ou testemunho direto, obtidos pelo caminho legal (ex.: o banco não entrega extrato sem autorização, por causa do sigilo bancário) |
+| Ouvir moradores, sabendo que um mente | Boato não é prova, mesmo quando parece certo |
+| Riscar suspeitos no caderno | Raciocínio por eliminação: cruzar informações |
+| Acusar com 2 provas que diferenciem o culpado | Acusação precisa de fundamentação; "chute certo" com prova ruim anula o auto |
+| Arcar com a acusação injusta | Errar também causa dano: responsabilidade da fiscalização |
+| Ver para onde vai o dinheiro recuperado | Função social do tributo |
+| Consultar o Portal da Transparência (grátis) | Controle social: os gastos públicos podem ser consultados por qualquer pessoa |
+| Os temas dos casos (venda sem nota, nota fria, IPTU, nota do consumidor) | Práticas de sonegação e o papel do consumidor na cadeia da nota fiscal |
+| Teste rápido antes e depois | Perceber o próprio aprendizado |
+
+### 15.1 Simplificações conceituais (intencionais)
+
+- **Esfera do tributo:**
+  - na vida real, a venda de mercadoria sem nota envolve **ICMS (estadual)**;
+  - a renda incompatível envolve o **Imposto de Renda (federal)**;
+  - o **IPTU é municipal**.
+
+  O jogo reúne tudo sob um único "auditor fiscal" para não sobrecarregar o público. O mediador deve
+  comentar isso no debate.
+- **Funcionários sem carteira:** é uma irregularidade **trabalhista e previdenciária**, não sonegação
+  de imposto em sentido estrito. No caso 001, ela aparece como **indício de informalidade**.
+- **Acesso a dados bancários:** no jogo, o banco só fornece dados "com o pedido oficial, com
+  autorização". Na vida real, o acesso da fiscalização segue regras legais específicas.
+- **Valores:** todos são fictícios.
+
+## 16. Referências pesquisadas
+
+> **[Confirmar]:** manter só o que foi de fato lido e acrescentar o que mais tiver sido consultado.
+
+- RECEITA FEDERAL DO BRASIL. **Cidadania Fiscal no currículo escolar**. Disponível em:
+  <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/revistas/cidadania-fiscal/cidadania-fiscal-no-curriculo-escolar.pdf/@@download/file>.
+- RECEITA FEDERAL DO BRASIL. **Relatório 2024: Cidadania Fiscal na extensão universitária e no
+  currículo escolar**. Cita as dinâmicas "A Ilha", "O Bairro" e o jogo "Pago ou Não?". Disponível em:
+  <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/relatorios/cidadania-fiscal/extensao-universitaria-e-curriculo-escolar/relatorio-2024>.
+- RECEITA FEDERAL DO BRASIL. **Relatório de Cidadania Fiscal 2025**. Disponível em:
+  <https://www.gov.br/receitafederal/pt-br/centrais-de-conteudo/publicacoes/relatorios/cidadania-fiscal/relatorios-cidadania-fiscal/2025-relatorio-cidadania-fiscal>.
+- Materiais indicados no enunciado da NP2 (seção 4): Materiais Pedagógicos de Cidadania Fiscal,
+  Metodologias Ativas, Planos de Aula, Fundamentação e Diretrizes, Programa de Extensão Universitária
+  e "O que é o NAF". **[Confirmar quais foram consultados.]**
+- Referência de gênero: a série de jogos *Where in the World Is Carmen Sandiego?*, jogos de
+  investigação com pistas.
+
+## 17. Escopo da NP2
+
+**Implementado e funcionando no protótipo:**
+- 4 casos completos e jogáveis do início ao resultado, destravados em sequência;
+- mapa com movimentação do boneco, escolhas dentro dos locais, moradores e imprevistos;
+- caderno, auto de infração, 4 desfechos com explicação, estrelas, modo desafio e glossário;
+- tutorial, teste rápido antes e depois, som e animações;
+- publicação Web automática.
+
+**Fora do escopo (decisões conscientes):**
+- **Ranking ou login:** exigiria servidor e dados de estudantes menores de idade.
+- **Câmera que segue o boneco no celular:** o mapa inteiro cabe na tela.
+- **"Horas do dia" ao andar:** adicionaria uma regra sem ganho pedagógico claro.
+- **Painel para o professor:** o placar do teste é anotado à mão.
+- **Funcionar sem internet:** depende de um servidor local (seção 19.5).
+
+**Pendente antes da entrega:**
+- aplicar o jogo com estudantes usando o roteiro de teste e registrar os ajustes;
+- gravar o vídeo de contingência.
+
+## 18. Divisão de atividades
+
+Trabalho **individual**. Todas as decisões, testes e entregas são de responsabilidade da autora.
+
+| Atividade | Responsável | Como |
+|---|---|---|
+| Ideia, tema (educação fiscal), público e gênero (investigação inspirada em Carmen Sandiego) | Pollyanna | Concepção própria, com ideação apoiada por IA (seção 18.2) |
+| Decisões de design | Pollyanna | Escolheu entre as alternativas propostas e pediu mudanças (lista na seção 18.2) |
+| Programação, arte em SVG, testes e publicação | Pollyanna, com IA como assistente de código | Código gerado com IA a partir dos pedidos da autora e conferido por testes automáticos e jogando no navegador |
+| Conteúdo dos casos (textos, perguntas, glossário) | Pollyanna, com IA na redação | **[Descrever a revisão feita pela autora]** |
+| Teste com jogadores e ajustes | Pollyanna | **[Pendente]** |
+| GDD, ficha de aplicação e apresentação | Pollyanna, com IA na redação | Revisão e adaptação pela autora |
+
+### 18.1 Organização do código (para análise e continuidade)
+
+| Pasta ou arquivo | Responsabilidade |
+|---|---|
+| `src/game/types.ts` | Tipos do caso: suspeitos, locais, abordagens, moradores |
+| `src/game/state.ts` | Estado imutável da partida |
+| `src/game/rules.ts` | Regras puras: visitar, escolher a abordagem, validar a acusação, desfechos, estrelas, imprevistos, modo desafio, validação do JSON |
+| `src/game/caso.ts` | Carrega e valida os 4 casos e junta o glossário comum |
+| `src/data/*.json` | Conteúdo dos casos (editável pelo NAF) |
+| `src/ui/app.ts` | Telas e eventos (arquivo de casos, mapa, card, caderno, acusação, resultado) |
+| `src/ui/mapa.ts` | Geometria do mapa: ruas, colisão, ajuda na curva, caminho mais curto, rotas dos moradores |
+| `src/ui/animacao.ts`, `src/ui/som.ts`, `src/ui/arte.ts` | Animações, efeitos sonoros e desenhos SVG |
+| `src/**/*.test.ts` | 124 testes automáticos |
+| `scripts/gerar-fichas.mjs` | Gera as fichas de solução a partir dos JSON |
+| `.github/workflows/deploy.yml` | Testa, gera o build e publica a cada envio |
+
+**Evidências de evolução:** o histórico de commits no GitHub registra cada etapa, desde o projeto Vite
+inicial e o GDD até a campanha com 4 casos.
+
+### 18.2 Uso de IA generativa
+
+| Item | Registro |
+|---|---|
+| **Ferramentas** | **Claude (Anthropic)**: no chat do claude.ai, na ideação inicial; e no **Claude Code** (extensão do VS Code, modelo Claude Opus 5.5), no desenvolvimento |
+| **Finalidade** | Ideação do design; programação em TypeScript, HTML, CSS e SVG; testes automáticos; redação dos textos dos casos, do glossário e das perguntas; documentação (GDD, lore, fichas, roteiro); configuração da publicação |
+| **O que foi decisão da autora** | Tema (educação fiscal) e gênero (investigação estilo Carmen Sandiego); visual de bonecos de blocos para aproximar o público jovem; pedido de lore; boneco controlado pelo jogador ("só com clique não parece jogo digital"); entre as alternativas propostas, a escolha de "clique e ele anda", card sobre o tabuleiro, dia e noite e porta que abre; pedido de mais casos e mais opções de visita, escolhendo 3 casos novos, desbloqueio em sequência, escolhas dentro da casa, moradores, imprevistos e mais locais; aceite de sugestões como 3 dias, Portal grátis e teste rápido |
+| **Como foi validado** | (1) **124 testes automáticos**, que conferem as regras, as telas, o mapa e o conteúdo (todo caso tem solução, nenhuma pista cita o nome do culpado, os boatos falsos continuam falsos no modo desafio); (2) **validação automática dos casos** ao carregar o JSON; (3) **jogo testado no navegador** (Edge) com capturas de tela a cada etapa, o que revelou e corrigiu falhas (ex.: animações desligadas pelo Windows, o morador fugindo antes da conversa); (4) **revisão da autora:** **[descrever: o que jogou, o que leu, o que pediu para mudar]** |
+| **Limites e responsabilidade** | O conteúdo fiscal gerado com IA foi simplificado de propósito (seção 15.1) e deve ser revisado com o NAF. A autora é responsável pela entrega e deve saber explicar as regras (`rules.ts`), os casos em JSON e o movimento do boneco (`mapa.ts`) |
+
+**Assets e bibliotecas de terceiros:**
+- nenhuma imagem, som ou fonte de terceiros (toda a arte e todo o som são gerados em código);
+- bibliotecas abertas usadas só no desenvolvimento: Vite, TypeScript, Vitest e happy-dom.
+
+## 19. Ficha de Aplicação Extensionista
 
 > Como o Rota Fantasma pode ser usado numa ação educativa mediada pelo **NAF da Unichristus**, nas
 > iniciativas de Cidadania Fiscal da Receita Federal. Os itens seguem a seção 6.1 do enunciado da NP2.
@@ -362,14 +417,14 @@ apenas o JSON, sem mexer no código.
 | Mediação | Extensionista do NAF da Unichristus ou professor(a) da turma |
 | Escola ou turma da primeira aplicação | **[preencher]** |
 
-### 9.1 Público esperado e faixa etária
+### 19.1 Público esperado e faixa etária
 
 - **Estudantes do Ensino Médio, de 15 a 18 anos** (1ª a 3ª série), sem conhecimento prévio de tributos.
 - Linguagem do dia a dia (lanche, loja, celular, praça). Termos técnicos (auto de infração, indício,
   nota fria, IPTU, dívida ativa) aparecem sublinhados e abrem um **glossário**.
 - Jogo em **duplas**: um controla o boneco e o outro cuida do caderno, e os dois decidem juntos a acusação.
 
-### 9.2 Objetivo educativo da atividade
+### 19.2 Objetivo educativo da atividade
 
 Levar o estudante a perceber que **o tributo já está no preço do que ele compra** e que a sonegação
 tira dinheiro de serviços que ele usa (hospital, creche, iluminação, biblioteca). Ao final, ele deve
@@ -385,7 +440,7 @@ conseguir:
 O jogo cobre quatro linhas temáticas do enunciado: função social dos tributos, sonegação e suas
 consequências, cidadania fiscal e controle social, e consumo consciente e documentos fiscais.
 
-### 9.3 Duração aproximada
+### 19.3 Duração aproximada
 
 | Formato | Duração | Conteúdo |
 |---|---|---|
@@ -400,11 +455,11 @@ consequências, cidadania fiscal e controle social, e consumo consciente e docum
 | 0–5 min | Abertura com a pergunta disparadora: "No preço de um lanche, quanto é imposto? Para onde ele vai?" |
 | 5–8 min | As duplas abrem o link e respondem o **teste rápido (antes)**, com 3 perguntas |
 | 8–33 min | Jogam o caso 001. O mediador circula e observa, sem dar respostas |
-| 33–43 min | **Debate** com as perguntas da tela de resultado (item 9.8) |
+| 33–43 min | **Debate** com as perguntas da tela de resultado (item 19.8) |
 | 43–48 min | **Teste rápido (depois)**. O mediador anota o placar antes → depois de cada dupla |
 | 48–50 min | Fechamento: "O que você vai fazer diferente na próxima compra?" |
 
-### 9.4 Equipamentos necessários
+### 19.4 Equipamentos necessários
 
 - **1 aparelho por dupla:** computador, notebook, tablet ou celular. No computador, joga-se com
   teclado (setas ou W A S D) ou mouse; no celular, com toque e um direcional na tela. Computador ou
@@ -413,7 +468,7 @@ consequências, cidadania fiscal e controle social, e consumo consciente e docum
 - **Projetor** (recomendado) para a abertura e o debate.
 - **Som:** opcional. O jogo tem botão para desligar; em sala, o ideal é jogar sem som ou com fones.
 
-### 9.5 Necessidade de conexão com a Internet
+### 19.5 Necessidade de conexão com a Internet
 
 - **Sim, para abrir o jogo.** Ele é um site e carrega pelo link.
 - Depois de carregado, o jogo roda inteiro no navegador. Se a internet cair durante a partida, dá para
@@ -422,7 +477,7 @@ consequências, cidadania fiscal e controle social, e consumo consciente e docum
   (`npm run build` e um servidor local). Isso exige alguém da equipe e não é uma opção para o mediador
   fazer sozinho.
 
-### 9.6 Contas, licenças, instalações ou dependências
+### 19.6 Contas, licenças, instalações ou dependências
 
 | Para quem | O que precisa |
 |---|---|
@@ -433,7 +488,7 @@ consequências, cidadania fiscal e controle social, e consumo consciente e docum
 estrelas) fica só no navegador do aparelho. O placar do teste rápido aparece na tela, e o mediador
 anota à mão. Isso facilita a aplicação com menores de idade.
 
-### 9.7 Instruções básicas para o mediador
+### 19.7 Instruções básicas para o mediador
 
 **Antes da aula**
 1. Abrir o link no aparelho da escola e testar (conexão, tela, som).
@@ -459,7 +514,7 @@ anota à mão. Isso facilita a aplicação com menores de idade.
 - Usar uma **aba anônima** ou limpar os dados do site. Assim o teste rápido e as dicas aparecem de
   novo, e o progresso de uma dupla não abre casos para a próxima.
 
-### 9.8 Questões para discussão depois do uso
+### 19.8 Questões para discussão depois do uso
 
 **Gerais (servem para qualquer caso):**
 1. Quais serviços públicos da sua cidade são pagos com tributos? Qual deles você usou esta semana?
@@ -488,15 +543,15 @@ anota à mão. Isso facilita a aplicação com menores de idade.
 **Dica de condução:** comparar uma dupla que resolveu o caso com uma que teve o auto anulado, com a
 mesma pergunta "que provas vocês usaram?", costuma render o melhor debate.
 
-### 9.9 Limitações conhecidas e cuidados para aplicação
+### 19.9 Limitações conhecidas e cuidados para aplicação
 
 | Limitação ou risco | Cuidado |
 |---|---|
-| **Simplificação conceitual:** o jogo reúne tributos de esferas diferentes sob um "auditor fiscal". Na vida real, venda sem nota envolve ICMS (estadual), renda incompatível envolve Imposto de Renda (federal) e IPTU é municipal; "funcionário sem carteira" é irregularidade trabalhista | Comentar no debate (seção 6 deste GDD) |
-| Precisa de internet para abrir | Testar o link antes; ter a versão local como reserva (item 9.5) |
+| **Simplificação conceitual:** o jogo reúne tributos de esferas diferentes sob um "auditor fiscal". Na vida real, venda sem nota envolve ICMS (estadual), renda incompatível envolve Imposto de Renda (federal) e IPTU é municipal; "funcionário sem carteira" é irregularidade trabalhista | Comentar no debate (seção 15.1 deste GDD) |
+| Precisa de internet para abrir | Testar o link antes; ter a versão local como reserva (item 19.5) |
 | **Testado só no Edge** (computador e celular simulado) | Testar o navegador da escola antes da aula |
 | No celular, o mapa fica pequeno | Preferir computador ou tablet; no celular, usar a tela deitada |
-| O progresso fica salvo no aparelho | Usar aba anônima entre duplas (item 9.7) |
+| O progresso fica salvo no aparelho | Usar aba anônima entre duplas (item 19.7) |
 | O placar do teste rápido não é registrado automaticamente | O mediador anota à mão (tabela abaixo) |
 | Duplas podem copiar a solução umas das outras | Usar o modo desafio, em que o culpado muda a cada partida |
 | Estudantes podem associar comerciantes reais à sonegação | Todos os nomes, empresas e valores são fictícios; reforçar isso na abertura |
@@ -508,7 +563,7 @@ mesma pergunta "que provas vocês usaram?", costuma render o melhor debate.
 |---|---|---|---|---|---|---|
 | | | | | | | |
 
-### 9.10 Potencial de uso e adaptação pelo NAF
+### 19.10 Potencial de uso e adaptação pelo NAF
 
 O NAF pode **criar casos novos sem programar**, editando um arquivo JSON:
 
@@ -528,3 +583,46 @@ O NAF pode **criar casos novos sem programar**, editando um arquivo JSON:
 - o ISS de um prestador de serviço;
 - contrabando e pirataria;
 - um caso baseado numa notícia da cidade da escola, com nomes e valores fictícios.
+
+## Apêndice A: Caso 001 em detalhe
+
+**Briefing:** o Hospital Municipal perdeu verba. Uma denúncia anônima diz que um entre quatro
+comerciantes sonega, mas não diz qual. Prazo: 3 dias.
+
+| Suspeito | Vendas no cartão sem nota | Patrimônio incompatível | Funcionários sem carteira |
+|---|:-:|:-:|:-:|
+| Aurélio (Mercadinho Bom Preço) | | ✔ | |
+| Célia (Oficina Turbo) | | | ✔ |
+| **Ricardo (Eletrônicos TecMais): culpado** | ✔ | ✔ | ✔ |
+| Marta (Restaurante Sabor do Mar): armadilha | ✔ | | ✔ |
+
+| Local | Indício | Abordagem que revela |
+|---|---|---|
+| Operadora de cartão | Vendas no cartão sem nota | Pedir o relatório de vendas no cartão |
+| Cartório de imóveis e Detran | Patrimônio incompatível | Pedir as certidões de imóveis e veículos |
+| Conversa com ex-funcionário | Funcionários sem carteira | Conversar com calma, sem pressa |
+| Concessionária Aurora Motors | Patrimônio incompatível (testemunho) | Conversar com a vendedora |
+| Consumidores na praça | Vendas no cartão sem nota (testemunho) | Ouvir os consumidores |
+| Banco Aurora | Contexto: sigilo bancário | Pedir o extrato da empresa denunciada |
+| Junta Comercial | Contexto: estar registrado não prova regularidade | Consultar o cadastro das empresas |
+| Portal da Transparência (grátis) | Contexto: quanto o hospital deixou de receber | Ver a receita e a verba do hospital |
+| Escritório Contábil Soma | Contexto: a sonegação começa no balcão | Perguntar como funciona a declaração |
+
+O patrimônio incompatível é o que separa Ricardo de Marta, então toda dupla de provas válida passa
+pelo Cartório ou pela Concessionária. Soluções dos 4 casos: [fichas-de-solucao.md](fichas-de-solucao.md).
+
+## Apêndice B: Detalhes de implementação do movimento e das animações
+
+- **Andar:**
+  - o boneco só anda em ruas e calçadas;
+  - ao bater na borda, desliza ao longo dela;
+  - é puxado para a transversal quando está perto da esquina (ajuda na curva);
+  - acelera e freia em cerca de 0,1 s;
+  - corre com Shift (1,75×).
+- **Caminhada automática:** clicar num local ou na rua faz o boneco seguir o caminho mais curto pelas
+  ruas (algoritmo de Dijkstra sobre o grafo das ruas). Uma seta cancela a caminhada.
+- **Visita:** caminhada → a porta abre e a casa acende → noite (uma bolinha de dia se apaga) →
+  amanhecer → o card da pista vira em 3D → ao guardar, o card voa até o caderno.
+- **Moradores:**
+  - dão voltas em quarteirões diferentes;
+  - param quando são chamados e se viram para o boneco durante a conversa.
