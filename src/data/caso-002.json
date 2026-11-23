@@ -4,15 +4,15 @@
   "tema": "Nota fria e empresa de fachada",
   "marco": { "nome": "Creche Municipal", "icone": "creche", "tag": "Obra parada" },
   "abertura": "Depois do caso do hospital, um nome não sai da sua cabeça: Distribuidora Horizonte. Ela vende para metade da cidade, mas o endereço dela é um terreno baldio. Notas fiscais de uma empresa de fachada, sem mercadoria de verdade, são chamadas de notas frias: servem para fingir despesas e pagar menos tributo.",
-  "briefing": "A obra da Creche Municipal parou por falta de verba. As notas frias da Distribuidora Horizonte aparecem nas compras de quatro comerciantes. Um deles é o verdadeiro dono da empresa de fachada, escondido atrás de um sócio-laranja. Você tem 3 dias para descobrir quem.",
+  "briefing": "A obra da Creche Municipal parou por falta de verba. A Distribuidora Horizonte vende para muita gente na cidade, mas a denúncia aponta quatro comerciantes. Um deles é o verdadeiro dono da empresa de fachada, escondido atrás de um sócio-laranja. Você tem 3 dias para descobrir quem.",
   "diasIniciais": 3,
   "custoVisitaDias": 1,
   "provasExigidas": 2,
   "culpadoId": "otavio",
   "indicios": [
     { "id": "notas_frias", "nome": "Compras da Horizonte sem mercadoria (notas frias)", "termo": "nota_fria" },
-    { "id": "socio_laranja", "nome": "Parente registrado como sócio da Horizonte", "termo": "laranja" },
-    { "id": "dinheiro_volta", "nome": "Dinheiro pago à Horizonte que volta para a conta", "termo": "empresa_fachada" }
+    { "id": "socio_laranja", "nome": "Parente que aparece como sócio de empresa de fachada", "termo": "laranja" },
+    { "id": "dinheiro_volta", "nome": "Dinheiro pago a fornecedor que volta para a própria conta", "termo": "empresa_fachada" }
   ],
   "suspeitos": [
     {
@@ -52,9 +52,9 @@
     {
       "id": "junta_comercial",
       "nome": "Junta Comercial",
-      "pista": "O contrato social da Horizonte tem um único sócio: um parente do dono ou da dona da empresa denunciada, aposentado, que ganha um salário mínimo. Ninguém abre uma distribuidora desse tamanho assim.",
+      "pista": "No contrato social da Horizonte, o sócio é um parente de quem comanda a empresa denunciada: aposentado, ganha um salário mínimo. Ninguém abre uma distribuidora desse tamanho assim.",
       "variacoes": [
-        "No contrato da Horizonte, o sócio é um parente aposentado do dono ou da dona da empresa denunciada. Ele mora em outra cidade e nunca assinou mais nada na vida."
+        "No contrato da Horizonte, o sócio é um parente aposentado de quem comanda a empresa denunciada. Ele mora no bairro ao lado e nunca assinou mais nada na vida."
       ],
       "indicio": "socio_laranja",
       "forca": "forte",
@@ -100,7 +100,7 @@
     {
       "id": "banco",
       "nome": "Banco Aurora",
-      "pista": "Com a autorização em mãos, o banco mostra: toda vez que a empresa denunciada paga a Horizonte, quase todo o dinheiro volta, dias depois, para a conta do dono ou da dona. O dinheiro dá uma volta e retorna.",
+      "pista": "Com a autorização em mãos, o banco mostra: toda vez que a empresa denunciada paga a Horizonte, quase todo o dinheiro volta, dias depois, para a conta pessoal de quem comanda a empresa. O dinheiro dá uma volta e retorna.",
       "indicio": "dinheiro_volta",
       "forca": "forte",
       "icone": "banco",
@@ -127,7 +127,7 @@
     {
       "id": "casa_socio",
       "nome": "Casa do sócio da Horizonte",
-      "pista": "Seu Valdir se assusta: \"Meu parente pediu meu documento para abrir uma firma. Disse que era só uma assinatura.\" Ele é o laranja: empresta o nome, e o dono de verdade, o dono ou a dona da empresa denunciada, fica escondido.",
+      "pista": "Seu Valdir se assusta: \"Meu parente pediu meu documento para abrir uma firma. Disse que era só uma assinatura.\" Ele é o laranja: empresta o nome, e quem manda de verdade, na empresa denunciada, fica escondido.",
       "indicio": "socio_laranja",
       "forca": "fraca",
       "icone": "casa",
@@ -169,7 +169,7 @@
     {
       "id": "associacao",
       "nome": "Associação Comercial",
-      "pista": "Marli conta que os quatro comerciantes compravam da Horizonte porque ela 'dava nota de tudo'. \"Quem compra nota sem mercadoria também está errado\", lembra. Mas só um deles é o dono da Horizonte.",
+      "pista": "Marli conta que muitos comerciantes compravam da Horizonte porque ela 'dava nota de tudo'. \"Quem compra nota sem mercadoria também está errado\", lembra. Mas comprar da Horizonte não faz de ninguém o dono dela.",
       "indicio": null,
       "icone": "contabilidade",
       "testemunha": { "nome": "Marli, presidente da associação", "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#7b4bb7", "calca": "#2b2b2b", "acessorios": ["cracha"] } },

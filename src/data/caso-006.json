@@ -1,0 +1,285 @@
+{
+  "id": "caso-006",
+  "titulo": "Serviço sem nota",
+  "tema": "ISS e a nota fiscal de serviço",
+  "marco": { "nome": "Ginásio Municipal", "icone": "ginasio", "tag": "Telhado furado" },
+  "abertura": "Quem presta serviço também paga imposto. Aula, tatuagem, banho no cachorro, limpeza de pele: tudo isso paga o ISS, o imposto municipal sobre serviços. A cada serviço, o prestador emite uma nota fiscal de serviço eletrônica, a NFS-e, e a prefeitura calcula o ISS a partir dela. No Ginásio Municipal, os campeonatos da escola foram cancelados: quando chove, a quadra alaga.",
+  "briefing": "O telhado do Ginásio Municipal espera conserto há dois anos. Uma denúncia diz que um dos cinco prestadores de serviço do centro atende muita gente, mas quase não emite nota, e assim paga muito menos ISS do que deveria. Desta vez são cinco suspeitos. Você tem 3 dias para descobrir quem.",
+  "diasIniciais": 3,
+  "custoVisitaDias": 1,
+  "provasExigidas": 2,
+  "culpadoId": "rodrigo",
+  "indicios": [
+    { "id": "pix_pessoal", "nome": "Recebe dos clientes na conta pessoal, não na da empresa", "termo": "conta_pessoal" },
+    { "id": "poucas_notas", "nome": "Emite poucas notas de serviço (NFS-e)", "termo": "nfse" },
+    { "id": "movimento", "nome": "Atende muitos clientes todos os dias", "termo": "iss" }
+  ],
+  "suspeitos": [
+    {
+      "id": "rodrigo",
+      "nome": "Rodrigo",
+      "empresa": "Academia Força Total",
+      "perfil": "Ex-jogador de vôlei. Conhece cada aluno pelo nome e adora uma música alta.",
+      "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "careca", "camisa": "#e5675d", "calca": "#2b2b2b", "acessorios": [] },
+      "indicios": ["pix_pessoal", "poucas_notas", "movimento"]
+    },
+    {
+      "id": "livia",
+      "nome": "Lívia",
+      "empresa": "Clínica de Estética Bella",
+      "perfil": "Faz limpeza de pele e massagem. A recepção da clínica é cheia de plantas.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#e07a5f", "estiloCabelo": "longo", "camisa": "#f2f2f2", "calca": "#6b4f6b", "acessorios": [] },
+      "indicios": ["pix_pessoal", "movimento"]
+    },
+    {
+      "id": "tiago",
+      "nome": "Tiago",
+      "empresa": "Estúdio de Tatuagem Traço",
+      "perfil": "Tatuador premiado. Cada desenho é feito sob encomenda, e ele nunca repete um.",
+      "aparencia": { "pele": "#e0ac69", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#1b2430", "calca": "#3a3a3a", "acessorios": [] },
+      "indicios": ["pix_pessoal", "poucas_notas"]
+    },
+    {
+      "id": "patricia",
+      "nome": "Patrícia",
+      "empresa": "Autoescola Via Certa",
+      "perfil": "Ensina a dirigir há 20 anos. Tem dois carros e uma paciência que ninguém mais tem.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#3b2a1a", "estiloCabelo": "curto", "camisa": "#4a90d9", "calca": "#2c5aa0", "acessorios": ["oculos"] },
+      "indicios": ["poucas_notas"]
+    },
+    {
+      "id": "marcelo",
+      "nome": "Marcelo",
+      "empresa": "Pet Shop Banho & Tosa",
+      "perfil": "Cuida de cães e gatos. Tem um papagaio que dá bom-dia para os clientes.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#8a5a44", "estiloCabelo": "bone", "camisa": "#5cc28a", "calca": "#3d5a80", "acessorios": ["avental"] },
+      "indicios": ["movimento"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "financas",
+      "nome": "Secretaria Municipal de Finanças",
+      "pista": "No sistema da NFS-e, a empresa denunciada emitiu só 40 notas de serviço no ano inteiro. Para um negócio aberto todos os dias, é pouquíssimo.",
+      "variacoes": [
+        "As notas de serviço emitidas pela empresa denunciada no ano cabem numa única página. O ISS que ela pagou é menor que o de uma banca de revista."
+      ],
+      "indicio": "poucas_notas",
+      "forca": "forte",
+      "icone": "fazenda",
+      "testemunha": { "nome": "Dr. Augusto, fiscal de tributos municipais", "aparencia": { "pele": "#e0ac69", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#2f4b7c", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "notas", "rotulo": "Consultar as notas de serviço emitidas", "revela": true },
+        { "id": "total", "rotulo": "Perguntar quanto a cidade arrecada de ISS", "texto": "É um número grande, da cidade inteira. Não aponta ninguém." },
+        { "id": "multar", "rotulo": "Pedir para multar os cinco de uma vez", "texto": "\"Multa sem prova não existe\", responde Dr. Augusto. Cada auto precisa de fundamento." }
+      ]
+    },
+    {
+      "id": "ex_recepcionista",
+      "nome": "Conversa com ex-recepcionista",
+      "pista": "\"Lá, nota só se o cliente pedisse. E quase ninguém pedia\", conta Duda sobre a empresa denunciada. \"Diziam que nota era só para quem reclamava.\"",
+      "indicio": "poucas_notas",
+      "forca": "fraca",
+      "icone": "casa",
+      "testemunha": { "nome": "Duda, ex-recepcionista", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#f4d35e", "calca": "#3d5a80", "acessorios": [] } },
+      "acoes": [
+        { "id": "calma", "rotulo": "Conversar com calma", "revela": true },
+        { "id": "radio", "rotulo": "Pedir que ela conte tudo na rádio", "texto": "Duda fica com medo e encerra a conversa. Testemunha precisa de confiança e proteção." },
+        { "id": "saida", "rotulo": "Perguntar por que ela saiu do emprego", "texto": "Ela mudou de cidade por causa da faculdade. Nada a ver com o caso." }
+      ]
+    },
+    {
+      "id": "banco",
+      "nome": "Banco Aurora",
+      "pista": "Com o pedido oficial, o banco mostra: quase todos os pagamentos dos clientes da empresa denunciada caem por Pix na conta pessoal de quem a comanda, e não na conta da empresa.",
+      "indicio": "pix_pessoal",
+      "forca": "forte",
+      "icone": "banco",
+      "testemunha": { "nome": "Seu Ademar, gerente", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#2b2b2b", "acessorios": ["gravata"] } },
+      "acoes": [
+        { "id": "oficial", "rotulo": "Apresentar o pedido oficial da fiscalização", "revela": true },
+        { "id": "sem", "rotulo": "Pedir o extrato sem autorização", "texto": "Seu Ademar recusa: sigilo bancário. Sem seguir o caminho legal, a prova nem valeria." },
+        { "id": "caixa", "rotulo": "Perguntar ao caixa quem recebe mais Pix", "texto": "O caixa não pode comentar sobre clientes. Conversa de balcão não vira prova." }
+      ]
+    },
+    {
+      "id": "praca",
+      "nome": "Praça do Centro",
+      "pista": "\"Lá eu pago por Pix direto no celular de quem manda, no CPF da pessoa, não no da empresa\", conta Jéssica sobre a empresa denunciada. \"Nunca me ofereceram nota.\"",
+      "indicio": "pix_pessoal",
+      "forca": "fraca",
+      "icone": "praca",
+      "testemunha": { "nome": "Jéssica, cliente", "aparencia": { "pele": "#f1c27d", "cabelo": "#f4d35e", "estiloCabelo": "coque", "camisa": "#7b4bb7", "calca": "#2c5aa0", "acessorios": [] } },
+      "acoes": [
+        { "id": "conversar", "rotulo": "Conversar com quem passa pela praça", "revela": true },
+        { "id": "descansar", "rotulo": "Sentar no banco e descansar", "texto": "Uma brisa boa, um sorvete... e nenhuma pista." },
+        { "id": "caro", "rotulo": "Perguntar quem cobra mais caro no centro", "texto": "Cada um fala de um lugar. Preço alto não é prova de nada." }
+      ]
+    },
+    {
+      "id": "bombeiros",
+      "nome": "Corpo de Bombeiros (vistoria)",
+      "pista": "No pedido de vistoria de segurança, a empresa denunciada informou que recebe cerca de 150 clientes por dia. Movimento de negócio grande.",
+      "variacoes": [
+        "O laudo de vistoria da empresa denunciada aprova lotação para muita gente ao mesmo tempo, com horário estendido todos os dias. Ela mesma declarou o movimento."
+      ],
+      "indicio": "movimento",
+      "forca": "forte",
+      "icone": "bombeiros",
+      "testemunha": { "nome": "Sargento Lima, vistoriador", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#d64545", "calca": "#2b2b2b", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "vistoria", "rotulo": "Consultar os pedidos de vistoria", "revela": true },
+        { "id": "extintor", "rotulo": "Perguntar como usar o extintor", "texto": "Você aprendeu a usar o extintor. Útil para a vida; inútil para o caso." },
+        { "id": "viatura", "rotulo": "Perguntar se a viatura já voltou", "texto": "\"Voltou, graças ao caso dos carregadores!\", ele sorri. Mas não é o caso de hoje." }
+      ]
+    },
+    {
+      "id": "lanhouse",
+      "nome": "Lan House do Beto",
+      "pista": "Nas redes sociais, a empresa denunciada mostra agenda lotada todos os dias, com lista de espera e fotos de clientes do começo ao fim do expediente.",
+      "indicio": "movimento",
+      "forca": "fraca",
+      "icone": "lanhouse",
+      "testemunha": { "nome": "Beto, dono da lan house", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2c5aa0", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "redes", "rotulo": "Pesquisar as redes sociais do endereço", "revela": true },
+        { "id": "jogo", "rotulo": "Jogar uma partida rápida", "texto": "Você ganhou! A investigação, nem tanto." },
+        { "id": "beto", "rotulo": "Perguntar ao Beto o que ele acha", "texto": "Beto acha muita coisa, mas não sabe de nada. Opinião não é prova." }
+      ]
+    },
+    {
+      "id": "contabilidade",
+      "nome": "Escritório Contábil Soma",
+      "pista": "Dr. Paulo explica: \"Receber na conta pessoal mistura as contas e atrapalha a fiscalização, mas, sozinho, não prova sonegação. Sonegar é prestar o serviço e não declarar.\"",
+      "indicio": null,
+      "icone": "contabilidade",
+      "testemunha": { "nome": "Dr. Paulo, contador", "aparencia": { "pele": "#f1c27d", "cabelo": "#5a3825", "estiloCabelo": "curto", "camisa": "#a3b18a", "calca": "#3a3a3a", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "explicar", "rotulo": "Perguntar o que conta como sonegação de ISS", "revela": true },
+        { "id": "clientes", "rotulo": "Pedir os documentos dos clientes dele", "texto": "Dr. Paulo não pode entregar documentos dos clientes sem autorização. É ética profissional." },
+        { "id": "suspeita", "rotulo": "Perguntar se ele desconfia de alguém", "texto": "\"Não aponto cliente\", ele responde. Desconfiança não é prova." }
+      ]
+    },
+    {
+      "id": "cadastro_iss",
+      "nome": "Prefeitura: cadastro do ISS",
+      "pista": "Dona Celeste mostra que os cinco estão cadastrados como prestadores de serviço. \"O ISS é municipal, e a alíquota vai de 2% a 5% do preço do serviço. Ele é calculado a partir das notas emitidas.\"",
+      "indicio": null,
+      "icone": "prefeitura",
+      "testemunha": { "nome": "Dona Celeste, servidora", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#3d5a80", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "cadastro", "rotulo": "Perguntar como funciona o cadastro do ISS", "revela": true },
+        { "id": "fila", "rotulo": "Esperar na fila da senha", "texto": "Senha 214. Você esperou uma hora e saiu sem nada novo." },
+        { "id": "denuncia", "rotulo": "Perguntar quem fez a denúncia", "texto": "\"A denúncia é sigilosa\", responde Dona Celeste. Quem denuncia precisa ser protegido." }
+      ]
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "No portal, a reforma do telhado do Ginásio Municipal aparece parada por falta de verba. O ISS que deixa de entrar com serviço sem nota chega a R$ 90.000 (valor fictício). O portal é público: consultar não gastou nenhum dia.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true,
+      "custoDias": 0,
+      "icone": "portal",
+      "acoes": [
+        { "id": "ginasio", "rotulo": "Ver a verba do ginásio", "revela": true },
+        { "id": "salarios", "rotulo": "Ver os salários dos servidores", "texto": "Tudo público, como deve ser. Mas não é isso que você procura." },
+        { "id": "frota", "rotulo": "Ver os carros da prefeitura", "texto": "A frota está lá, carro por carro. Não ajuda no caso." }
+      ]
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 90000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O ISS recuperado volta ao orçamento do município e conserta o telhado do Ginásio Municipal.",
+    "detalhes": [
+      "R$ 60.000 para o telhado e as calhas.",
+      "R$ 20.000 para tabelas, redes e marcação da quadra.",
+      "R$ 10.000 para uma escolinha de esportes gratuita."
+    ]
+  },
+  "gancho": "Na volta dos campeonatos, alguém aponta o rio: a ponte nova recebeu todo o dinheiro do contrato, mas só metade foi construída. Para onde foi o resto?",
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "O prestador foi autuado e terá que pagar o ISS dos serviços que não declarou. O telhado do ginásio vai ser consertado.",
+      "ensina": "Serviço também paga imposto: o ISS, que fica com a cidade. Poucas notas, sozinhas, não provam nada; muito cliente, sozinho, também não. A prova está na combinação: muito movimento e quase nenhuma nota.",
+      "perguntasDebate": [
+        "Que serviços você e sua família usam no mês? Algum deles costuma dar nota?",
+        "Por que receber por Pix na conta pessoal não basta para provar sonegação?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a pessoa certa, mas as provas não a diferenciam dos outros prestadores. O auto foi anulado.",
+      "ensina": "Com cinco suspeitos, vários têm algum indício em comum. Só a combinação certa separa o responsável.",
+      "perguntasDebate": [
+        "Que dupla de provas teria separado o responsável dos outros quatro?",
+        "Por que receber na conta pessoal não serviu como prova?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Você autuou um prestador que não era o denunciado. O verdadeiro responsável continua atendendo sem nota.",
+      "ensina": "Ter pouca nota ou muito cliente não faz de ninguém sonegador. A fiscalização precisa acertar quem, e por quê.",
+      "perguntasDebate": [
+        "Que indício faltava à pessoa que você acusou?",
+        "Como uma acusação errada afeta a clientela de um negócio pequeno?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem auto de infração. O ginásio continua alagando quando chove.",
+      "ensina": "Com cinco suspeitos, planejar é ainda mais importante: comece pelos documentos que mais separam as pessoas.",
+      "perguntasDebate": [
+        "Quais locais trouxeram informação útil e quais não?",
+        "Como você planejaria os três dias se jogasse de novo?"
+      ]
+    }
+  },
+  "moradores": [
+    { "nome": "Seu Arlindo, porteiro", "aparencia": { "pele": "#8d5524", "cabelo": "#e8e8e8", "estiloCabelo": "careca", "camisa": "#3d5a80", "calca": "#2b2b2b", "acessorios": ["cracha"] }, "fala": "Passo na frente da {empresa} toda manhã: tem fila na porta antes mesmo de abrir!", "verdadeira": true },
+    { "nome": "Bia, estudante", "aparencia": { "pele": "#f1c27d", "cabelo": "#e07a5f", "estiloCabelo": "longo", "camisa": "#5cc28a", "calca": "#6b4f6b" }, "fala": "Li num comentário que {inocente} nunca dá nota para ninguém. Comentário de internet conta, né?", "verdadeira": false },
+    { "nome": "Professora Irene", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2b2b2b", "acessorios": ["oculos"] }, "fala": "Corte de cabelo, aula, conserto: serviço também tem imposto, o ISS. E ele fica todo aqui na cidade.", "verdadeira": true }
+  ],
+  "quiz": [
+    {
+      "id": "iss",
+      "pergunta": "O que é o ISS?",
+      "opcoes": [
+        "Um imposto federal sobre o salário.",
+        "Um imposto municipal pago por quem presta serviços, como aulas, consertos e tratamentos.",
+        "Uma taxa paga só por quem tem carro."
+      ],
+      "correta": 1,
+      "explicacao": "ISS é o Imposto Sobre Serviços. É municipal: academias, clínicas, autoescolas e oficinas pagam à prefeitura uma parte do preço de cada serviço."
+    },
+    {
+      "id": "nfse",
+      "pergunta": "Que documento o prestador de serviço deve emitir para o cliente?",
+      "opcoes": [
+        "A nota fiscal de serviço eletrônica (NFS-e).",
+        "Um bilhete escrito à mão.",
+        "Nenhum: serviço não precisa de documento."
+      ],
+      "correta": 0,
+      "explicacao": "A NFS-e registra o serviço no sistema da prefeitura. É a partir dela que o ISS é calculado, e ela também protege o cliente se o serviço der problema."
+    },
+    {
+      "id": "pix",
+      "pergunta": "Receber pagamento por Pix na conta pessoal, sozinho, prova sonegação?",
+      "opcoes": [
+        "Sim, sempre.",
+        "Sim, se o Pix for de valor alto.",
+        "Não: é um indício, mas sonegar é prestar o serviço e não declarar."
+      ],
+      "correta": 2,
+      "explicacao": "Misturar a conta pessoal com a da empresa dificulta a fiscalização, mas não é prova. É preciso mostrar que houve serviço sem nota e sem imposto."
+    }
+  ],
+  "glossario": [
+    { "id": "iss", "termo": "ISS", "definicao": "Imposto Sobre Serviços. É municipal e pago por quem presta serviços. A alíquota vai de 2% a 5% do preço do serviço, conforme a cidade e o tipo de serviço." },
+    { "id": "nfse", "termo": "NFS-e", "definicao": "Nota Fiscal de Serviço eletrônica. Registra cada serviço prestado no sistema da prefeitura e é a base para calcular o ISS." },
+    { "id": "conta_pessoal", "termo": "Conta pessoal × conta da empresa", "definicao": "O dinheiro da empresa deve entrar na conta da empresa. Receber na conta pessoal mistura as duas e dificulta a fiscalização, mas, sozinho, não prova sonegação." }
+  ]
+}

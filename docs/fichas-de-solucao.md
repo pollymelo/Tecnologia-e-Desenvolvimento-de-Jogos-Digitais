@@ -4,12 +4,12 @@
 > Arquivo gerado por `node scripts/gerar-fichas.mjs` a partir de `src/data/caso-*.json`.
 > Vale para o **modo história** (no modo desafio, o culpado é sorteado).
 
-**Regra do auto:** as 2 provas precisam ser indícios que o culpado tem **e**, juntas, descartar todos os
+**Regra do auto:** as provas (2 na maioria dos casos; 3 no caso 007) precisam ser indícios que o culpado tem **e**, juntas, descartar todos os
 outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abordagem certa** dentro do local.
 
 ## Caso 001: A verba do hospital
 
-**Tema:** Venda sem nota e sonegação. **Culpado:** Ricardo (Eletrônicos TecMais). **Dias:** 3.
+**Tema:** Venda sem nota e sonegação. **Culpado:** Ricardo (Eletrônicos TecMais). **Dias:** 3. **Provas exigidas:** 2.
 
 ### Suspeitos
 
@@ -53,27 +53,27 @@ outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abo
 
 ## Caso 002: A empresa fantasma
 
-**Tema:** Nota fria e empresa de fachada. **Culpado:** Otávio (Materiais de Construção Pedra Firme). **Dias:** 3.
+**Tema:** Nota fria e empresa de fachada. **Culpado:** Otávio (Materiais de Construção Pedra Firme). **Dias:** 3. **Provas exigidas:** 2.
 
 ### Suspeitos
 
 | Suspeito | Indícios | Papel |
 |---|---|---|
-| Otávio (Materiais de Construção Pedra Firme) | Compras da Horizonte sem mercadoria (notas frias), Parente registrado como sócio da Horizonte, Dinheiro pago à Horizonte que volta para a conta | **culpado** |
-| Sandra (Farmácia Bem-Estar) | Compras da Horizonte sem mercadoria (notas frias), Dinheiro pago à Horizonte que volta para a conta | armadilha |
-| Jonas (Papelaria Ponto Final) | Parente registrado como sócio da Horizonte | inocente |
-| Fátima (Mercadinho Boa Vista) | Dinheiro pago à Horizonte que volta para a conta | inocente |
+| Otávio (Materiais de Construção Pedra Firme) | Compras da Horizonte sem mercadoria (notas frias), Parente que aparece como sócio de empresa de fachada, Dinheiro pago a fornecedor que volta para a própria conta | **culpado** |
+| Sandra (Farmácia Bem-Estar) | Compras da Horizonte sem mercadoria (notas frias), Dinheiro pago a fornecedor que volta para a própria conta | armadilha |
+| Jonas (Papelaria Ponto Final) | Parente que aparece como sócio de empresa de fachada | inocente |
+| Fátima (Mercadinho Boa Vista) | Dinheiro pago a fornecedor que volta para a própria conta | inocente |
 
 ### Locais e abordagem certa
 
 | Local | Indício | Abordagem que revela | Observação |
 |---|---|---|---|
-| Junta Comercial | Parente registrado como sócio da Horizonte | Pedir o contrato social da Horizonte |  |
+| Junta Comercial | Parente que aparece como sócio de empresa de fachada | Pedir o contrato social da Horizonte |  |
 | Secretaria da Fazenda | Compras da Horizonte sem mercadoria (notas frias) | Cruzar as notas da Horizonte com as entregas |  |
 | Transportadora Rápido | Compras da Horizonte sem mercadoria (notas frias) | Conversar com os motoristas | testemunho |
-| Banco Aurora | Dinheiro pago à Horizonte que volta para a conta | Apresentar o pedido oficial, com autorização |  |
+| Banco Aurora | Dinheiro pago a fornecedor que volta para a própria conta | Apresentar o pedido oficial, com autorização |  |
 | Endereço da Horizonte | Nenhum (contexto) | Conversar com o vizinho |  |
-| Casa do sócio da Horizonte | Parente registrado como sócio da Horizonte | Conversar com calma | aparece depois de: Junta Comercial; testemunho |
+| Casa do sócio da Horizonte | Parente que aparece como sócio de empresa de fachada | Conversar com calma | aparece depois de: Junta Comercial; testemunho |
 | Feira de Sábado | Nenhum (contexto) | Ouvir os feirantes |  |
 | Portal da Transparência | Nenhum (contexto) | Ver a verba da creche | grátis |
 | Associação Comercial | Nenhum (contexto) | Perguntar como a Horizonte vendia |  |
@@ -97,7 +97,7 @@ outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abo
 
 ## Caso 003: O IPTU esquecido
 
-**Tema:** IPTU e a função social da cidade. **Culpado:** Henrique (Galpão Estrela (festas e eventos)). **Dias:** 3.
+**Tema:** IPTU e a função social da cidade. **Culpado:** Henrique (Galpão Estrela (festas e eventos)). **Dias:** 3. **Provas exigidas:** 2.
 
 ### Suspeitos
 
@@ -120,7 +120,7 @@ outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abo
 | Associação de Moradores | Nenhum (contexto) | Ler o abaixo-assinado |  |
 | Cartório de Imóveis | Nenhum (contexto) | Pedir as matrículas dos quatro imóveis |  |
 | Portal da Transparência | Nenhum (contexto) | Ver o IPTU arrecadado no bairro | grátis |
-| Companhia de Energia | Comércio funcionando em imóvel cadastrado como casa | Pedir o histórico de consumo do endereço |  |
+| Companhia de Energia | Comércio funcionando em imóvel cadastrado como casa | Apresentar o ofício e pedir o histórico de consumo |  |
 
 ### Duplas que resolvem o caso (9 de 36)
 
@@ -144,7 +144,7 @@ outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abo
 
 ## Caso 004: A nota que ninguém pede
 
-**Tema:** O consumidor e a nota fiscal. **Culpado:** Bruno (Lanchonete Mordida). **Dias:** 3.
+**Tema:** O consumidor e a nota fiscal. **Culpado:** Bruno (Lanchonete Mordida). **Dias:** 3. **Provas exigidas:** 2.
 
 ### Suspeitos
 
@@ -187,3 +187,143 @@ outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abo
 | Mel, aluna da campanha | verdade |
 | Seu Osvaldo, taxista | **boato falso** |
 | Professora Irene | verdade |
+
+## Caso 005: O barato que sai caro
+
+**Tema:** Pirataria, descaminho e consumo consciente. **Culpado:** Diego (Conecta Celulares). **Dias:** 3. **Provas exigidas:** 2.
+
+### Suspeitos
+
+| Suspeito | Indícios | Papel |
+|---|---|---|
+| Diego (Conecta Celulares) | Vende aparelho com a marca copiada (pirataria), Mercadoria do exterior que entrou sem pagar os tributos (descaminho), Vende produto sem o selo obrigatório de segurança | **culpado** |
+| Marta (Bazar Mil Coisas) | Vende aparelho com a marca copiada (pirataria), Vende produto sem o selo obrigatório de segurança | armadilha |
+| Caio (Games Point) | Mercadoria do exterior que entrou sem pagar os tributos (descaminho) | inocente |
+| Sueli (Brinquedos Alegria) | Vende produto sem o selo obrigatório de segurança | inocente |
+
+### Locais e abordagem certa
+
+| Local | Indício | Abordagem que revela | Observação |
+|---|---|---|---|
+| Receita Federal (aduana) | Mercadoria do exterior que entrou sem pagar os tributos (descaminho) | Consultar as apreensões e as declarações de importação |  |
+| Rodoviária | Mercadoria do exterior que entrou sem pagar os tributos (descaminho) | Conversar com o carregador de malas | testemunho |
+| Escritório da fabricante | Vende aparelho com a marca copiada (pirataria) | Pedir para conferir os números de série |  |
+| Assistência técnica | Vende aparelho com a marca copiada (pirataria) | Perguntar que aparelhos chegam com defeito | testemunho |
+| Procon | Vende produto sem o selo obrigatório de segurança | Ler as reclamações dos consumidores | testemunho |
+| Laboratório de ensaios | Vende produto sem o selo obrigatório de segurança | Pedir o laudo dos carregadores apreendidos | aparece depois de: Procon |
+| Agência dos Correios | Nenhum (contexto) | Perguntar como chega uma compra do exterior |  |
+| Escola Estadual (grêmio) | Nenhum (contexto) | Perguntar o que a turma anda comprando |  |
+| Portal da Transparência | Nenhum (contexto) | Ver a verba dos bombeiros | grátis |
+
+### Duplas que resolvem o caso (8 de 36)
+
+- Receita Federal (aduana) + Escritório da fabricante
+- Receita Federal (aduana) + Assistência técnica
+- Receita Federal (aduana) + Procon
+- Receita Federal (aduana) + Laboratório de ensaios
+- Rodoviária + Escritório da fabricante
+- Rodoviária + Assistência técnica
+- Rodoviária + Procon
+- Rodoviária + Laboratório de ensaios
+
+### Moradores
+
+| Morador | A fala é |
+|---|---|
+| Dona Cida, costureira | verdade |
+| Pedro, motoboy | **boato falso** |
+| Seu Nestor, bombeiro aposentado | verdade |
+
+## Caso 006: Serviço sem nota
+
+**Tema:** ISS e a nota fiscal de serviço. **Culpado:** Rodrigo (Academia Força Total). **Dias:** 3. **Provas exigidas:** 2.
+
+### Suspeitos
+
+| Suspeito | Indícios | Papel |
+|---|---|---|
+| Rodrigo (Academia Força Total) | Recebe dos clientes na conta pessoal, não na da empresa, Emite poucas notas de serviço (NFS-e), Atende muitos clientes todos os dias | **culpado** |
+| Lívia (Clínica de Estética Bella) | Recebe dos clientes na conta pessoal, não na da empresa, Atende muitos clientes todos os dias | armadilha |
+| Tiago (Estúdio de Tatuagem Traço) | Recebe dos clientes na conta pessoal, não na da empresa, Emite poucas notas de serviço (NFS-e) | armadilha |
+| Patrícia (Autoescola Via Certa) | Emite poucas notas de serviço (NFS-e) | inocente |
+| Marcelo (Pet Shop Banho & Tosa) | Atende muitos clientes todos os dias | inocente |
+
+### Locais e abordagem certa
+
+| Local | Indício | Abordagem que revela | Observação |
+|---|---|---|---|
+| Secretaria Municipal de Finanças | Emite poucas notas de serviço (NFS-e) | Consultar as notas de serviço emitidas |  |
+| Conversa com ex-recepcionista | Emite poucas notas de serviço (NFS-e) | Conversar com calma | testemunho |
+| Banco Aurora | Recebe dos clientes na conta pessoal, não na da empresa | Apresentar o pedido oficial da fiscalização |  |
+| Praça do Centro | Recebe dos clientes na conta pessoal, não na da empresa | Conversar com quem passa pela praça | testemunho |
+| Corpo de Bombeiros (vistoria) | Atende muitos clientes todos os dias | Consultar os pedidos de vistoria |  |
+| Lan House do Beto | Atende muitos clientes todos os dias | Pesquisar as redes sociais do endereço | testemunho |
+| Escritório Contábil Soma | Nenhum (contexto) | Perguntar o que conta como sonegação de ISS |  |
+| Prefeitura: cadastro do ISS | Nenhum (contexto) | Perguntar como funciona o cadastro do ISS |  |
+| Portal da Transparência | Nenhum (contexto) | Ver a verba do ginásio | grátis |
+
+### Duplas que resolvem o caso (4 de 36)
+
+- Secretaria Municipal de Finanças + Corpo de Bombeiros (vistoria)
+- Secretaria Municipal de Finanças + Lan House do Beto
+- Conversa com ex-recepcionista + Corpo de Bombeiros (vistoria)
+- Conversa com ex-recepcionista + Lan House do Beto
+
+### Moradores
+
+| Morador | A fala é |
+|---|---|
+| Seu Arlindo, porteiro | verdade |
+| Bia, estudante | **boato falso** |
+| Professora Irene | verdade |
+
+## Caso 007: A obra que nunca terminou
+
+**Tema:** Corrupção e controle social. **Culpado:** Vanessa (Construtora Alicerce). **Dias:** 4. **Provas exigidas:** 3.
+
+### Suspeitos
+
+| Suspeito | Indícios | Papel |
+|---|---|---|
+| Vanessa (Construtora Alicerce) | Recebeu por etapa da obra que não foi feita (medição falsa), Cobrou preço muito acima do mercado, Não tem trabalhadores nem máquinas para o serviço que cobrou, Sacou em dinheiro vivo logo depois de cada pagamento | **culpado** |
+| Edson (Concreto Forte) | Recebeu por etapa da obra que não foi feita (medição falsa), Cobrou preço muito acima do mercado, Sacou em dinheiro vivo logo depois de cada pagamento | armadilha |
+| Luana (Ferragens Aço Bom) | Cobrou preço muito acima do mercado, Não tem trabalhadores nem máquinas para o serviço que cobrou, Sacou em dinheiro vivo logo depois de cada pagamento | armadilha |
+| Mauro (Topografia Exata) | Recebeu por etapa da obra que não foi feita (medição falsa), Não tem trabalhadores nem máquinas para o serviço que cobrou | inocente |
+| Célia (Transportes Rio Claro) | Sacou em dinheiro vivo logo depois de cada pagamento | inocente |
+
+### Locais e abordagem certa
+
+| Local | Indício | Abordagem que revela | Observação |
+|---|---|---|---|
+| Vistoria na ponte | Recebeu por etapa da obra que não foi feita (medição falsa) | Medir a obra com o projeto na mão |  |
+| Conversa com pedreiro demitido | Recebeu por etapa da obra que não foi feita (medição falsa) | Conversar com calma | testemunho |
+| Tribunal de Contas | Cobrou preço muito acima do mercado | Pedir a comparação de preços do contrato |  |
+| Loja de material de construção | Cobrou preço muito acima do mercado | Comparar a tabela de preços com o contrato | testemunho |
+| Sindicato da Construção | Não tem trabalhadores nem máquinas para o serviço que cobrou | Consultar os trabalhadores registrados |  |
+| Endereço da empresa | Não tem trabalhadores nem máquinas para o serviço que cobrou | Conversar com a vizinha | aparece depois de: Sindicato da Construção; testemunho |
+| Banco Aurora | Sacou em dinheiro vivo logo depois de cada pagamento | Apresentar o pedido oficial, com autorização |  |
+| Câmara Municipal (audiência pública) | Nenhum (contexto) | Assistir à audiência pública |  |
+| Portal da Transparência | Nenhum (contexto) | Ver os pagamentos do contrato da ponte | grátis |
+
+### Trios que resolvem o caso (12 de 84)
+
+- Vistoria na ponte + Tribunal de Contas + Sindicato da Construção
+- Vistoria na ponte + Tribunal de Contas + Endereço da empresa
+- Vistoria na ponte + Loja de material de construção + Sindicato da Construção
+- Vistoria na ponte + Loja de material de construção + Endereço da empresa
+- Vistoria na ponte + Sindicato da Construção + Banco Aurora
+- Vistoria na ponte + Endereço da empresa + Banco Aurora
+- Conversa com pedreiro demitido + Tribunal de Contas + Sindicato da Construção
+- Conversa com pedreiro demitido + Tribunal de Contas + Endereço da empresa
+- Conversa com pedreiro demitido + Loja de material de construção + Sindicato da Construção
+- Conversa com pedreiro demitido + Loja de material de construção + Endereço da empresa
+- Conversa com pedreiro demitido + Sindicato da Construção + Banco Aurora
+- Conversa com pedreiro demitido + Endereço da empresa + Banco Aurora
+
+### Moradores
+
+| Morador | A fala é |
+|---|---|
+| Seu Tião, barqueiro | verdade |
+| Rafa, estudante | **boato falso** |
+| Seu Ezequiel, engenheiro aposentado | verdade |

@@ -35,6 +35,9 @@ import type { Caso } from './types.ts'
 /** Abordagem que revela a pista do local. */
 const certa = (c: Caso, id: string) => c.locais.find((l) => l.id === id)!.acoes!.find((a) => a.revela)!.id
 
+/** Deixa a partida na última vida: o próximo auto errado encerra o caso. */
+const naUltimaVida = (estado: EstadoJogo): EstadoJogo => ({ ...estado, vidasRestantes: 1 })
+
 /** Visita os locais e, dentro de cada um, escolhe a abordagem certa. */
 function visitar(estado: EstadoJogo, ...locais: string[]): EstadoJogo {
   return locais.reduce((e, id) => escolherAcao(caso, visitarLocal(caso, e, id).estado, id, certa(caso, id)), estado)
@@ -162,13 +165,13 @@ describe('os 4 resultados', () => {
   })
 
   it('auto anulado: suspeito certo, mas provas que não o diferenciam', () => {
-    const estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario')
+    const estado = naUltimaVida(visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario'))
     const final = acusar(caso, estado, 'ricardo', ['operadora_cartao', 'ex_funcionario'])
     expect(final.resultado?.tipo).toBe('auto_anulado')
   })
 
   it('acusação injusta: suspeito errado, mesmo com provas válidas para o culpado', () => {
-    const estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'cartorio_detran')
+    const estado = naUltimaVida(visitar(criarEstadoInicial(caso), 'operadora_cartao', 'cartorio_detran'))
     const final = acusar(caso, estado, 'aurelio', ['operadora_cartao', 'cartorio_detran'])
     expect(final.resultado?.tipo).toBe('acusacao_injusta')
     expect(calcularTipoResultado(caso, 'marta', ['operadora_cartao', 'ex_funcionario'])).toBe(
@@ -452,11 +455,53 @@ describe('escolhas dentro do local', () => {
   it('com a abordagem errada, o auto é anulado mesmo com o culpado certo', () => {
     let estado = visitarLocal(caso, criarEstadoInicial(caso), 'cartorio_detran').estado
     estado = escolherAcao(caso, estado, 'cartorio_detran', 'fofoca')
-    estado = visitar(estado, 'ex_funcionario')
+    estado = naUltimaVida(visitar(estado, 'ex_funcionario'))
     const final = acusar(caso, estado, 'ricardo', ['cartorio_detran', 'ex_funcionario'])
     expect(final.resultado?.tipo).toBe('auto_anulado')
     const e = explicarAcusacao(caso, 'ricardo', ['cartorio_detran', 'ex_funcionario'], estado)
     expect(e.provas[0].texto).toContain('a abordagem escolhida não revelou o indício')
+  })
+})
+
+describe('vidas: auto errado volta para corrigir', () => {
+  it('cada caso começa com 3 vidas (ou com as do JSON)', () => {
+    expect(criarEstadoInicial(caso).vidasRestantes).toBe(3)
+    expect(criarEstadoInicial({ ...caso, vidas: 5 }).vidasRestantes).toBe(5)
+    expect(validarCaso({ ...caso, vidas: 0 })).toContain('vidas deve ser um inteiro de pelo menos 1.')
+  })
+
+  it('auto errado com vidas sobrando: perde 1 vida, guarda o auto e a partida continua', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario')
+    estado = acusar(caso, estado, 'marta', ['operadora_cartao', 'ex_funcionario'])
+    expect(estado.resultado).toBeNull()
+    expect(estado.vidasRestantes).toBe(2)
+    expect(estado.autosRecusados).toEqual([
+      { tipo: 'acusacao_injusta', suspeitoAcusadoId: 'marta', provas: ['operadora_cartao', 'ex_funcionario'] },
+    ])
+    // continua investigando e acerta
+    estado = visitar(estado, 'cartorio_detran')
+    estado = acusar(caso, estado, 'ricardo', ['operadora_cartao', 'cartorio_detran'])
+    expect(estado.resultado?.tipo).toBe('resolvido')
+    expect(estado.vidasRestantes).toBe(2)
+  })
+
+  it('o terceiro auto errado encerra o caso com o desfecho desse erro', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario')
+    estado = acusar(caso, estado, 'marta', ['operadora_cartao', 'ex_funcionario'])
+    estado = acusar(caso, estado, 'ricardo', ['operadora_cartao', 'ex_funcionario'])
+    expect(estado.resultado).toBeNull()
+    estado = acusar(caso, estado, 'ricardo', ['operadora_cartao', 'ex_funcionario'])
+    expect(estado.vidasRestantes).toBe(0)
+    expect(estado.resultado?.tipo).toBe('auto_anulado')
+    expect(estado.autosRecusados).toHaveLength(3)
+  })
+
+  it('dá para acusar de novo mesmo com os dias zerados', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'praca', 'operadora_cartao', 'cartorio_detran')
+    expect(estado.diasRestantes).toBe(0)
+    estado = acusar(caso, estado, 'marta', ['operadora_cartao', 'cartorio_detran'])
+    expect(podeAcusar(caso, estado)).toBe(true)
+    expect(acusar(caso, estado, 'ricardo', ['operadora_cartao', 'cartorio_detran']).resultado?.tipo).toBe('resolvido')
   })
 })
 
@@ -490,7 +535,7 @@ describe('locais descobertos e imprevistos', () => {
       for (const c of casos) {
         const fechados = sortearImprevistos(c, () => r)
         const dias = Object.values(fechados).map((f) => f.dia).sort()
-        expect(dias).toEqual([1, 2])
+        expect(dias).toEqual(Array.from({ length: c.diasIniciais - 1 }, (_, i) => i + 1))
         for (const id of Object.keys(fechados)) {
           const local = c.locais.find((l) => l.id === id)!
           expect(local.custoDias ?? c.custoVisitaDias).toBeGreaterThan(0)
@@ -502,9 +547,9 @@ describe('locais descobertos e imprevistos', () => {
   })
 })
 
-describe('os quatro casos da campanha', () => {
+describe('os sete casos da campanha', () => {
   it('todos carregam sem erro, com 9 locais, 3 moradores e 3 perguntas', () => {
-    expect(casos.map((c) => c.id)).toEqual(['caso-001', 'caso-002', 'caso-003', 'caso-004'])
+    expect(casos.map((c) => c.id)).toEqual(['caso-001', 'caso-002', 'caso-003', 'caso-004', 'caso-005', 'caso-006', 'caso-007'])
     for (const c of casos) {
       expect(validarCaso(c)).toEqual([])
       expect(c.locais).toHaveLength(9)
@@ -520,13 +565,45 @@ describe('os quatro casos da campanha', () => {
     }
   })
 
-  it('em todos, há mais de uma dupla de provas que resolve o caso (e todas passam pela armadilha certa)', () => {
+  /** Todas as combinações de `tamanho` locais do caso. */
+  const grupos = (ids: string[], tamanho: number, inicio = 0): string[][] =>
+    tamanho === 0 ? [[]] : ids.slice(inicio).flatMap((id, d) => grupos(ids, tamanho - 1, inicio + d + 1).map((g) => [id, ...g]))
+
+  it('em todos, há várias combinações de provas que resolvem o caso', () => {
     for (const c of casos) {
-      const ids = c.locais.map((l) => l.id)
-      let validas = 0
-      for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) if (provasValidas(c, [ids[i], ids[j]])) validas++
-      expect(validas).toBeGreaterThanOrEqual(4)
+      const validas = grupos(c.locais.map((l) => l.id), c.provasExigidas).filter((g) => provasValidas(c, g))
+      expect(validas.length).toBeGreaterThanOrEqual(4)
     }
+  })
+
+  it('caso 006: com 5 suspeitos, só "poucas notas" + "muito movimento" resolve', () => {
+    const c = casos[5]
+    expect(c.suspeitos).toHaveLength(5)
+    for (const g of grupos(c.locais.map((l) => l.id), 2).filter((g) => provasValidas(c, g))) {
+      expect(g.map((id) => c.locais.find((l) => l.id === id)!.indicio).sort()).toEqual(['movimento', 'poucas_notas'])
+    }
+  })
+
+  it('caso 007: exige 3 provas; nenhum trio sem medição falsa e sem estrutura resolve', () => {
+    const c = casos[6]
+    expect(c.provasExigidas).toBe(3)
+    expect(c.diasIniciais).toBe(4)
+    for (const g of grupos(c.locais.map((l) => l.id), 3).filter((g) => provasValidas(c, g))) {
+      const indicios = g.map((id) => c.locais.find((l) => l.id === id)!.indicio)
+      expect(indicios).toContain('medicao_falsa')
+      expect(indicios).toContain('sem_estrutura')
+    }
+    // duas provas não bastam: o auto exige exatamente 3
+    let estado = criarEstadoInicial(c)
+    for (const id of ['vistoria', 'sindicato', 'tribunal']) estado = escolherAcao(c, visitarLocal(c, estado, id).estado, id, certa(c, id))
+    expect(() => acusar(c, estado, 'vanessa', ['vistoria', 'sindicato'])).toThrow(RegraError)
+    expect(acusar(c, estado, 'vanessa', ['vistoria', 'sindicato', 'tribunal']).resultado?.tipo).toBe('resolvido')
+  })
+
+  it('nenhum caso fala que o IPTU paga a luz dos postes (é a COSIP)', () => {
+    const textos = JSON.stringify(casos)
+    expect(textos).not.toMatch(/IPTU que paga a luz|IPTU paga a luz|ilumina a praça/)
+    expect(casos[2].glossario!.some((t) => t.id === 'cosip')).toBe(true)
   })
 
   it('o modo desafio funciona em todos os casos', () => {

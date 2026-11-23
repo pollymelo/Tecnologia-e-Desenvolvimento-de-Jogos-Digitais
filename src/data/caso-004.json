@@ -69,7 +69,7 @@
     {
       "id": "procon",
       "nome": "Procon",
-      "pista": "Há várias reclamações iguais: clientes da empresa denunciada tentaram trocar produtos e descobriram que o 'cupom' que receberam não vale como nota fiscal.",
+      "pista": "Há várias reclamações iguais: clientes da empresa denunciada reclamaram de um problema na compra e, ao conferir o 'cupom', viram que ele não existe no sistema da nota fiscal.",
       "indicio": "cupom_falso",
       "forca": "fraca",
       "icone": "junta",
@@ -111,7 +111,7 @@
     {
       "id": "atacado",
       "nome": "Atacado Central",
-      "pista": "Nas notas de venda do Atacado Central não aparece nenhuma compra da empresa denunciada. Mas o gerente lembra que ela compra muito, sempre \"em dinheiro e sem nota\".",
+      "pista": "Nas notas de venda do Atacado Central não aparece nenhuma compra da empresa denunciada. Mas o gerente lembra que ela compra muito, sempre \"em dinheiro e sem nota\". Vender sem nota também é irregular: o atacado vai ter que se explicar.",
       "indicio": "compra_sem_nota",
       "forca": "forte",
       "icone": "atacado",
@@ -151,7 +151,7 @@
     {
       "id": "portal_transparencia",
       "nome": "Portal da Transparência",
-      "pista": "O portal mostra que a Biblioteca Pública não recebe verba para livros novos há quatro anos. O que se perde com vendas sem nota chega a R$ 120.000 (valor fictício). O portal é público: consultar não gastou nenhum dia.",
+      "pista": "O portal mostra que a Biblioteca Pública não recebe verba para livros novos há quatro anos. O que se perde com vendas sem nota chega a R$ 120.000 (valor fictício). O ICMS é do estado, mas um quarto dele volta para o município. O portal é público: consultar não gastou nenhum dia.",
       "indicio": null,
       "liberaRelatorioDetalhado": true,
       "custoDias": 0,
@@ -187,12 +187,12 @@
       "R$ 20.000 para um programa de leitura com as escolas."
     ]
   },
-  "gancho": "Com os quatro casos resolvidos, Dona Helena se aposenta e deixa um bilhete na sua mesa: \"Os fantasmas da Aurora só existem quando ninguém olha. Agora a cidade inteira aprendeu a olhar.\" Fim da primeira temporada da Rota Fantasma.",
+  "gancho": "Com os quatro casos resolvidos, Dona Helena se aposenta e deixa um bilhete na sua mesa: \"Os fantasmas da Aurora só existem quando ninguém olha. Agora a cidade inteira aprendeu a olhar.\" Fim da primeira temporada. No verso, um último pedido antes da aposentadoria: \"Fique de olho no que chega pela estrada. Tem carregador barato demais nesta cidade.\"",
   "resultados": {
     "resolvido": {
       "titulo": "Caso resolvido",
       "mensagem": "O comerciante foi autuado, a maquininha irregular foi cancelada e os consumidores enganados foram avisados. A campanha dos alunos ajudou a resolver o caso.",
-      "ensina": "Pedir e conferir a nota fiscal é um ato de cidadania: garante os seus direitos e faz o imposto que você já paga chegar aos cofres da cidade.",
+      "ensina": "Pedir e conferir a nota fiscal é um ato de cidadania: garante os seus direitos e faz o imposto que você já paga chegar aos cofres públicos, e parte dele volta para a cidade.",
       "perguntasDebate": [
         "Você costuma pedir nota fiscal? O que muda quando a cidade inteira pede?",
         "Como a campanha dos alunos ajudou a fiscalização?"
@@ -229,7 +229,7 @@
   "moradores": [
     { "nome": "Mel, aluna da campanha", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] }, "fala": "Conferi três cupons da {empresa} no aplicativo e nenhum apareceu! Será que o app está com defeito?", "verdadeira": true },
     { "nome": "Seu Osvaldo, taxista", "aparencia": { "pele": "#f1c27d", "cabelo": "#d6d6d6", "estiloCabelo": "bone", "camisa": "#a3b18a", "calca": "#3a3a3a" }, "fala": "Aposto que quem não dá nota é {inocente}! Bom... faz tempo que não passo lá, mas aposto.", "verdadeira": false },
-    { "nome": "Professora Irene", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2b2b2b", "acessorios": ["oculos"] }, "fala": "Quando você pede nota, o imposto que já está no preço chega aos cofres da cidade. É cidadania em cada compra!", "verdadeira": true }
+    { "nome": "Professora Irene", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2b2b2b", "acessorios": ["oculos"] }, "fala": "Quando você pede nota, o imposto que já está no preço chega aos cofres públicos, e uma parte volta para a cidade. É cidadania em cada compra!", "verdadeira": true }
   ],
   "quiz": [
     {
@@ -252,7 +252,7 @@
         "Ela garante os seus direitos e ajuda o imposto já pago a chegar aos cofres públicos."
       ],
       "correta": 2,
-      "explicacao": "O imposto já está embutido no preço. A nota garante que ele seja registrado e chegue à cidade, além de proteger o consumidor em trocas e garantias."
+      "explicacao": "O imposto já está embutido no preço. A nota garante que ele seja registrado e chegue aos cofres públicos (parte do ICMS volta para o município), além de proteger o consumidor em trocas e garantias."
     },
     {
       "id": "cadeia",

@@ -114,7 +114,7 @@ Lore completa: [lore.md](lore.md).
   programas. Um jogo Web abre em qualquer navegador, sem conta e sem licença, e o NAF só precisa
   passar um link.
 - **Escopo:** o jogo é feito de telas, textos, um mapa 2D e decisões. Isso não exige física nem 3D,
-  então HTML, CSS e SVG bastam, e o jogo fica leve (cerca de 50 KB comprimidos, incluindo os 4 casos).
+  então HTML, CSS e SVG bastam, e o jogo fica leve (cerca de 60 KB comprimidos, incluindo os 7 casos).
 - **Continuidade pelo NAF:** os casos ficam em **arquivos JSON**, separados do código. Um caso novo
   é criado editando texto, e a validação automática impede publicar caso sem solução.
 - **Domínio técnico:** as regras são funções puras e testáveis, separadas da interface (seção 18.1).
@@ -148,7 +148,8 @@ provas que só batam com uma pessoa.
 | **Moradores** | Três moradores andam pelas ruas. Encostar num deles (ou clicar) traz uma dica de graça, anotada no caderno. Duas falas são verdade e **uma é boato falso**; nenhuma vale como prova |
 | **Imprevistos** | A cada partida, um local fica **fechado** no dia 1 e outro no dia 2. Alguns locais só **aparecem no mapa** depois de outra visita (ex.: a casa do sócio-laranja surge depois da Junta Comercial) |
 | **Caderno de suspeitos** | Tabela suspeitos × indícios. Cada coluna começa oculta ("?") e se revela quando o indício é encontrado. **O jogador risca quem descartou; o jogo não elimina ninguém sozinho** |
-| **Auto de infração** | O jogador escolhe 1 suspeito e 2 provas coletadas. **Acusar não gasta dia** |
+| **Auto de infração** | O jogador escolhe 1 suspeito e 2 provas coletadas (3 no caso 007). **Acusar não gasta dia** |
+| **Vidas** | Cada caso tem **3 vidas**. Um auto errado (acusação injusta ou provas que não diferenciam) é **devolvido pela Dona Helena**, que explica onde ele falhou sem revelar o culpado. O jogador perde 1 vida e volta à investigação no mesmo dia, com as pistas que já tem. Só o erro na última vida encerra o caso |
 
 ### 9.1 Regras numéricas
 
@@ -194,10 +195,19 @@ caso destrava o próximo**. As melhores estrelas de cada caso ficam salvas no na
 |---|---|---|
 | 001: A verba do hospital | Venda sem nota e sonegação | Hospital Municipal |
 | 002: A empresa fantasma | Nota fria, empresa de fachada e laranja | Obra da Creche Municipal |
-| 003: O IPTU esquecido | IPTU e a função social da cidade | Iluminação da praça do bairro |
+| 003: O IPTU esquecido | IPTU e a função social da cidade | Reforma e postes da praça do bairro |
 | 004: A nota que ninguém pede | O consumidor e a nota fiscal | Livros da Biblioteca Pública |
+| 005: O barato que sai caro | Pirataria, descaminho e consumo consciente | Viatura do Corpo de Bombeiros |
+| 006: Serviço sem nota | ISS e a nota fiscal de serviço (5 suspeitos) | Telhado do Ginásio Municipal |
+| 007: A obra que nunca terminou | Corrupção e controle social (5 suspeitos, 3 provas, 4 dias) | Ponte do Rio Aurora |
 
-**Vitória e derrota:** cada caso termina em um de quatro desfechos.
+Os casos 001 a 004 formam a **primeira temporada**; os casos 005 a 007, a **segunda**, com dificuldade
+crescente: o caso 006 tem cinco suspeitos e só uma combinação de indícios resolve; o caso 007 exige três
+provas e dá quatro dias.
+
+**Vitória e derrota:** cada caso termina em um de quatro desfechos. Os desfechos de erro (auto anulado e
+acusação injusta) só encerram o caso quando o jogador erra na **última vida**; antes disso, o auto volta
+para ser corrigido.
 
 | Situação | Desfecho | O que ensina |
 |---|---|---|
@@ -302,11 +312,12 @@ terceiros. O som pode ser desligado.
 | Escolher a abordagem certa dentro do local (documento × fofoca × pressão) | Prova vem de documento oficial ou testemunho direto, obtidos pelo caminho legal (ex.: o banco não entrega extrato sem autorização, por causa do sigilo bancário) |
 | Ouvir moradores, sabendo que um mente | Boato não é prova, mesmo quando parece certo |
 | Riscar suspeitos no caderno | Raciocínio por eliminação: cruzar informações |
-| Acusar com 2 provas que diferenciem o culpado | Acusação precisa de fundamentação; "chute certo" com prova ruim anula o auto |
+| Acusar com 2 provas (3 no caso 007) que diferenciem o culpado | Acusação precisa de fundamentação; "chute certo" com prova ruim anula o auto |
+| Auto devolvido pela chefia, com 3 vidas por caso | Errar faz parte de aprender: a revisão mostra a falha e o jogador corrige o raciocínio, mas cada erro tem custo |
 | Arcar com a acusação injusta | Errar também causa dano: responsabilidade da fiscalização |
 | Ver para onde vai o dinheiro recuperado | Função social do tributo |
 | Consultar o Portal da Transparência (grátis) | Controle social: os gastos públicos podem ser consultados por qualquer pessoa |
-| Os temas dos casos (venda sem nota, nota fria, IPTU, nota do consumidor) | Práticas de sonegação e o papel do consumidor na cadeia da nota fiscal |
+| Os temas dos casos (venda sem nota, nota fria, IPTU, nota do consumidor, pirataria, ISS, obra pública) | Práticas de sonegação e de desvio de dinheiro público, e o papel do consumidor e do cidadão na fiscalização |
 | Teste rápido antes e depois | Perceber o próprio aprendizado |
 
 ### 15.1 Simplificações conceituais (intencionais)
@@ -314,7 +325,8 @@ terceiros. O som pode ser desligado.
 - **Esfera do tributo:**
   - na vida real, a venda de mercadoria sem nota envolve **ICMS (estadual)**;
   - a renda incompatível envolve o **Imposto de Renda (federal)**;
-  - o **IPTU é municipal**.
+  - o **IPTU** e o **ISS** são municipais;
+  - os tributos de importação do caso 005 são federais.
 
   O jogo reúne tudo sob um único "auditor fiscal" para não sobrecarregar o público. O mediador deve
   comentar isso no debate.
@@ -323,6 +335,11 @@ terceiros. O som pode ser desligado.
 - **Acesso a dados bancários:** no jogo, o banco só fornece dados "com o pedido oficial, com
   autorização". Na vida real, o acesso da fiscalização segue regras legais específicas.
 - **Valores:** todos são fictícios.
+- **Iluminação pública:** não é uma simplificação, mas um ponto de atenção. A luz dos postes é paga pela
+  **COSIP** (cobrada na conta de energia), não pelo IPTU. No caso 003 a praça continua apagada, mas o
+  motivo é a obra que nunca levou os postes até lá, e a COSIP aparece no glossário e nas falas.
+- **Corrupção (caso 007):** o auditor trabalha junto com o Tribunal de Contas, e o caso segue para o
+  Ministério Público. Na vida real, cada órgão tem a sua competência.
 
 ### 15.2 Alinhamento com as referências oficiais
 
@@ -341,20 +358,20 @@ jogo:
 
 | Tema da Matriz | Como aparece no Rota Fantasma |
 |---|---|
-| 2. Patrimônio Público | Os prédios-marco (hospital, creche, praça, biblioteca) e o destino do valor recuperado |
+| 2. Patrimônio Público | Os prédios-marco (hospital, creche, praça, biblioteca, bombeiros, ginásio, ponte) e o destino do valor recuperado |
 | 3. Origem dos Recursos Públicos | O tributo embutido no preço: abertura dos casos e teste rápido |
-| 4. Nota Fiscal e Cupom Fiscal | Casos 001 (venda sem nota) e 004 ("cupom" que não é documento fiscal, conferido pelo aplicativo) |
+| 4. Nota Fiscal e Cupom Fiscal | Casos 001 (venda sem nota), 004 ("cupom" que não é documento fiscal, conferido pelo aplicativo) e 006 (nota fiscal de serviço, NFS-e) |
 | 7. Direito à Informação | Portal da Transparência grátis e glossário com linguagem simples |
-| 10. Controle Social | Portal da Transparência e a campanha dos alunos no caso 004 |
-| 13. Sonegação Fiscal | Tema central dos quatro casos (venda sem nota, nota fria, empresa de fachada, IPTU) |
+| 10. Controle Social | Portal da Transparência, a campanha dos alunos no caso 004 e a audiência pública do caso 007 |
+| 11. Impactos da Corrupção | Caso 007: medição falsa e superfaturamento numa obra pública |
+| 12. Consumo Consciente | Caso 005: produto pirata e sem certificação, "o barato que sai caro" |
+| 13. Sonegação Fiscal | Tema central dos casos 001 a 006 (venda sem nota, nota fria, empresa de fachada, IPTU, descaminho, ISS) |
+| 15. Aduana | Caso 005: a Receita Federal na aduana e o descaminho |
 | 5. Tributos e Constituição · 6. Estado Democrático de Direito | De forma indireta: a fiscalização só pune com prova obtida pelo caminho legal |
 | 8. Orçamento Público · 9. Políticas Públicas | Parcial: o resultado mostra para onde vai o dinheiro, mas o jogador ainda não decide o orçamento (proposta na seção 17.2) |
 
-Temas **ainda não trabalhados**, que estão nas propostas da seção 17.2:
-- 11. Impactos da Corrupção;
-- 12. Consumo Consciente (produto pirata);
-- 14. CPF;
-- 15. Aduana.
+Tema **ainda não trabalhado**: 14. CPF. Orçamento Público e Políticas Públicas (8 e 9) aparecem só em
+parte e são o assunto do caso 008 proposto na seção 17.2.
 
 **BNCC.** A apostila destaca as competências gerais 1, 6, 7 e 10 para a Educação Fiscal. O jogo mobiliza:
 - **competência 1 (conhecimento):** a função social do tributo;
@@ -425,7 +442,7 @@ Enunciado do trabalho.
 
 ### 17.1 Escopo inicial (implementado e funcionando no protótipo)
 
-- 4 casos completos e jogáveis do início ao resultado, destravados em sequência;
+- 7 casos completos e jogáveis do início ao resultado, em duas temporadas, destravados em sequência;
 - mapa com movimentação do boneco, escolhas dentro dos locais, moradores e imprevistos;
 - caderno, auto de infração, 4 desfechos com explicação, estrelas, modo desafio e glossário;
 - tutorial, teste rápido antes e depois, som e animações;
@@ -465,22 +482,22 @@ O protótipo da NP2 é um escopo inicial. Para as próximas versões, pretende-s
 |---|---|---|
 | Renomear locais para órgãos reais (Sefaz, Receita Federal, Procon etc.) | Baixo | Só os textos no JSON. Alguns já existem: Secretaria da Fazenda, Procon, Junta Comercial e Prefeitura |
 | Força-tarefa entre órgãos como enredo | Baixo | Briefing e textos das pistas |
-| Novos locais: Detran, Secretaria Municipal de Finanças, Tribunal de Contas, unidade da Receita Federal | Baixo | Novas entradas no JSON. A lógica de visitar, escolher a abordagem e coletar a pista já funciona para qualquer local. Acima de 10 locais por caso, o mapa precisa crescer (esforço médio) |
+| Novos locais: Detran, Secretaria Municipal de Finanças, Tribunal de Contas, unidade da Receita Federal | **Feito** (casos 005 a 007) | Novas entradas no JSON. A lógica de visitar, escolher a abordagem e coletar a pista já funciona para qualquer local. Acima de 10 locais por caso, o mapa precisa crescer (esforço médio) |
 | Explicação de cada órgão ao visitar: o que ele fiscaliza e de que esfera é (municipal, estadual ou federal) | Baixo | Um campo de texto a mais por local. Também reduz a simplificação da seção 15.1 |
-| Suspeito prestador de serviço (ISS e nota fiscal de serviço) | Médio | Novo tipo de indício. A validação da acusação continua igual, porque compara indícios genéricos |
-| Casos com dificuldade crescente (mais suspeitos, menos dias, mais provas exigidas) | Médio | Parâmetros que já existem no JSON (dias, suspeitos, provas exigidas). O arquivo de casos já destrava em sequência |
+| Suspeito prestador de serviço (ISS e nota fiscal de serviço) | **Feito** (caso 006) | Novo tipo de indício. A validação da acusação continua igual, porque compara indícios genéricos |
+| Casos com dificuldade crescente (mais suspeitos, menos dias, mais provas exigidas) | **Feito** (casos 006 e 007) | Parâmetros que já existem no JSON (dias, suspeitos, provas exigidas). O arquivo de casos já destrava em sequência |
 
 **Ampliação dos casos (segunda temporada)**
 
-Os casos propostos cobrem temas da Matriz de Educação Fiscal que o protótipo ainda não trabalha
-(seção 15.2) e aumentam a dificuldade aos poucos.
+Os casos 005 a 007 já foram **implementados** (seção 10). Eles cobrem temas da Matriz que a primeira
+temporada não trabalhava e aumentam a dificuldade aos poucos.
 
-| Caso proposto | Tema da Matriz | Ideia | Locais e órgãos | Dificuldade |
+| Caso | Tema da Matriz | Ideia | Locais e órgãos | Situação |
 |---|---|---|---|---|
-| 005: O barato que sai caro | 12. Consumo Consciente (produto pirata) · 15. Aduana | Uma loja vende eletrônicos falsificados e contrabandeados, com prejuízo à arrecadação e risco ao consumidor | Unidade da Receita Federal (aduana), Procon, transportadora, rodoviária, Portal da Transparência | 4 suspeitos, 3 dias |
-| 006: Serviço sem nota | ISS e nota fiscal de serviço | Um prestador de serviço (academia, oficina, salão) não emite nota e declara faturamento menor | Secretaria Municipal de Finanças, Prefeitura (cadastro do ISS), clientes, contador | 5 suspeitos, 3 dias |
-| 007: A obra que nunca terminou | 11. Impactos da Corrupção · 10. Controle Social | A verba de uma obra pública some; o jogador cruza contrato, medições e pagamentos | Tribunal de Contas, Portal da Transparência, Câmara Municipal, fiscal de obras, empreiteira | 5 suspeitos, 3 provas exigidas |
-| 008: O orçamento da cidade | 8. Orçamento Público · 9. Políticas Públicas | Depois de recuperar os valores dos casos anteriores, o jogador decide como distribuí-los em audiência pública e vê as consequências | Prefeitura, Câmara, conselho municipal, associação de moradores | Encerramento da temporada |
+| 005: O barato que sai caro | 12. Consumo Consciente (produto pirata) · 15. Aduana | Uma loja vende eletrônicos falsificados que entram sem passar pela aduana, com prejuízo à arrecadação e risco ao consumidor | Receita Federal (aduana), rodoviária, fabricante, assistência técnica, Procon, laboratório, Correios, escola, Portal | **Implementado** (4 suspeitos, 3 dias) |
+| 006: Serviço sem nota | ISS e nota fiscal de serviço | Um prestador de serviço atende muita gente e quase não emite nota | Secretaria Municipal de Finanças, cadastro do ISS, banco, bombeiros (vistoria), contador, cliente, ex-recepcionista, Portal | **Implementado** (5 suspeitos, 3 dias) |
+| 007: A obra que nunca terminou | 11. Impactos da Corrupção · 10. Controle Social | A verba da ponte some; o jogador cruza medição, preços, registros e pagamentos | Tribunal de Contas, Câmara Municipal (audiência), fiscal de obras, sindicato, loja de material, banco, Portal | **Implementado** (5 suspeitos, 3 provas, 4 dias) |
+| 008: O orçamento da cidade | 8. Orçamento Público · 9. Políticas Públicas | Depois de recuperar os valores dos casos anteriores, o jogador decide como distribuí-los em audiência pública e vê as consequências | Prefeitura, Câmara, conselho municipal, associação de moradores | Proposta: exige uma tela nova (distribuir o orçamento), fora da mecânica de investigação |
 | Temporada em outra cidade | Todos | Os mesmos tipos de caso numa cidade portuária ou rural, com outros serviços públicos em jogo | Novo mapa e novos marcos | Variável |
 
 ## 18. Divisão de atividades
@@ -503,17 +520,17 @@ Trabalho **individual**. Todas as decisões, testes e entregas são de responsab
 | `src/game/types.ts` | Tipos do caso: suspeitos, locais, abordagens, moradores |
 | `src/game/state.ts` | Estado imutável da partida |
 | `src/game/rules.ts` | Regras puras: visitar, escolher a abordagem, validar a acusação, desfechos, estrelas, imprevistos, modo desafio, validação do JSON |
-| `src/game/caso.ts` | Carrega e valida os 4 casos e junta o glossário comum |
+| `src/game/caso.ts` | Carrega e valida os 7 casos e junta o glossário comum |
 | `src/data/*.json` | Conteúdo dos casos (editável pelo NAF) |
 | `src/ui/app.ts` | Telas e eventos (arquivo de casos, mapa, card, caderno, acusação, resultado) |
 | `src/ui/mapa.ts` | Geometria do mapa: ruas, colisão, ajuda na curva, caminho mais curto, rotas dos moradores |
 | `src/ui/animacao.ts`, `src/ui/som.ts`, `src/ui/arte.ts` | Animações, efeitos sonoros e desenhos SVG |
-| `src/**/*.test.ts` | 124 testes automáticos |
+| `src/**/*.test.ts` | 134 testes automáticos |
 | `scripts/gerar-fichas.mjs` | Gera as fichas de solução a partir dos JSON |
 | `.github/workflows/deploy.yml` | Testa, gera o build e publica a cada envio |
 
 **Evidências de evolução:** o histórico de commits no GitHub registra cada etapa, desde o projeto Vite
-inicial e o GDD até a campanha com 4 casos.
+inicial e o GDD até a campanha com 7 casos.
 
 ### 18.2 Uso de IA generativa
 
@@ -521,8 +538,8 @@ inicial e o GDD até a campanha com 4 casos.
 |---|---|
 | **Ferramentas** | **Claude (Anthropic)**: no chat do claude.ai, na ideação inicial; e no **Claude Code** (extensão do VS Code, modelo Claude Opus 5.5), no desenvolvimento |
 | **Finalidade** | Ideação do design; programação em TypeScript, HTML, CSS e SVG; testes automáticos; redação dos textos dos casos, do glossário e das perguntas; documentação (GDD, lore, fichas, roteiro); configuração da publicação |
-| **O que foi decisão da autora** | Tema (educação fiscal) e gênero (investigação estilo Carmen Sandiego); visual de bonecos de blocos para aproximar o público jovem; pedido de lore; boneco controlado pelo jogador ("só com clique não parece jogo digital"); entre as alternativas propostas, a escolha de "clique e ele anda", card sobre o tabuleiro, dia e noite e porta que abre; pedido de mais casos e mais opções de visita, escolhendo 3 casos novos, desbloqueio em sequência, escolhas dentro da casa, moradores, imprevistos e mais locais; aceite de sugestões como 3 dias, Portal grátis e teste rápido |
-| **Como foi validado** | (1) **124 testes automáticos**, que conferem as regras, as telas, o mapa e o conteúdo (todo caso tem solução, nenhuma pista cita o nome do culpado, os boatos falsos continuam falsos no modo desafio); (2) **validação automática dos casos** ao carregar o JSON; (3) **jogo testado no navegador** (Edge) com capturas de tela a cada etapa, o que revelou e corrigiu falhas (ex.: animações desligadas pelo Windows, o morador fugindo antes da conversa); (4) **revisão da autora:** **[descrever: o que jogou, o que leu, o que pediu para mudar]** |
+| **O que foi decisão da autora** | Tema (educação fiscal) e gênero (investigação estilo Carmen Sandiego); visual de bonecos de blocos para aproximar o público jovem; pedido de lore; boneco controlado pelo jogador ("só com clique não parece jogo digital"); entre as alternativas propostas, a escolha de "clique e ele anda", card sobre o tabuleiro, dia e noite e porta que abre; pedido de mais casos e mais opções de visita, escolhendo 3 casos novos, desbloqueio em sequência, escolhas dentro da casa, moradores, imprevistos e mais locais; pedido de revisão dos casos 002 a 004 e escolha de manter a praça apagada explicando a COSIP; pedido de implementar os casos 005 a 007 propostos na seção 17.2; pedido de 3 vidas por caso e escolha de que o auto errado custe 1 vida e o jogador continue investigando; aceite de sugestões como 3 dias, Portal grátis e teste rápido |
+| **Como foi validado** | (1) **134 testes automáticos**, que conferem as regras, as telas, o mapa e o conteúdo (todo caso tem solução, nenhuma pista cita o nome do culpado, os boatos falsos continuam falsos no modo desafio); (2) **validação automática dos casos** ao carregar o JSON; (3) **jogo testado no navegador** (Edge) com capturas de tela a cada etapa, o que revelou e corrigiu falhas (ex.: animações desligadas pelo Windows, o morador fugindo antes da conversa); (4) **revisão da autora:** **[descrever: o que jogou, o que leu, o que pediu para mudar]** |
 | **Limites e responsabilidade** | O conteúdo fiscal gerado com IA foi simplificado de propósito (seção 15.1) e deve ser revisado com o NAF. A autora é responsável pela entrega e deve saber explicar as regras (`rules.ts`), os casos em JSON e o movimento do boneco (`mapa.ts`) |
 
 **Assets e bibliotecas de terceiros:**
@@ -571,6 +588,7 @@ consequências, cidadania fiscal e controle social, e consumo consciente e docum
 |---|---|---|
 | **Uma aula** (recomendado para a primeira aplicação) | **50 min** | Caso 001, com teste rápido antes e depois e debate |
 | **Duas aulas** | **100 min** | Caso 001 na primeira aula; casos 002 a 004 e debate comparando os temas na segunda |
+| **Segunda temporada** | 1 ou 2 aulas | Casos 005 a 007, para turmas que já jogaram a primeira; o 007 (3 provas) funciona bem como desafio final |
 | Partida de um caso | 15 a 25 min | Varia com a leitura e as escolhas da dupla |
 
 **Roteiro da aula de 50 minutos:**
@@ -664,6 +682,9 @@ anota à mão. Isso facilita a aplicação com menores de idade.
 | 002 | O que pode acontecer com quem empresta o nome para abrir uma empresa para outra pessoa? |
 | 003 | É justo um imóvel grande pagar o mesmo IPTU que uma casa pequena? |
 | 004 | Como garantir que uma campanha de cidadania não vire "caça às bruxas"? |
+| 005 | Por que o produto pirata prejudica também quem não comprou nada? |
+| 006 | Por que receber por Pix na conta pessoal, sozinho, não prova sonegação? |
+| 007 | Que obra do seu bairro você gostaria de acompanhar, e onde encontraria as informações dela? |
 
 **Dica de condução:** comparar uma dupla que resolveu o caso com uma que teve o auto anulado, com a
 mesma pergunta "que provas vocês usaram?", costuma render o melhor debate.
@@ -728,7 +749,7 @@ comerciantes sonega, mas não diz qual. Prazo: 3 dias.
 | Escritório Contábil Soma | Contexto: a sonegação começa no balcão | Perguntar como funciona a declaração |
 
 O patrimônio incompatível é o que separa Ricardo de Marta, então toda dupla de provas válida passa
-pelo Cartório ou pela Concessionária. Soluções dos 4 casos: [fichas-de-solucao.md](fichas-de-solucao.md).
+pelo Cartório ou pela Concessionária. Soluções dos 7 casos: [fichas-de-solucao.md](fichas-de-solucao.md).
 
 ## Apêndice B: Detalhes de implementação do movimento e das animações
 

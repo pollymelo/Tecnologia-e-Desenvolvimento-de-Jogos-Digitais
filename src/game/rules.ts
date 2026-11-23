@@ -165,7 +165,11 @@ export function alternarDescarte(
   return { ...estado, descartados }
 }
 
-/** Emite o auto de infração contra um suspeito, fundamentado nas provas (locais visitados). */
+/**
+ * Emite o auto de infração contra um suspeito, fundamentado nas provas (locais visitados).
+ * Auto errado com vidas sobrando: a chefia devolve o auto, o jogador perde uma vida e continua
+ * investigando (resultado continua null). Na última vida, o erro encerra o caso.
+ */
 export function acusar(
   caso: Caso,
   estado: EstadoJogo,
@@ -187,7 +191,17 @@ export function acusar(
   }
 
   const tipo = calcularTipoResultado(caso, suspeitoId, provas, estado)
-  return { ...estado, resultado: montarResultado(caso, estado, tipo, suspeitoId, provas) }
+  if (tipo === 'resolvido') {
+    return { ...estado, resultado: montarResultado(caso, estado, tipo, suspeitoId, provas) }
+  }
+  const vidasRestantes = estado.vidasRestantes - 1
+  const autosRecusados = [...estado.autosRecusados, { tipo, suspeitoAcusadoId: suspeitoId, provas }]
+  return {
+    ...estado,
+    vidasRestantes,
+    autosRecusados,
+    resultado: vidasRestantes > 0 ? null : montarResultado(caso, estado, tipo, suspeitoId, provas),
+  }
 }
 
 /**
@@ -266,6 +280,7 @@ export function validarCaso(caso: Caso): string[] {
 
   if (!suspeitos.has(caso.culpadoId)) erros.push(`culpadoId "${caso.culpadoId}" não é um suspeito.`)
   if (caso.diasIniciais < 1) erros.push('diasIniciais deve ser pelo menos 1.')
+  if (caso.vidas !== undefined && (!Number.isInteger(caso.vidas) || caso.vidas < 1)) erros.push('vidas deve ser um inteiro de pelo menos 1.')
   if (caso.custoVisitaDias < 1) erros.push('custoVisitaDias deve ser pelo menos 1.')
 
   for (const s of caso.suspeitos) {

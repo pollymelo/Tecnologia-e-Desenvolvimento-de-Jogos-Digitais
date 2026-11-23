@@ -144,6 +144,8 @@ export interface Caso {
   diasIniciais: number
   custoVisitaDias: number
   provasExigidas: number
+  /** Autos errados que o jogador pode emitir antes de o caso terminar. Sem isto, vale 3. */
+  vidas?: number
   culpadoId: SuspeitoId
   indicios: Indicio[]
   suspeitos: Suspeito[]
@@ -161,6 +163,13 @@ export interface Caso {
   /** Moradores que andam pelas ruas (até 4). */
   moradores?: Morador[]
   resultados: Record<TipoResultado, TextoResultado>
+}
+
+/** Auto devolvido pela chefia (acusação errada que custou uma vida). */
+export interface AutoRecusado {
+  tipo: 'auto_anulado' | 'acusacao_injusta'
+  suspeitoAcusadoId: SuspeitoId
+  provas: LocalId[]
 }
 
 export interface Resultado {

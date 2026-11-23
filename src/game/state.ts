@@ -1,4 +1,7 @@
-import type { Caso, LocalId, Resultado, SuspeitoId } from './types.ts'
+import type { AutoRecusado, Caso, LocalId, Resultado, SuspeitoId } from './types.ts'
+
+/** Vidas de cada caso quando o JSON não define `vidas`. */
+export const VIDAS_PADRAO = 3
 
 /** Imprevisto: um local fechado em um dos dias da investigação. */
 export interface Fechamento {
@@ -23,6 +26,10 @@ export interface EstadoJogo {
   fechados: Record<LocalId, Fechamento>
   /** Suspeitos riscados no caderno. Quem decide é o jogador; o jogo não descarta ninguém sozinho. */
   descartados: SuspeitoId[]
+  /** Autos errados que ainda podem ser emitidos sem encerrar o caso. */
+  vidasRestantes: number
+  /** Autos devolvidos pela chefia, na ordem. O último é o que o jogador acabou de ver. */
+  autosRecusados: AutoRecusado[]
   /** null enquanto a partida está em andamento. */
   resultado: Resultado | null
 }
@@ -35,6 +42,8 @@ export function criarEstadoInicial(caso: Caso, fechados: Record<LocalId, Fechame
     escolhas: {},
     fechados,
     descartados: [],
+    vidasRestantes: caso.vidas ?? VIDAS_PADRAO,
+    autosRecusados: [],
     resultado: null,
   }
 }

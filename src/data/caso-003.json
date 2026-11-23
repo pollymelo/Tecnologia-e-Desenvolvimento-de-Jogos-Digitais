@@ -3,7 +3,7 @@
   "titulo": "O IPTU esquecido",
   "tema": "IPTU e a função social da cidade",
   "marco": { "nome": "Praça do Jardim Aurora", "icone": "praca_apagada", "tag": "Sem luz" },
-  "abertura": "O IPTU é o imposto que quem tem imóvel na cidade paga à prefeitura. Ele depende do tamanho e do uso do imóvel, e paga boa parte da iluminação, das praças e das calçadas. No Jardim Aurora, a conta não fecha: o bairro dobrou de tamanho, mas o IPTU arrecadado é o mesmo de dez anos atrás.",
+  "abertura": "O IPTU é o imposto que quem tem imóvel na cidade paga à prefeitura. Ele depende do tamanho e do uso do imóvel, e ajuda a pagar praças, calçadas e ruas. A luz dos postes tem uma contribuição própria, a COSIP, cobrada na conta de energia, mas levar postes até uma praça nova é obra, e obra depende do orçamento da prefeitura. No Jardim Aurora, a conta não fecha: o bairro dobrou de tamanho, mas o IPTU arrecadado é o mesmo de dez anos atrás.",
   "briefing": "A praça do Jardim Aurora está às escuras e sem brinquedos. Uma denúncia diz que um dos quatro donos de imóveis grandes do bairro esconde o tamanho e o uso do imóvel para pagar menos IPTU. Você tem 3 dias para descobrir quem.",
   "diasIniciais": 3,
   "custoVisitaDias": 1,
@@ -27,7 +27,7 @@
       "id": "rosa",
       "nome": "Rosa",
       "empresa": "Pousada Recanto",
-      "perfil": "Transformou o casarão da família numa pousada charmosa, cheia de turistas no fim de semana.",
+      "perfil": "Transformou o casarão da família numa pousada charmosa, registrada como comércio e cheia de turistas no fim de semana.",
       "aparencia": { "pele": "#e0ac69", "cabelo": "#8a5a44", "estiloCabelo": "coque", "camisa": "#e5675d", "calca": "#2b2b2b", "acessorios": [] },
       "indicios": ["area_maior", "iptu_atrasado"]
     },
@@ -52,7 +52,7 @@
     {
       "id": "cadastro",
       "nome": "Prefeitura: Cadastro Imobiliário",
-      "pista": "No cadastro, o imóvel do dono ou da dona da empresa denunciada tem 200 m². Na foto aérea deste ano, a construção passa de 1.500 m². O IPTU continua sendo cobrado sobre os 200.",
+      "pista": "No cadastro, o imóvel da empresa denunciada tem 200 m². Na foto aérea deste ano, a construção passa de 1.500 m². O IPTU continua sendo cobrado sobre os 200.",
       "variacoes": [
         "O cadastro registra uma casa pequena no endereço da empresa denunciada. A foto aérea mostra um galpão que ocupa o terreno inteiro."
       ],
@@ -69,7 +69,7 @@
     {
       "id": "vistoria",
       "nome": "Vistoria com o fiscal de obras",
-      "pista": "Com a trena e o projeto na mão, Marcão confirma: o imóvel do dono ou da dona da empresa denunciada ganhou um andar e um anexo enormes, sem nenhuma licença.",
+      "pista": "Com a trena e o projeto na mão, Marcão confirma: o imóvel da empresa denunciada ganhou um andar e um anexo enormes, sem nenhuma licença.",
       "indicio": "area_maior",
       "forca": "fraca",
       "icone": "obras",
@@ -111,7 +111,7 @@
     {
       "id": "divida_ativa",
       "nome": "Procuradoria: Dívida Ativa",
-      "pista": "O imóvel do dono ou da dona da empresa denunciada não paga IPTU há 6 anos. A dívida já está inscrita em dívida ativa, e ninguém pediu para negociar.",
+      "pista": "O imóvel da empresa denunciada não paga IPTU há 6 anos. A dívida já está inscrita em dívida ativa, e ninguém pediu para negociar.",
       "indicio": "iptu_atrasado",
       "forca": "forte",
       "icone": "cartorio",
@@ -165,14 +165,14 @@
     {
       "id": "energia",
       "nome": "Companhia de Energia",
-      "pista": "O consumo de energia do imóvel da empresa denunciada é de comércio grande, parecido com o de um pequeno shopping, e não de uma casa. Mesmo assim, ele segue cadastrado como residência.",
+      "pista": "Com o ofício da fiscalização, Ana mostra: o consumo de energia do imóvel da empresa denunciada é de comércio grande, parecido com o de um pequeno shopping, e não de uma casa. Mesmo assim, ele segue cadastrado como residência.",
       "indicio": "uso_comercial",
       "forca": "forte",
       "icone": "energia",
       "testemunha": { "nome": "Ana, técnica da companhia", "aparencia": { "pele": "#e0ac69", "cabelo": "#1f1a17", "estiloCabelo": "longo", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] } },
       "acoes": [
-        { "id": "consumo", "rotulo": "Pedir o histórico de consumo do endereço", "revela": true },
-        { "id": "postes", "rotulo": "Perguntar por que a praça está apagada", "texto": "Ana explica que a companhia só troca lâmpadas que a prefeitura paga. Sem dinheiro, sem luz. Faz sentido, mas não aponta ninguém." },
+        { "id": "consumo", "rotulo": "Apresentar o ofício e pedir o histórico de consumo", "revela": true },
+        { "id": "postes", "rotulo": "Perguntar por que a praça está apagada", "texto": "Ana explica: a conta de luz dos postes é paga pela COSIP, que vem na conta de energia. A praça está apagada porque a prefeitura nunca fez a obra que leva postes até lá, e obra depende do orçamento que o IPTU ajuda a pagar. Faz sentido, mas não aponta ninguém." },
         { "id": "gato", "rotulo": "Perguntar se alguém faz 'gato' de luz", "texto": "\"Isso é outro problema, e não é o do seu caso\", ela responde." }
       ]
     }
@@ -180,9 +180,9 @@
   "impacto": {
     "valorRecuperado": 150000,
     "aviso": "Todos os valores são ilustrativos e fictícios.",
-    "resumo": "O IPTU recuperado volta ao orçamento do município e ilumina a praça do Jardim Aurora.",
+    "resumo": "O IPTU recuperado volta ao orçamento do município e paga a reforma da praça do Jardim Aurora, com postes novos.",
     "detalhes": [
-      "R$ 70.000 para trocar os postes da praça por lâmpadas LED.",
+      "R$ 70.000 para a obra que leva postes e fiação até o meio da praça (a conta de luz, depois, é paga pela COSIP).",
       "R$ 50.000 para brinquedos e bancos novos.",
       "R$ 30.000 para consertar as calçadas do bairro."
     ]
@@ -191,8 +191,8 @@
   "resultados": {
     "resolvido": {
       "titulo": "Caso resolvido",
-      "mensagem": "O imóvel foi recadastrado com o tamanho e o uso reais, e o IPTU atrasado foi cobrado. A praça vai ganhar luz.",
-      "ensina": "O IPTU é calculado pelo tamanho e pelo uso do imóvel. Esconder qualquer um dos dois tira dinheiro da praça, da luz e da calçada de todo o bairro.",
+      "mensagem": "O imóvel foi recadastrado com o tamanho e o uso reais, e o IPTU atrasado foi cobrado. A praça vai ser reformada e ganhar postes.",
+      "ensina": "O IPTU é calculado pelo tamanho e pelo uso do imóvel. Esconder qualquer um dos dois tira dinheiro das obras da praça e da calçada de todo o bairro. A conta da luz dos postes é outra: a COSIP.",
       "perguntasDebate": [
         "Que serviços do seu bairro são pagos com IPTU?",
         "É justo um imóvel grande pagar o mesmo IPTU que uma casa pequena? Por quê?"
@@ -229,7 +229,7 @@
   "moradores": [
     { "nome": "Juca, pipoqueiro", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#e5675d", "calca": "#3a3a3a" }, "fala": "Toda sexta eu vendo pipoca na porta da {empresa}. Fila enorme, ingresso caro... e dizem que lá é 'casa de família'!", "verdadeira": true },
     { "nome": "Lara, skatista", "aparencia": { "pele": "#f1c27d", "cabelo": "#f4d35e", "estiloCabelo": "longo", "camisa": "#7b4bb7", "calca": "#2c5aa0" }, "fala": "Meu primo disse que {inocente} não paga nada de IPTU. Mas meu primo inventa muita coisa...", "verdadeira": false },
-    { "nome": "Seu Messias, eletricista", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#f4d35e", "calca": "#2b2b2b", "acessorios": ["cracha"] }, "fala": "Poste sem lâmpada é dinheiro que não chegou. É o IPTU que paga a luz da rua, sabia?", "verdadeira": true }
+    { "nome": "Seu Messias, eletricista", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#f4d35e", "calca": "#2b2b2b", "acessorios": ["cracha"] }, "fala": "A luz da rua tem conta própria: a COSIP, que vem na sua conta de energia. Mas levar poste até a praça, com banco e brinquedo, é obra, e obra sai do orçamento que o IPTU ajuda a pagar.", "verdadeira": true }
   ],
   "quiz": [
     {
@@ -241,7 +241,7 @@
         "Uma taxa paga só por quem tem carro."
       ],
       "correta": 1,
-      "explicacao": "IPTU é o Imposto Predial e Territorial Urbano. É municipal e depende do tamanho, da localização e do uso do imóvel."
+      "explicacao": "IPTU é o Imposto Predial e Territorial Urbano. É municipal e é calculado sobre o valor venal do imóvel, que depende do tamanho, da localização e do padrão; o uso (casa ou comércio) pode mudar a alíquota."
     },
     {
       "id": "esconder",
@@ -252,7 +252,7 @@
         "Paga mais imposto, por engano."
       ],
       "correta": 0,
-      "explicacao": "O IPTU é calculado pela área cadastrada. Esconder a área real reduz o imposto e tira dinheiro de praças, luz e calçadas."
+      "explicacao": "O IPTU é calculado sobre o valor do imóvel, e a área cadastrada pesa muito nesse valor. Esconder a área real reduz o imposto e tira dinheiro de praças, calçadas e ruas."
     },
     {
       "id": "destino",
@@ -260,15 +260,16 @@
       "opcoes": [
         "Para o governo de outro país.",
         "Para o dono do imóvel vizinho.",
-        "Para a própria cidade: iluminação, praças, calçadas e escolas."
+        "Para a própria cidade: praças, calçadas, ruas e escolas."
       ],
       "correta": 2,
-      "explicacao": "O IPTU fica com o município e ajuda a pagar serviços do dia a dia, como iluminação pública, praças e manutenção das ruas."
+      "explicacao": "O IPTU fica com o município e ajuda a pagar serviços do dia a dia, como praças e manutenção das ruas. A conta da iluminação pública tem uma contribuição própria, a COSIP, cobrada na conta de energia."
     }
   ],
   "glossario": [
     { "id": "iptu", "termo": "IPTU", "definicao": "Imposto Predial e Territorial Urbano. É pago à prefeitura por quem tem imóvel na cidade, e o valor depende do tamanho, do lugar e do uso do imóvel (casa ou comércio)." },
     { "id": "cadastro_imobiliario", "termo": "Cadastro imobiliário", "definicao": "Registro da prefeitura com o tamanho e o uso de cada imóvel. É a base para calcular o IPTU." },
+    { "id": "cosip", "termo": "COSIP", "definicao": "Contribuição para o Custeio da Iluminação Pública. É municipal e vem na conta de energia: paga a luz e a manutenção dos postes. Não é o IPTU." },
     { "id": "divida_ativa", "termo": "Dívida ativa", "definicao": "Lista de tributos vencidos e não pagos. Quem entra nela pode ser cobrado na Justiça." }
   ]
 }

@@ -75,7 +75,7 @@ const TECLAS_DE_DIRECAO: Record<string, Direcao> = {
   d: 'direita',
 }
 
-type Tela = 'arquivo' | 'briefing' | 'quiz-antes' | 'mapa' | 'caderno' | 'acusacao' | 'resultado' | 'quiz-depois'
+type Tela = 'arquivo' | 'briefing' | 'quiz-antes' | 'mapa' | 'caderno' | 'acusacao' | 'recusado' | 'resultado' | 'quiz-depois'
 
 /** Prédio do meio do mapa quando o caso não define outro. */
 const MARCO_PADRAO: Marco = { nome: 'Hospital Municipal', icone: 'hospital', tag: 'Verba em falta' }
@@ -272,6 +272,16 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
 
   // ---------- Componentes ----------
 
+  /** Corações das vidas: autos errados que ainda dá para emitir. */
+  function vidasHud(): string {
+    const total = ui.estado.vidasRestantes + ui.estado.autosRecusados.length
+    const restam = ui.estado.vidasRestantes
+    const coracoes = Array.from({ length: total }, (_, i) =>
+      `<span class="coracao ${i < restam ? '' : 'perdido'}" aria-hidden="true">${i < restam ? '♥' : '♡'}</span>`,
+    ).join('')
+    return `<div class="hud-info vidas" role="status" aria-label="${restam} de ${total} vidas">${coracoes}</div>`
+  }
+
   function hud(): string {
     const { diasRestantes } = ui.estado
     const pips = Array.from({ length: caso.diasIniciais }, (_, i) => {
@@ -296,6 +306,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
         <div class="hud-info">Dia <strong>${diaAtual(caso, ui.estado)}</strong> de ${caso.diasIniciais}</div>
         <div class="hud-info">Pistas: <strong>${ui.estado.locaisVisitados.length}</strong></div>
         <div class="hud-info">Riscados: <strong>${riscados}/${caso.suspeitos.length}</strong></div>
+        ${vidasHud()}
         ${modo === 'desafio' ? '<span class="tag tag-desafio">Modo desafio</span>' : ''}
         <div class="hud-botoes">
           ${botaoSom()}
@@ -356,7 +367,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
             <li>Lá dentro, <strong>escolha o que fazer</strong>: só a abordagem certa (o documento certo, a conversa certa) rende prova.</li>
             <li>Na rua, <strong>moradores</strong> contam dicas de graça, mas <strong>boato não é prova</strong>. Fique de olho nos <strong>imprevistos</strong>: um local pode estar fechado no dia.</li>
             <li>No <strong>caderno</strong>, veja quais comerciantes têm cada ${termo('indicio', 'indício')} e <strong>risque</strong> quem você descartou.</li>
-            <li>Emita o ${termo('auto', '<strong>auto de infração</strong>')}: escolha o suspeito e <strong>${caso.provasExigidas} ${termo('prova', 'provas')}</strong> que o diferenciem dos outros.</li>
+            <li>Emita o ${termo('auto', '<strong>auto de infração</strong>')}: escolha o suspeito e <strong>${caso.provasExigidas} ${termo('prova', 'provas')}</strong> que o diferenciem dos outros. Você tem <strong>${ui.estado.vidasRestantes} vidas</strong>: um auto errado volta para você corrigir, mas custa uma vida.</li>
             <li>Ganhe até <strong>3 estrelas</strong>: resolva o caso, termine com tempo sobrando e deixe o caderno certo.</li>
           </ol>
         </div>
@@ -660,6 +671,55 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       </section>`
   }
 
+  function dicaVidas(): string {
+    const auto = termo('auto', 'auto de infração')
+    return ui.estado.vidasRestantes > 1
+      ? `O ${auto} não gasta dia. Se estiver errado, a Dona Helena devolve o auto e você perde uma vida (restam <strong>${ui.estado.vidasRestantes}</strong>).`
+      : `<strong>Última vida:</strong> se este ${auto} estiver errado, o caso termina. Escolha com cuidado.`
+  }
+
+  /** Auto devolvido pela chefia: mostra o que falhou, sem revelar o culpado, e volta à investigação. */
+  function telaRecusado(): string {
+    const auto = ui.estado.autosRecusados.at(-1)!
+    const injusta = auto.tipo === 'acusacao_injusta'
+    const acusado = buscarSuspeito(caso, auto.suspeitoAcusadoId)
+    const e = explicarAcusacao(caso, auto.suspeitoAcusadoId, auto.provas, ui.estado)
+    const linha = (l: LinhaExplicacao) =>
+      `<li class="${l.ok ? 'ok' : 'falhou'}"><span aria-hidden="true">${l.ok ? '✔' : '✘'}</span><span class="sr">${l.ok ? 'Certo:' : 'Problema:'}</span> ${esc(l.texto)}</li>`
+    const restam = ui.estado.vidasRestantes
+    // A fala segue o que realmente falhou: prova que não vale contra a pessoa, ou provas que não separam.
+    const nome = `<strong>${esc(acusado.nome)}</strong>`
+    const motivo = e.provas.some((l) => !l.ok)
+      ? `Alguma prova não vale contra ${nome}: aponta um indício que essa pessoa não tem, ou não é prova.`
+      : `As provas não separam ${nome} de todos os outros suspeitos, e a defesa derruba a acusação. Falta uma prova que descarte quem ainda está marcado com ✘.`
+    const fala = `Devolvi o seu auto. ${motivo}${injusta ? ' E cuidado: acusar um inocente causa um estrago enorme.' : ''} Volte ao caderno e confira os indícios.`
+    return `
+      ${hud()}
+      <section class="tela recusado">
+        <p class="rotulo">Auto devolvido · ${injusta ? 'acusação injusta' : 'provas insuficientes'}</p>
+        <h1 tabindex="-1">Auto devolvido</h1>
+        <div class="cena cena-briefing">
+          <div class="cena-personagem">
+            ${boneco(DONA_HELENA, { expressao: 'neutro', classe: 'grande', rotulo: 'Dona Helena' })}
+            <span class="nome-personagem">Dona Helena</span>
+          </div>
+          ${balao(fala)}
+        </div>
+        <div class="cartao explicacao">
+          <h2>Onde o auto falhou</h2>
+          <h3>O que cada prova aponta</h3>
+          <ul class="lista-explicacao">${e.provas.map(linha).join('')}</ul>
+          <h3>Os outros suspeitos</h3>
+          <ul class="lista-explicacao">${e.outros.map(linha).join('')}</ul>
+        </div>
+        <p class="dica">${restam === 1 ? '<strong>Última vida.</strong> O próximo auto errado encerra o caso.' : `Você ainda tem <strong>${restam} vidas</strong>.`} As pistas que você já coletou continuam no caderno.</p>
+        <div class="acoes">
+          <button type="button" class="secundario" data-acao="abrir-caderno">Abrir o caderno</button>
+          <button type="button" data-acao="voltar-mapa">Voltar à investigação</button>
+        </div>
+      </section>`
+  }
+
   function telaAcusacao(): string {
     const suspeitos = caso.suspeitos
       .map((s) => {
@@ -691,7 +751,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       ${hud()}
       <section class="tela">
         <h1 tabindex="-1">Auto de infração</h1>
-        <p class="dica">O ${termo('auto', 'auto de infração')} não gasta dia, mas encerra o caso. Escolha com cuidado.</p>
+        <p class="dica">${dicaVidas()}</p>
         <fieldset>
           <legend>1. Quem está sonegando?</legend>
           <div class="grade-suspeitos">${suspeitos}</div>
@@ -844,7 +904,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       },
       {
         alvo: '[data-acao="ir-acusacao"]',
-        texto: `Quando tiver ${caso.provasExigidas} provas que só batem com uma pessoa, emita o auto de infração. Prova fraca anula o auto, e acusar a pessoa errada prejudica um inocente.`,
+        texto: `Quando tiver ${caso.provasExigidas} provas que só batem com uma pessoa, emita o auto de infração. Você tem ${ui.estado.vidasRestantes} vidas: se o auto estiver errado, eu devolvo e você perde uma. Mas cuidado: acusar a pessoa errada prejudica um inocente.`,
       },
     ]
   }
@@ -1166,6 +1226,12 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       const provas = resultado.provas.map((id) => esc(buscarLocal(caso, id).nome)).join(' e ')
       acusacao = `<p class="resumo-acusacao">Você acusou <strong>${esc(s.nome)}</strong> (${esc(s.empresa)}) com as provas: ${provas}.</p>`
     }
+    // No erro da última vida, o último auto recusado é o próprio resultado.
+    const errouNoFim = resultado.tipo === 'auto_anulado' || resultado.tipo === 'acusacao_injusta'
+    const devolvidos = ui.estado.autosRecusados.length - (errouNoFim ? 1 : 0)
+    if (devolvidos > 0) {
+      acusacao += `<p class="resumo-acusacao">Antes disso, a Dona Helena devolveu ${devolvidos === 1 ? '1 auto' : `${devolvidos} autos`}.</p>`
+    }
 
     const valor = sucesso
       ? `<div class="valor sucesso">
@@ -1237,6 +1303,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     mapa: telaMapa,
     caderno: telaCaderno,
     acusacao: telaAcusacao,
+    recusado: telaRecusado,
     resultado: telaResultado,
     'quiz-depois': () => telaQuiz('depois'),
   }
@@ -1744,7 +1811,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
         void guardarPista('caderno')
         break
       case 'abrir-caderno':
-        ui = { ...ui, pistasNovas: 0, voltarDoCaderno: ui.tela === 'caderno' ? ui.voltarDoCaderno : ui.tela }
+        ui = { ...ui, pistasNovas: 0, voltarDoCaderno: ui.tela === 'caderno' ? ui.voltarDoCaderno : ui.tela === 'recusado' ? 'mapa' : ui.tela }
         irPara('caderno')
         break
       case 'voltar-caderno':
@@ -1764,6 +1831,13 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
         break
       case 'emitir-auto':
         ui = { ...ui, estado: acusar(caso, ui.estado, ui.acusado!, ui.provas) }
+        if (ui.estado.resultado === null) {
+          // Auto devolvido: perdeu uma vida e volta a investigar com o formulário limpo.
+          ui = { ...ui, acusado: null, provas: [] }
+          irPara('recusado')
+          som.tocar('falha', 0.2)
+          break
+        }
         registrarProgresso()
         irPara('resultado')
         somDoResultado()

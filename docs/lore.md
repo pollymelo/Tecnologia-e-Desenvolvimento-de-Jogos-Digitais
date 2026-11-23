@@ -88,18 +88,31 @@ Aurora têm uma rota, e ela está só começando.
 
 ### A primeira temporada: quatro casos
 
-Os quatro casos estão no jogo (`src/data/caso-00X.json`) e são destravados em sequência. O gancho de
+Os casos estão no jogo (`src/data/caso-00X.json`) e são destravados em sequência. O gancho de
 cada caso leva ao seguinte.
 
 | Caso | Tema fiscal | O que falta na cidade | Culpado (modo história) | Gancho para o próximo |
 |---|---|---|---|---|
 | 001: A verba do hospital | Venda sem nota e sonegação | Verba do Hospital Municipal | Ricardo, Eletrônicos TecMais | A Distribuidora Horizonte, que só existe no papel |
 | 002: A empresa fantasma | Nota fria, empresa de fachada e laranja | Obra da Creche Municipal parada | Otávio, Materiais de Construção Pedra Firme | Um galpão enorme cadastrado como "casa pequena" no Jardim Aurora |
-| 003: O IPTU esquecido | IPTU e a função social da cidade | Praça do Jardim Aurora sem luz | Henrique, Galpão Estrela | O anúncio "desconto sem nota" e a campanha dos alunos |
-| 004: A nota que ninguém pede | O consumidor e a nota fiscal | Livros novos da Biblioteca Pública | Bruno, Lanchonete Mordida | Dona Helena se aposenta: "agora a cidade inteira aprendeu a olhar" |
+| 003: O IPTU esquecido | IPTU e a função social da cidade | Praça do Jardim Aurora sem luz (a obra dos postes nunca foi feita) | Henrique, Galpão Estrela | O anúncio "desconto sem nota" e a campanha dos alunos |
+| 004: A nota que ninguém pede | O consumidor e a nota fiscal | Livros novos da Biblioteca Pública | Bruno, Lanchonete Mordida | O bilhete de Dona Helena: "fique de olho no que chega pela estrada" |
+
+### A segunda temporada: três casos
+
+A pedido de Dona Helena, antes da aposentadoria, o auditor segue a mercadoria que chega pela estrada, os
+serviços que não emitem nota e, por fim, o dinheiro de uma obra pública. A dificuldade cresce: o caso 006
+tem cinco suspeitos, e o 007 exige três provas.
+
+| Caso | Tema fiscal | O que falta na cidade | Culpado (modo história) | Gancho para o próximo |
+|---|---|---|---|---|
+| 005: O barato que sai caro | Pirataria, descaminho e consumo consciente | Viatura do Corpo de Bombeiros parada | Diego, Conecta Celulares | Um negócio de serviços lotado que quase não emite nota |
+| 006: Serviço sem nota | ISS e nota fiscal de serviço | Telhado do Ginásio Municipal | Rodrigo, Academia Força Total | A ponte paga por inteiro e construída pela metade |
+| 007: A obra que nunca terminou | Corrupção e controle social | Ponte do Rio Aurora pela metade | Vanessa, Construtora Alicerce | Dona Helena, já aposentada: "como a cidade decide onde gastar?" (caso 008, proposto) |
 
 Personagens que voltam: Seu Jorge (cartório), Rafa (Junta Comercial), Bia (operadora de cartão),
-Dona Lúcia (feira), Seu Ademar (banco) e Dr. Paulo (contador). Cada caso tem também **três moradores**
+Dona Lúcia (feira), Seu Ademar (banco), Dr. Paulo (contador), Marcão (fiscal de obras), Dona Celeste
+(prefeitura), Dona Graça (associação de moradores), Dona Sônia (Procon), Beto (lan house) e Kauã (aluno). Cada caso tem também **três moradores**
 que andam pelas ruas: dois contam verdades e um espalha um boato falso.
 
 ## Como a lore aparece no jogo

@@ -1,0 +1,278 @@
+{
+  "id": "caso-005",
+  "titulo": "O barato que sai caro",
+  "tema": "Pirataria, descaminho e consumo consciente",
+  "marco": { "nome": "Corpo de Bombeiros", "icone": "bombeiros", "tag": "Viatura parada" },
+  "abertura": "O último pedido de Dona Helena faz sentido: os bombeiros de Vila Aurora nunca apagaram tantos incêndios começados em carregador de celular. Aparelhos baratos demais estão chegando à cidade. Alguns são piratas, com a marca copiada. Outros vêm do exterior escondidos, sem pagar os tributos de importação. Isso se chama descaminho.",
+  "briefing": "A segunda viatura do Corpo de Bombeiros está parada por falta de verba para o conserto. Uma denúncia diz que um dos quatro comerciantes de eletrônicos e presentes do centro vende aparelhos falsificados que entram na cidade sem passar pela aduana. Você tem 3 dias para descobrir quem.",
+  "diasIniciais": 3,
+  "custoVisitaDias": 1,
+  "provasExigidas": 2,
+  "culpadoId": "diego",
+  "indicios": [
+    { "id": "falsificado", "nome": "Vende aparelho com a marca copiada (pirataria)", "termo": "pirataria" },
+    { "id": "descaminho", "nome": "Mercadoria do exterior que entrou sem pagar os tributos (descaminho)", "termo": "descaminho" },
+    { "id": "sem_selo", "nome": "Vende produto sem o selo obrigatório de segurança", "termo": "certificacao" }
+  ],
+  "suspeitos": [
+    {
+      "id": "diego",
+      "nome": "Diego",
+      "empresa": "Conecta Celulares",
+      "perfil": "Loja pequena e colorida, com música alta na porta. Diego conhece todos os modelos de celular de cor.",
+      "aparencia": { "pele": "#e0ac69", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#4a90d9", "calca": "#2b2b2b", "acessorios": [] },
+      "indicios": ["falsificado", "descaminho", "sem_selo"]
+    },
+    {
+      "id": "marta",
+      "nome": "Marta",
+      "empresa": "Bazar Mil Coisas",
+      "perfil": "Vende de tudo um pouco: panela, fone, guarda-chuva e enfeite de festa. A loja vive cheia de gente.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#8a5a44", "estiloCabelo": "coque", "camisa": "#e5675d", "calca": "#6b4f6b", "acessorios": ["oculos"] },
+      "indicios": ["falsificado", "sem_selo"]
+    },
+    {
+      "id": "caio",
+      "nome": "Caio",
+      "empresa": "Games Point",
+      "perfil": "Loja de videogames com uma TV na vitrine. Organiza campeonatos no fim de semana.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2c5aa0", "acessorios": [] },
+      "indicios": ["descaminho"]
+    },
+    {
+      "id": "sueli",
+      "nome": "Sueli",
+      "empresa": "Brinquedos Alegria",
+      "perfil": "Loja de brinquedos que existe desde que os pais dos alunos de hoje eram crianças.",
+      "aparencia": { "pele": "#c68642", "cabelo": "#d6d6d6", "estiloCabelo": "longo", "camisa": "#f4d35e", "calca": "#3d5a80", "acessorios": ["avental"] },
+      "indicios": ["sem_selo"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "aduana",
+      "nome": "Receita Federal (aduana)",
+      "pista": "No posto de fiscalização da estrada, a Receita apreendeu caixas de mercadoria importada com etiqueta de entrega para a empresa denunciada. Não há nenhuma declaração de importação, nem tributo pago.",
+      "variacoes": [
+        "As caixas apreendidas num ônibus de excursão levam o endereço da empresa denunciada. Mercadoria do exterior que entrou sem passar pela aduana e sem pagar os tributos: é descaminho."
+      ],
+      "indicio": "descaminho",
+      "forca": "forte",
+      "icone": "aduana",
+      "testemunha": { "nome": "Dra. Lia, auditora da Receita Federal", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#2f4b7c", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "apreensoes", "rotulo": "Consultar as apreensões e as declarações de importação", "revela": true },
+        { "id": "imposto", "rotulo": "Perguntar como funciona o imposto de importação", "texto": "Dra. Lia explica que quem traz mercadoria do exterior precisa declarar e pagar os tributos. Útil, mas não aponta ninguém." },
+        { "id": "galpao", "rotulo": "Pedir para ver o galpão de apreensões", "texto": "Montanhas de caixas, sem dizer de quem é cada uma. Sem o registro da apreensão, é só um galpão cheio." }
+      ]
+    },
+    {
+      "id": "rodoviaria",
+      "nome": "Rodoviária",
+      "pista": "\"Toda semana chega sacola grande dos ônibus de excursão para a empresa denunciada, sempre de madrugada\", conta Zé Carlos. Mercadoria que viaja escondida para fugir da fiscalização.",
+      "indicio": "descaminho",
+      "forca": "fraca",
+      "icone": "rodoviaria",
+      "testemunha": { "nome": "Zé Carlos, carregador de malas", "aparencia": { "pele": "#c68642", "cabelo": "#3b2a1a", "estiloCabelo": "bone", "camisa": "#f3722c", "calca": "#3a3a3a", "acessorios": [] } },
+      "acoes": [
+        { "id": "carregador", "rotulo": "Conversar com o carregador de malas", "revela": true },
+        { "id": "painel", "rotulo": "Olhar o painel de horários", "texto": "Os horários dos ônibus estão ali, mas não dizem o que cada um carrega." },
+        { "id": "revistar", "rotulo": "Revistar as malas por conta própria", "texto": "Você não pode revistar ninguém sem autorização. Prova conseguida assim não valeria." }
+      ]
+    },
+    {
+      "id": "escritorio_marca",
+      "nome": "Escritório da fabricante",
+      "pista": "Rui confere os números de série dos celulares comprados na empresa denunciada: nenhum existe no cadastro da fábrica. São cópias com o logotipo da marca. Isso é pirataria.",
+      "variacoes": [
+        "Rui abre um dos aparelhos vendidos pela empresa denunciada: o logotipo é igual, mas as peças são de imitação. A fábrica nunca produziu aquele celular."
+      ],
+      "indicio": "falsificado",
+      "forca": "forte",
+      "icone": "marca",
+      "testemunha": { "nome": "Rui, representante da fabricante", "aparencia": { "pele": "#f1c27d", "cabelo": "#5a3825", "estiloCabelo": "curto", "camisa": "#f2f2f2", "calca": "#2b2b2b", "acessorios": ["gravata", "cracha"] } },
+      "acoes": [
+        { "id": "serie", "rotulo": "Pedir para conferir os números de série", "revela": true },
+        { "id": "preco", "rotulo": "Perguntar o preço oficial dos aparelhos", "texto": "O preço oficial é bem mais alto. Barato demais é sinal de alerta, mas não prova nada sozinho." },
+        { "id": "brinde", "rotulo": "Pedir um brinde", "texto": "Você ganhou um chaveiro. A investigação não ganhou nada." }
+      ]
+    },
+    {
+      "id": "assistencia",
+      "nome": "Assistência técnica",
+      "pista": "\"Os celulares da empresa denunciada chegam aqui com peças de imitação e não aceitam a atualização da fábrica\", conta Nanda. Por fora parecem originais; por dentro, não.",
+      "indicio": "falsificado",
+      "forca": "fraca",
+      "icone": "assistencia",
+      "testemunha": { "nome": "Nanda, técnica de celular", "aparencia": { "pele": "#8d5524", "cabelo": "#7b4bb7", "estiloCabelo": "longo", "camisa": "#5cc28a", "calca": "#2c5aa0", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "defeitos", "rotulo": "Perguntar que aparelhos chegam com defeito", "revela": true },
+        { "id": "conserto", "rotulo": "Mandar consertar o seu celular", "texto": "Seu celular ficou ótimo. O caso continua parado." },
+        { "id": "clientes", "rotulo": "Pedir a lista de clientes", "texto": "Nanda não pode entregar dados dos clientes. Sem pedido oficial, não dá." }
+      ]
+    },
+    {
+      "id": "procon",
+      "nome": "Procon",
+      "pista": "Várias reclamações iguais: carregadores comprados na empresa denunciada esquentaram até derreter. Nenhum tinha o selo de segurança na caixa.",
+      "indicio": "sem_selo",
+      "forca": "fraca",
+      "icone": "junta",
+      "testemunha": { "nome": "Dona Sônia, atendente do Procon", "aparencia": { "pele": "#e0ac69", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#4a90d9", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "reclamacoes", "rotulo": "Ler as reclamações dos consumidores", "revela": true },
+        { "id": "garantia", "rotulo": "Perguntar sobre garantia", "texto": "Dona Sônia explica que todo produto tem garantia prevista em lei. Importante, mas não aponta ninguém." },
+        { "id": "camelo", "rotulo": "Comprar um carregador na porta do Procon", "texto": "Um vendedor oferece carregador a R$ 5. Você recusa: é o barato que sai caro." }
+      ]
+    },
+    {
+      "id": "laboratorio",
+      "nome": "Laboratório de ensaios",
+      "pista": "Os carregadores apreendidos na empresa denunciada passaram pelo teste: esquentam a mais de 90 °C e não têm a certificação da Anatel. Produto sem certificação pode dar choque e causar incêndio.",
+      "indicio": "sem_selo",
+      "forca": "forte",
+      "icone": "laboratorio",
+      "liberadoPor": "procon",
+      "testemunha": { "nome": "Dr. Sérgio, engenheiro do laboratório", "aparencia": { "pele": "#e0ac69", "cabelo": "#e8e8e8", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#3a3a3a", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "laudo", "rotulo": "Pedir o laudo dos carregadores apreendidos", "revela": true },
+        { "id": "testar", "rotulo": "Pedir para testar o seu carregador", "texto": "O seu passou no teste. Bom para você, mas não ajuda no caso." },
+        { "id": "selo", "rotulo": "Perguntar para que serve o selo", "texto": "Dr. Sérgio explica que o selo mostra que o produto passou nos testes de segurança. Boa aula, mas não aponta ninguém." }
+      ]
+    },
+    {
+      "id": "correios",
+      "nome": "Agência dos Correios",
+      "pista": "Márcia mostra como funciona uma compra legal do exterior: a encomenda é declarada e paga os tributos antes de ser entregue. \"Quem declara paga o imposto. Quem esconde a mercadoria, sonega.\"",
+      "indicio": null,
+      "icone": "transportadora",
+      "testemunha": { "nome": "Márcia, atendente dos Correios", "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "importar", "rotulo": "Perguntar como chega uma compra do exterior", "revela": true },
+        { "id": "carta", "rotulo": "Mandar uma carta", "texto": "Carta enviada! Mas não era isso que você veio fazer." },
+        { "id": "pacotes", "rotulo": "Perguntar quem recebe mais pacotes", "texto": "Márcia não pode falar das encomendas dos clientes: é sigilo de correspondência." }
+      ]
+    },
+    {
+      "id": "escola",
+      "nome": "Escola Estadual (grêmio)",
+      "pista": "Kauã conta que metade da turma comprou fone \"de marca\" por R$ 20. \"Quebrou em uma semana, e não deu para trocar.\" O produto pirata parece economia, mas não paga tributo e tira o emprego de quem trabalha certo.",
+      "indicio": null,
+      "icone": "escola",
+      "testemunha": { "nome": "Kauã, aluno do grêmio", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#f4d35e", "calca": "#2c5aa0", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "turma", "rotulo": "Perguntar o que a turma anda comprando", "revela": true },
+        { "id": "quimica", "rotulo": "Ajudar no trabalho de química", "texto": "Você lembrou a tabela periódica inteira! Mas o caso não andou." },
+        { "id": "barato", "rotulo": "Perguntar quem vende mais barato", "texto": "Cada aluno fala uma loja. Preço baixo não é prova." }
+      ]
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "No portal, a segunda viatura do Corpo de Bombeiros aparece parada há um ano, sem verba para o conserto. Os tributos que deixam de entrar com mercadoria pirata e contrabandeada chegam a R$ 180.000 (valor fictício). O portal é público: consultar não gastou nenhum dia.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true,
+      "custoDias": 0,
+      "icone": "portal",
+      "acoes": [
+        { "id": "bombeiros", "rotulo": "Ver a verba dos bombeiros", "revela": true },
+        { "id": "festas", "rotulo": "Ver os gastos com festas da cidade", "texto": "Tudo público, como deve ser. Mas não é isso que você procura." },
+        { "id": "diarias", "rotulo": "Ver as diárias de viagem dos servidores", "texto": "Estão todas lá, uma por uma. Não ajudam no caso." }
+      ]
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 180000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O valor recuperado volta aos cofres públicos e coloca a viatura dos bombeiros de volta na rua.",
+    "detalhes": [
+      "R$ 110.000 para consertar a viatura e a escada.",
+      "R$ 40.000 para mangueiras e roupas de proteção.",
+      "R$ 30.000 para uma campanha nas escolas sobre carregador falsificado."
+    ]
+  },
+  "gancho": "Na fila da aduana, alguém comenta que um negócio de serviços do centro vive lotado, mas quase nunca emite nota. Serviço também paga imposto: o ISS. E o telhado do Ginásio Municipal continua furado.",
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "A mercadoria pirata foi apreendida, a loja foi autuada e os tributos devidos foram cobrados. A viatura dos bombeiros volta para a rua.",
+      "ensina": "Produto pirata ou contrabandeado parece barato, mas não paga tributo, pode ser perigoso por não ter certificação e prejudica quem vende certo. Comprar com nota e com selo também é cidadania.",
+      "perguntasDebate": [
+        "Você já comprou algo barato demais que estragou logo? O que estava por trás desse preço?",
+        "Por que o produto pirata prejudica também quem não comprou nada?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a pessoa certa, mas as provas não a diferenciam das outras lojas do centro. O auto foi anulado.",
+      "ensina": "Mais de uma loja vende produto sem selo ou com marca copiada. A prova precisa mostrar o que só a loja denunciada fez.",
+      "perguntasDebate": [
+        "Que indício só a loja denunciada tinha?",
+        "Por que a prova precisa separar o culpado de todos os outros?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Você autuou uma loja que não era a denunciada. A mercadoria pirata continua chegando pela estrada.",
+      "ensina": "Ter um problema não faz de alguém o responsável pela denúncia. Acusar errado prejudica um inocente e deixa a fraude seguir.",
+      "perguntasDebate": [
+        "Que indício faltava à loja que você acusou?",
+        "Como uma acusação errada afeta um comerciante pequeno?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem auto de infração. Os carregadores falsos continuam à venda, e a viatura continua parada.",
+      "ensina": "Fiscalizar exige escolher bem onde gastar o tempo. Laudo e registro de apreensão valem mais que palpite.",
+      "perguntasDebate": [
+        "Quais locais trouxeram documentos e quais trouxeram só conversa?",
+        "Por onde você começaria se jogasse de novo?"
+      ]
+    }
+  },
+  "moradores": [
+    { "nome": "Dona Cida, costureira", "aparencia": { "pele": "#c68642", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#8e6c8a", "calca": "#3a3a3a", "acessorios": ["oculos"] }, "fala": "Comprei um carregador na {empresa} e ele esquentou tanto que derreteu a tomada. Nem selo tinha na caixa!", "verdadeira": true },
+    { "nome": "Pedro, motoboy", "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#e5675d", "calca": "#2c5aa0" }, "fala": "Dizem que {inocente} traz mercadoria escondida da fronteira. Mas quem me contou foi o primo do vizinho...", "verdadeira": false },
+    { "nome": "Seu Nestor, bombeiro aposentado", "aparencia": { "pele": "#8d5524", "cabelo": "#e8e8e8", "estiloCabelo": "careca", "camisa": "#d64545", "calca": "#2b2b2b" }, "fala": "Muito incêndio em casa que atendi começou em carregador falsificado. Barato que sai caro, viu?", "verdadeira": true }
+  ],
+  "quiz": [
+    {
+      "id": "descaminho",
+      "pergunta": "O que é descaminho?",
+      "opcoes": [
+        "Trazer do exterior uma mercadoria permitida sem pagar os tributos de importação.",
+        "Pegar o caminho errado na estrada.",
+        "Vender um produto nacional sem dar desconto."
+      ],
+      "correta": 0,
+      "explicacao": "Descaminho é importar mercadoria permitida escondendo-a da aduana para não pagar os tributos. Trazer mercadoria proibida é outro crime: o contrabando."
+    },
+    {
+      "id": "pirata",
+      "pergunta": "Por que o produto pirata é um problema, além da qualidade?",
+      "opcoes": [
+        "Não é problema: o barato compensa.",
+        "Não paga tributo, pode ser perigoso por não ter certificação e prejudica quem trabalha certo.",
+        "Porque ele é sempre mais caro que o original."
+      ],
+      "correta": 1,
+      "explicacao": "O produto pirata copia a marca de outra empresa, não paga os tributos e não passa pelos testes de segurança. A cidade perde arrecadação e empregos."
+    },
+    {
+      "id": "selo",
+      "pergunta": "O selo da Anatel ou do Inmetro na caixa de um produto mostra que...",
+      "opcoes": [
+        "o produto é importado.",
+        "a loja pagou o aluguel em dia.",
+        "o produto passou por testes e cumpre as regras de segurança."
+      ],
+      "correta": 2,
+      "explicacao": "Carregadores e celulares precisam da certificação da Anatel; brinquedos, do Inmetro. Sem ela, não há garantia de que o produto é seguro."
+    }
+  ],
+  "glossario": [
+    { "id": "pirataria", "termo": "Pirataria", "definicao": "Fabricar ou vender cópia de um produto usando a marca de outra empresa sem autorização. Além de enganar o consumidor, não paga os tributos." },
+    { "id": "descaminho", "termo": "Descaminho", "definicao": "Trazer do exterior uma mercadoria permitida sem declarar e sem pagar os tributos de importação. Se a mercadoria for proibida, o crime é outro: contrabando." },
+    { "id": "certificacao", "termo": "Certificação (selo)", "definicao": "Sinal de que o produto passou por testes de segurança. Carregadores e celulares são certificados pela Anatel; brinquedos e outros produtos, pelo Inmetro." }
+  ]
+}

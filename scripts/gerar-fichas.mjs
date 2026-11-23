@@ -2,7 +2,7 @@
 // Uso: node scripts/gerar-fichas.mjs   (rode de novo sempre que editar um caso)
 import { readFileSync, writeFileSync } from 'node:fs'
 
-const ids = ['001', '002', '003', '004']
+const ids = ['001', '002', '003', '004', '005', '006', '007']
 const casos = ids.map((n) => JSON.parse(readFileSync(new URL(`../src/data/caso-${n}.json`, import.meta.url), 'utf8')))
 
 const nomeIndicio = (c, id) => c.indicios.find((i) => i.id === id)?.nome ?? id
@@ -24,7 +24,7 @@ const partes = [
 > Arquivo gerado por \`node scripts/gerar-fichas.mjs\` a partir de \`src/data/caso-*.json\`.
 > Vale para o **modo história** (no modo desafio, o culpado é sorteado).
 
-**Regra do auto:** as 2 provas precisam ser indícios que o culpado tem **e**, juntas, descartar todos os
+**Regra do auto:** as provas (2 na maioria dos casos; 3 no caso 007) precisam ser indícios que o culpado tem **e**, juntas, descartar todos os
 outros suspeitos. Cada visita só rende o indício se o jogador escolher a **abordagem certa** dentro do local.
 `,
 ]
@@ -41,13 +41,17 @@ for (const [k, c] of casos.entries()) {
     })
     .join('\n')
 
-  const pares = []
-  for (let i = 0; i < c.locais.length; i++) {
-    for (let j = i + 1; j < c.locais.length; j++) {
-      if (provasValidas(c, [c.locais[i].id, c.locais[j].id])) pares.push(`- ${c.locais[i].nome} + ${c.locais[j].nome}`)
-    }
-  }
-  const total = (c.locais.length * (c.locais.length - 1)) / 2
+  // Todas as combinações de locais do tamanho exigido (duplas ou trios)
+  const combinacoes = (inicio, escolhidos) =>
+    escolhidos.length === c.provasExigidas
+      ? [escolhidos]
+      : c.locais.slice(inicio).flatMap((l, d) => combinacoes(inicio + d + 1, [...escolhidos, l]))
+  const todas = combinacoes(0, [])
+  const pares = todas
+    .filter((grupo) => provasValidas(c, grupo.map((l) => l.id)))
+    .map((grupo) => `- ${grupo.map((l) => l.nome).join(' + ')}`)
+  const total = todas.length
+  const grupo = c.provasExigidas === 2 ? 'Duplas' : 'Trios'
 
   const suspeitos = c.suspeitos
     .map((s) => `| ${s.nome} (${s.empresa}) | ${s.indicios.map((i) => nomeIndicio(c, i)).join(', ')} | ${s.id === c.culpadoId ? '**culpado**' : s.indicios.length === c.indicios.length - 1 ? 'armadilha' : 'inocente'} |`)
@@ -60,7 +64,7 @@ for (const [k, c] of casos.entries()) {
   partes.push(`
 ## Caso ${ids[k]}: ${c.titulo}
 
-**Tema:** ${c.tema}. **Culpado:** ${culpado.nome} (${culpado.empresa}). **Dias:** ${c.diasIniciais}.
+**Tema:** ${c.tema}. **Culpado:** ${culpado.nome} (${culpado.empresa}). **Dias:** ${c.diasIniciais}. **Provas exigidas:** ${c.provasExigidas}.
 
 ### Suspeitos
 
@@ -74,7 +78,7 @@ ${suspeitos}
 |---|---|---|---|
 ${locais}
 
-### Duplas que resolvem o caso (${pares.length} de ${total})
+### ${grupo} que resolvem o caso (${pares.length} de ${total})
 
 ${pares.join('\n')}
 

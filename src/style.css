@@ -1936,3 +1936,19 @@ kbd {
   background: var(--destaque);
   color: #1b2430;
 }
+
+/* Vidas: autos errados que ainda dá para emitir */
+.vidas {
+  display: inline-flex;
+  gap: 0.15rem;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.coracao {
+  color: #d64545;
+}
+
+.coracao.perdido {
+  color: #9aa1ab;
+}

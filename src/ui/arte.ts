@@ -378,6 +378,80 @@ const PREDIOS: Record<string, string> = {
     <rect x="50" y="24" width="18" height="38" fill="#c9ced6" stroke="${CONTORNO}" stroke-width="2"/>
     ${[28, 34, 40, 46, 52].map((y) => `<rect x="50" y="${y}" width="18" height="1.5" fill="#8a8f98"/>`).join('')}
     ${porta(34, 46)}`,
+  // Corpo de Bombeiros: quartel vermelho com portão e sirene
+  bombeiros: `
+    <rect x="8" y="18" width="64" height="44" fill="#d64545" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="4" y="12" width="72" height="8" fill="#a83232" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="34" y="4" width="12" height="8" rx="3" fill="#f4d35e" stroke="${CONTORNO}" stroke-width="1.5"/>
+    <rect x="12" y="30" width="30" height="32" fill="#f5f1e6" stroke="${CONTORNO}" stroke-width="2"/>
+    ${[36, 42, 48, 54].map((y) => `<rect x="12" y="${y}" width="30" height="1.5" fill="#c9ced6"/>`).join('')}
+    ${janelas(50, 26, 2, 1)}
+    ${porta(52, 46)}`,
+  // Receita Federal (aduana): posto com cancela listrada
+  aduana: `
+    <rect x="10" y="16" width="44" height="46" fill="#2f4b7c" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="6" y="10" width="52" height="8" fill="#1b2430" stroke="${CONTORNO}" stroke-width="2"/>
+    ${janelas(16, 22, 3, 1)}
+    <rect x="58" y="34" width="6" height="28" fill="#8a8f98" stroke="${CONTORNO}"/>
+    <rect x="40" y="30" width="38" height="5" fill="#f2f2f2" stroke="${CONTORNO}"/>
+    ${[44, 54, 64, 74].map((x) => `<rect x="${x}" y="30" width="4" height="5" fill="#d64545"/>`).join('')}
+    ${porta(24, 46)}`,
+  // Rodoviária: cobertura com ônibus parado
+  rodoviaria: `
+    <polygon points="4,22 76,22 70,12 10,12" fill="#f4d35e" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="10" y="22" width="4" height="40" fill="#8a8f98"/><rect x="66" y="22" width="4" height="40" fill="#8a8f98"/>
+    <rect x="16" y="32" width="48" height="22" rx="3" fill="#4a90d9" stroke="${CONTORNO}" stroke-width="2"/>
+    ${[20, 30, 40, 50].map((x) => `<rect x="${x}" y="36" width="8" height="7" fill="#bfe3ff" stroke="${CONTORNO}"/>`).join('')}
+    <rect x="21" y="52" width="7" height="7" rx="3" fill="${CONTORNO}"/><rect x="52" y="52" width="7" height="7" rx="3" fill="${CONTORNO}"/>`,
+  // Escritório da fabricante: torre com a marca registrada
+  marca: `
+    <rect x="16" y="6" width="48" height="56" fill="#dbe4ee" stroke="${CONTORNO}" stroke-width="2"/>
+    <circle cx="40" cy="20" r="9" fill="#fff" stroke="${CONTORNO}" stroke-width="2"/>
+    <text x="40" y="24" text-anchor="middle" font-size="11" font-weight="700" fill="${CONTORNO}">R</text>
+    ${janelas(22, 32, 4, 1)}
+    ${porta(34, 46)}`,
+  // Assistência técnica: loja com chave inglesa e celular
+  assistencia: `
+    <rect x="10" y="14" width="60" height="48" fill="#5cc28a" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="18" y="18" width="12" height="22" rx="2" fill="#1b2430" stroke="${CONTORNO}" stroke-width="1.5"/><rect x="20" y="21" width="8" height="14" fill="#9ad1f5"/>
+    <rect x="46" y="26" width="18" height="4" rx="2" fill="#8a8f98" stroke="${CONTORNO}" transform="rotate(-35 55 28)"/>
+    <circle cx="61" cy="22" r="4" fill="none" stroke="${CONTORNO}" stroke-width="2"/>
+    ${porta(34, 46)}`,
+  // Laboratório de ensaios: prédio branco com frasco
+  laboratorio: `
+    <rect x="10" y="12" width="60" height="50" fill="#f5f1e6" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="6" y="8" width="68" height="6" fill="#2a9d8f" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="23" y="18" width="6" height="8" fill="#bfe3ff" stroke="${CONTORNO}"/>
+    <polygon points="22,26 30,26 36,40 16,40" fill="#9ad1f5" stroke="${CONTORNO}" stroke-width="1.5"/>
+    <rect x="18" y="34" width="16" height="5" fill="#5cc28a"/>
+    ${janelas(48, 20, 2, 2)}
+    ${porta(34, 46)}`,
+  // Ginásio municipal: telhado curvo com um buraco e uma bola
+  ginasio: `
+    <path d="M6 28 Q40 2 74 28 Z" fill="#8a8f98" stroke="${CONTORNO}" stroke-width="2"/>
+    <polygon points="44,16 52,17 49,23" fill="#1b2430"/>
+    <rect x="8" y="28" width="64" height="34" fill="#f9c74f" stroke="${CONTORNO}" stroke-width="2"/>
+    <circle cx="18" cy="40" r="6" fill="#f3722c" stroke="${CONTORNO}" stroke-width="1.5"/><path d="M12 40 H24 M18 34 V46" stroke="${CONTORNO}" stroke-width="1"/>
+    ${janelas(52, 34, 2, 1)}
+    ${porta(34, 46)}`,
+  // Ponte pela metade: pilares e pista que param no meio do rio
+  ponte: `
+    <rect x="2" y="48" width="76" height="14" fill="#4a90d9" stroke="${CONTORNO}" stroke-width="2"/>
+    <path d="M6 54 h8 M22 58 h10 M44 54 h8 M60 58 h10" stroke="#bfe3ff" stroke-width="1.5"/>
+    <rect x="2" y="24" width="44" height="7" fill="#c9ced6" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="14" y="31" width="7" height="18" fill="#a5abb4" stroke="${CONTORNO}" stroke-width="1.5"/>
+    <rect x="36" y="31" width="7" height="18" fill="#a5abb4" stroke="${CONTORNO}" stroke-width="1.5"/>
+    <rect x="58" y="40" width="7" height="9" fill="#a5abb4" stroke="${CONTORNO}" stroke-width="1.5" stroke-dasharray="3 2"/>
+    <rect x="46" y="16" width="14" height="8" fill="#f4d35e" stroke="${CONTORNO}" stroke-width="1.5"/>
+    <rect x="52" y="24" width="2" height="7" fill="${CONTORNO}"/>`,
+  // Tribunal de Contas: prédio de colunas com balança
+  tribunal: `
+    <polygon points="6,20 40,4 74,20" fill="#d8d2bf" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="10" y="20" width="60" height="42" fill="#f5f1e6" stroke="${CONTORNO}" stroke-width="2"/>
+    <rect x="16" y="24" width="6" height="22" fill="#e9e4d4" stroke="${CONTORNO}"/><rect x="58" y="24" width="6" height="22" fill="#e9e4d4" stroke="${CONTORNO}"/>
+    <rect x="39" y="8" width="2" height="9" fill="${CONTORNO}"/><rect x="32" y="10" width="16" height="1.5" fill="${CONTORNO}"/>
+    <path d="M31 11 l-3 5 h6 Z M49 11 l-3 5 h6 Z" fill="#e8b04b" stroke="${CONTORNO}" stroke-width="1"/>
+    ${porta(34, 46)}`,
   // Prédio genérico (casos novos sem ícone)
   generico: `
     <rect x="14" y="10" width="52" height="52" fill="#8a8f98" stroke="${CONTORNO}" stroke-width="2"/>

@@ -1,0 +1,288 @@
+{
+  "id": "caso-007",
+  "titulo": "A obra que nunca terminou",
+  "tema": "Corrupção e controle social",
+  "marco": { "nome": "Ponte do Rio Aurora", "icone": "ponte", "tag": "Pela metade" },
+  "abertura": "A ponte do Rio Aurora ligaria o Jardim Aurora ao centro. A prefeitura já pagou 100% do contrato, mas só metade da ponte existe. Quando o dinheiro público é desviado, o efeito é o mesmo do tributo sonegado: a obra para e a cidade paga duas vezes. Desta vez você trabalha junto com o Tribunal de Contas, o órgão que fiscaliza como o dinheiro público é gasto.",
+  "briefing": "Cinco empresas trabalharam na ponte, e uma delas recebeu por serviço que nunca fez. O caso é mais difícil: o auto precisa de 3 provas, porque várias empresas têm algum problema e só a combinação certa separa a responsável. Por isso você tem 4 dias para descobrir quem.",
+  "diasIniciais": 4,
+  "custoVisitaDias": 1,
+  "provasExigidas": 3,
+  "culpadoId": "vanessa",
+  "indicios": [
+    { "id": "medicao_falsa", "nome": "Recebeu por etapa da obra que não foi feita (medição falsa)", "termo": "medicao" },
+    { "id": "superfaturamento", "nome": "Cobrou preço muito acima do mercado", "termo": "superfaturamento" },
+    { "id": "sem_estrutura", "nome": "Não tem trabalhadores nem máquinas para o serviço que cobrou", "termo": "empresa_fachada" },
+    { "id": "saque", "nome": "Sacou em dinheiro vivo logo depois de cada pagamento", "termo": "rastro_dinheiro" }
+  ],
+  "suspeitos": [
+    {
+      "id": "vanessa",
+      "nome": "Vanessa",
+      "empresa": "Construtora Alicerce",
+      "perfil": "Engenheira de terno impecável. Diz em toda entrevista que a ponte vai mudar a cidade.",
+      "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "coque", "camisa": "#1b2430", "calca": "#2b2b2b", "acessorios": ["oculos"] },
+      "indicios": ["medicao_falsa", "superfaturamento", "sem_estrutura", "saque"]
+    },
+    {
+      "id": "edson",
+      "nome": "Edson",
+      "empresa": "Concreto Forte",
+      "perfil": "Dono da usina de concreto. Seus caminhões betoneira são conhecidos na região toda.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#f3722c", "calca": "#3a3a3a", "acessorios": [] },
+      "indicios": ["medicao_falsa", "superfaturamento", "saque"]
+    },
+    {
+      "id": "luana",
+      "nome": "Luana",
+      "empresa": "Ferragens Aço Bom",
+      "perfil": "Herdou a empresa do pai e vende vergalhão e tela de aço para quase todas as obras.",
+      "aparencia": { "pele": "#c68642", "cabelo": "#8a5a44", "estiloCabelo": "longo", "camisa": "#4a90d9", "calca": "#2c5aa0", "acessorios": [] },
+      "indicios": ["superfaturamento", "sem_estrutura", "saque"]
+    },
+    {
+      "id": "mauro",
+      "nome": "Mauro",
+      "empresa": "Topografia Exata",
+      "perfil": "Mede terrenos com um tripé e uma luneta. Fala de ângulos como quem fala de futebol.",
+      "aparencia": { "pele": "#e0ac69", "cabelo": "#5a3825", "estiloCabelo": "bone", "camisa": "#a3b18a", "calca": "#5a3825", "acessorios": [] },
+      "indicios": ["medicao_falsa", "sem_estrutura"]
+    },
+    {
+      "id": "celia",
+      "nome": "Célia",
+      "empresa": "Transportes Rio Claro",
+      "perfil": "Começou com um caminhão só. Hoje tem doze e ainda dirige um deles toda semana.",
+      "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#f4d35e", "calca": "#3d5a80", "acessorios": [] },
+      "indicios": ["saque"]
+    }
+  ],
+  "locais": [
+    {
+      "id": "vistoria",
+      "nome": "Vistoria na ponte",
+      "pista": "Com a trena e o projeto na mão, Marcão mede: a empresa denunciada recebeu por três pilares e pela pista, mas só um pilar existe. Mesmo assim, o boletim de medição foi assinado como se tudo estivesse pronto.",
+      "variacoes": [
+        "Marcão compara o boletim de medição com a obra: a etapa que a empresa denunciada diz ter entregado simplesmente não está lá. O papel diz 100%; o rio mostra outra coisa."
+      ],
+      "indicio": "medicao_falsa",
+      "forca": "forte",
+      "icone": "obras",
+      "testemunha": { "nome": "Marcão, fiscal de obras", "aparencia": { "pele": "#e0ac69", "cabelo": "#5a3825", "estiloCabelo": "bone", "camisa": "#f3722c", "calca": "#3a3a3a", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "medir", "rotulo": "Medir a obra com o projeto na mão", "revela": true },
+        { "id": "foto", "rotulo": "Fotografar a ponte da outra margem", "texto": "De longe, a ponte parece só atrasada. Sem medir, não dá para provar nada." },
+        { "id": "prazo", "rotulo": "Perguntar quando a obra termina", "texto": "\"Isso quem diz é o contrato, não eu\", responde Marcão." }
+      ]
+    },
+    {
+      "id": "pedreiro",
+      "nome": "Conversa com pedreiro demitido",
+      "pista": "\"Mandaram a gente embora em março. Depois disso, ninguém mais trabalhou na parte da empresa denunciada, mas os boletins continuaram dizendo que a obra andava\", conta Ivan.",
+      "indicio": "medicao_falsa",
+      "forca": "fraca",
+      "icone": "casa",
+      "testemunha": { "nome": "Ivan, pedreiro", "aparencia": { "pele": "#c68642", "cabelo": "#1f1a17", "estiloCabelo": "bone", "camisa": "#e5675d", "calca": "#3d5a80", "acessorios": [] } },
+      "acoes": [
+        { "id": "calma", "rotulo": "Conversar com calma", "revela": true },
+        { "id": "pagar", "rotulo": "Oferecer dinheiro pela informação", "texto": "Ivan se ofende e vai embora. Pagar por depoimento é errado e estraga a prova." },
+        { "id": "salario", "rotulo": "Perguntar do salário atrasado", "texto": "Ivan desabafa sobre as contas do mês, mas isso não ajuda no caso." }
+      ]
+    },
+    {
+      "id": "tribunal",
+      "nome": "Tribunal de Contas",
+      "pista": "Dra. Regina comparou os preços do contrato com os de mercado: a empresa denunciada cobrou o triplo pelo mesmo serviço. Isso é superfaturamento.",
+      "indicio": "superfaturamento",
+      "forca": "forte",
+      "icone": "tribunal",
+      "testemunha": { "nome": "Dra. Regina, auditora de controle externo", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#2f4b7c", "calca": "#2b2b2b", "acessorios": ["oculos", "cracha"] } },
+      "acoes": [
+        { "id": "precos", "rotulo": "Pedir a comparação de preços do contrato", "revela": true },
+        { "id": "todas", "rotulo": "Pedir a lista de todas as obras do estado", "texto": "São milhares de obras. Sem foco, é papel demais e pista de menos." },
+        { "id": "culpado", "rotulo": "Perguntar se ela já sabe quem é o culpado", "texto": "\"O Tribunal julga com prova, não com palpite\", ela responde." }
+      ]
+    },
+    {
+      "id": "loja_material",
+      "nome": "Loja de material de construção",
+      "pista": "\"O mesmo material que a empresa denunciada cobrou da prefeitura por R$ 30 eu vendo por R$ 10\", diz Gilda, mostrando a tabela de preços.",
+      "indicio": "superfaturamento",
+      "forca": "fraca",
+      "icone": "atacado",
+      "testemunha": { "nome": "Gilda, vendedora", "aparencia": { "pele": "#f1c27d", "cabelo": "#e07a5f", "estiloCabelo": "longo", "camisa": "#5cc28a", "calca": "#2b2b2b", "acessorios": ["avental"] } },
+      "acoes": [
+        { "id": "tabela", "rotulo": "Comparar a tabela de preços com o contrato", "revela": true },
+        { "id": "cimento", "rotulo": "Comprar um saco de cimento", "texto": "Agora você tem um saco de cimento. O caso, nenhuma prova nova." },
+        { "id": "quem", "rotulo": "Perguntar quem compra mais na loja", "texto": "Gilda não comenta sobre clientes. E quem compra muito não é, por isso, culpado." }
+      ]
+    },
+    {
+      "id": "sindicato",
+      "nome": "Sindicato da Construção",
+      "pista": "Josué confere os registros: a empresa denunciada não tem nenhum trabalhador registrado e nunca alugou máquina na cidade. Como fez a parte dela na ponte?",
+      "indicio": "sem_estrutura",
+      "forca": "forte",
+      "icone": "junta",
+      "testemunha": { "nome": "Josué, diretor do sindicato", "aparencia": { "pele": "#e0ac69", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#d64545", "calca": "#3a3a3a", "acessorios": ["cracha"] } },
+      "acoes": [
+        { "id": "registros", "rotulo": "Consultar os trabalhadores registrados", "revela": true },
+        { "id": "greve", "rotulo": "Perguntar sobre a greve do ano passado", "texto": "Josué conta a história da greve com orgulho. Boa história, outro assunto." },
+        { "id": "assembleia", "rotulo": "Pedir para falar na assembleia", "texto": "Você faz um discurso sobre tributos. Aplausos, mas nenhuma prova." }
+      ]
+    },
+    {
+      "id": "endereco",
+      "nome": "Endereço da empresa",
+      "pista": "\"Aí é uma sala vazia. Nunca vi caminhão, nem peão, nem máquina\", conta Dona Zuleide sobre o endereço da empresa denunciada.",
+      "indicio": "sem_estrutura",
+      "forca": "fraca",
+      "icone": "deposito",
+      "liberadoPor": "sindicato",
+      "testemunha": { "nome": "Dona Zuleide, vizinha", "aparencia": { "pele": "#8d5524", "cabelo": "#e8e8e8", "estiloCabelo": "coque", "camisa": "#8e6c8a", "calca": "#5a3825", "acessorios": ["oculos"] } },
+      "acoes": [
+        { "id": "vizinha", "rotulo": "Conversar com a vizinha", "revela": true },
+        { "id": "forcar", "rotulo": "Forçar a porta para olhar dentro", "texto": "Entrar sem ordem judicial é ilegal, e a prova não valeria." },
+        { "id": "placa", "rotulo": "Ler a placa da porta", "texto": "A placa tem só um nome e um telefone que ninguém atende. Não diz quem trabalha ali." }
+      ]
+    },
+    {
+      "id": "banco",
+      "nome": "Banco Aurora",
+      "pista": "Com o pedido oficial, o banco mostra: a cada pagamento da prefeitura, a empresa denunciada sacou quase tudo em dinheiro vivo no mesmo dia. Dinheiro em espécie não deixa rastro de para onde foi.",
+      "indicio": "saque",
+      "forca": "forte",
+      "icone": "banco",
+      "testemunha": { "nome": "Seu Ademar, gerente", "aparencia": { "pele": "#8d5524", "cabelo": "#1f1a17", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#2b2b2b", "acessorios": ["gravata"] } },
+      "acoes": [
+        { "id": "oficial", "rotulo": "Apresentar o pedido oficial, com autorização", "revela": true },
+        { "id": "sem", "rotulo": "Pedir o extrato sem autorização", "texto": "Seu Ademar recusa: sigilo bancário. Sem seguir o caminho legal, a prova nem valeria." },
+        { "id": "cofre", "rotulo": "Pedir para ver o cofre", "texto": "Seu Ademar ri. \"Nem eu vejo o cofre direito.\" Nada para o caso." }
+      ]
+    },
+    {
+      "id": "camara",
+      "nome": "Câmara Municipal (audiência pública)",
+      "pista": "Na audiência pública, Dona Graça mostra o abaixo-assinado pela ponte. \"Qualquer cidadão pode acompanhar a obra, pedir informação e denunciar.\" Controle social também é fiscalização.",
+      "indicio": null,
+      "icone": "fazenda",
+      "testemunha": { "nome": "Dona Graça, presidente da associação de moradores", "aparencia": { "pele": "#8d5524", "cabelo": "#d6d6d6", "estiloCabelo": "coque", "camisa": "#5cc28a", "calca": "#3d5a80", "acessorios": [] } },
+      "acoes": [
+        { "id": "audiencia", "rotulo": "Assistir à audiência pública", "revela": true },
+        { "id": "discurso", "rotulo": "Pedir para discursar", "texto": "Você fala bonito sobre a ponte. Aplausos, mas a investigação não andou." },
+        { "id": "politico", "rotulo": "Perguntar qual político é o culpado", "texto": "Acusação sem prova vira briga política, não fiscalização." }
+      ]
+    },
+    {
+      "id": "portal_transparencia",
+      "nome": "Portal da Transparência",
+      "pista": "No portal, o contrato da ponte aparece 100% pago, mas a obra está pela metade. A diferença chega a R$ 400.000 (valor fictício). O portal é público: consultar não gastou nenhum dia.",
+      "indicio": null,
+      "liberaRelatorioDetalhado": true,
+      "custoDias": 0,
+      "icone": "portal",
+      "acoes": [
+        { "id": "contrato", "rotulo": "Ver os pagamentos do contrato da ponte", "revela": true },
+        { "id": "festas", "rotulo": "Ver os gastos com festas da cidade", "texto": "Tudo público, como deve ser. Mas não é isso que você procura." },
+        { "id": "salarios", "rotulo": "Ver os salários dos servidores", "texto": "Estão todos lá, nome por nome. Não ajudam no caso." }
+      ]
+    }
+  ],
+  "impacto": {
+    "valorRecuperado": 400000,
+    "aviso": "Todos os valores são ilustrativos e fictícios.",
+    "resumo": "O dinheiro recuperado volta ao orçamento do município e termina a ponte do Rio Aurora.",
+    "detalhes": [
+      "R$ 300.000 para terminar os pilares e a pista da ponte.",
+      "R$ 70.000 para uma passarela de pedestres e ciclistas.",
+      "R$ 30.000 para placas e um site em que a população acompanha a obra."
+    ]
+  },
+  "gancho": "Na inauguração da ponte, Dona Helena aparece, já aposentada: \"Hospital, creche, praça, biblioteca, bombeiros, ginásio e ponte. A cidade recuperou muito dinheiro. Agora a pergunta é outra: como a cidade decide onde gastar?\" Fim da segunda temporada.",
+  "resultados": {
+    "resolvido": {
+      "titulo": "Caso resolvido",
+      "mensagem": "A empresa responsável foi autuada, e o caso seguiu para o Tribunal de Contas e o Ministério Público. A ponte vai ser terminada.",
+      "ensina": "Corrupção é desviar dinheiro público, e ele some do mesmo jeito que o tributo sonegado. Cruzar documentos (medição, preço, registros e pagamentos) é o que separa o culpado, e qualquer cidadão pode ajudar acompanhando as obras.",
+      "perguntasDebate": [
+        "Que obra do seu bairro você gostaria de acompanhar? Onde encontraria as informações dela?",
+        "Por que este caso precisou de três provas, e não de duas?"
+      ]
+    },
+    "auto_anulado": {
+      "titulo": "Auto anulado",
+      "mensagem": "Você acusou a empresa certa, mas as três provas não a separam das outras empresas da obra. O auto foi anulado.",
+      "ensina": "Nesta obra, várias empresas têm algum problema. Só a combinação certa de três provas mostra o que só a responsável fez.",
+      "perguntasDebate": [
+        "Que trio de provas teria separado a responsável das outras quatro?",
+        "Por que o superfaturamento, sozinho, não bastava?"
+      ]
+    },
+    "acusacao_injusta": {
+      "titulo": "Acusação injusta",
+      "mensagem": "Você autuou uma empresa que não era a responsável. O dinheiro da ponte continua sumido.",
+      "ensina": "Ter um problema na obra não faz de uma empresa a responsável pelo desvio. Acusar errado prejudica um inocente e protege o culpado.",
+      "perguntasDebate": [
+        "Que indício faltava à empresa que você acusou?",
+        "Como uma acusação errada pode atrapalhar uma investigação de corrupção?"
+      ]
+    },
+    "prazo_encerrado": {
+      "titulo": "Prazo encerrado",
+      "mensagem": "Os dias acabaram sem auto de infração. A ponte continua pela metade, e o povo continua atravessando de barco.",
+      "ensina": "Com três provas exigidas, cada visita conta. Comece pelos documentos que separam mais empresas de uma vez.",
+      "perguntasDebate": [
+        "Que indício eliminava mais empresas de uma vez?",
+        "Como você planejaria os quatro dias se jogasse de novo?"
+      ]
+    }
+  },
+  "moradores": [
+    { "nome": "Seu Tião, barqueiro", "aparencia": { "pele": "#8d5524", "cabelo": "#e8e8e8", "estiloCabelo": "bone", "camisa": "#a3b18a", "calca": "#3a3a3a" }, "fala": "Desde que a ponte parou, eu atravesso o povo de barco. Da {empresa} eu nunca vi um trabalhador na margem.", "verdadeira": true },
+    { "nome": "Rafa, estudante", "aparencia": { "pele": "#f1c27d", "cabelo": "#1f1a17", "estiloCabelo": "curto", "camisa": "#7b4bb7", "calca": "#2c5aa0" }, "fala": "Vi num grupo de mensagens que {inocente} levou o dinheiro da ponte para o exterior. Tinha até print!", "verdadeira": false },
+    { "nome": "Seu Ezequiel, engenheiro aposentado", "aparencia": { "pele": "#e0ac69", "cabelo": "#d6d6d6", "estiloCabelo": "careca", "camisa": "#f2f2f2", "calca": "#2b2b2b", "acessorios": ["oculos"] }, "fala": "Toda obra pública tem placa com valor e prazo, e o contrato fica no Portal da Transparência. Qualquer um pode cobrar.", "verdadeira": true }
+  ],
+  "quiz": [
+    {
+      "id": "superfaturamento",
+      "pergunta": "O que é superfaturamento numa obra pública?",
+      "opcoes": [
+        "Cobrar do governo um preço muito acima do valor de mercado.",
+        "Terminar a obra antes do prazo.",
+        "Contratar muitos trabalhadores."
+      ],
+      "correta": 0,
+      "explicacao": "No superfaturamento, a empresa cobra muito mais do que o serviço vale. A diferença sai dos cofres públicos e falta para outras coisas."
+    },
+    {
+      "id": "medicao",
+      "pergunta": "Para que serve o boletim de medição de uma obra?",
+      "opcoes": [
+        "Para medir a altura dos trabalhadores.",
+        "Para registrar quanto da obra foi feito e quanto pode ser pago.",
+        "Para decidir a cor da ponte."
+      ],
+      "correta": 1,
+      "explicacao": "O governo paga a obra por etapas, conforme a medição. Se a medição mente, a empresa recebe por algo que não fez."
+    },
+    {
+      "id": "controle_social",
+      "pergunta": "Quem pode acompanhar e cobrar uma obra pública?",
+      "opcoes": [
+        "Só o prefeito.",
+        "Só os engenheiros da empresa.",
+        "Qualquer cidadão, pelo Portal da Transparência, audiências públicas e ouvidorias."
+      ],
+      "correta": 2,
+      "explicacao": "Isso é o controle social: a população acompanha os gastos públicos e denuncia irregularidades. O Tribunal de Contas e o Ministério Público investigam."
+    }
+  ],
+  "glossario": [
+    { "id": "medicao", "termo": "Medição", "definicao": "Registro de quanto da obra foi feito em cada etapa. O pagamento da obra pública segue a medição; medição falsa faz o governo pagar por algo que não existe." },
+    { "id": "superfaturamento", "termo": "Superfaturamento", "definicao": "Cobrar do governo um preço muito acima do valor de mercado. A diferença é dinheiro público desviado." },
+    { "id": "empresa_fachada", "termo": "Empresa de fachada", "definicao": "Empresa que só existe no papel: não tem sede de verdade, trabalhadores nem máquinas. Serve para receber dinheiro sem fazer o serviço." },
+    { "id": "rastro_dinheiro", "termo": "Rastro do dinheiro", "definicao": "O caminho que o dinheiro faz entre contas bancárias. Sacar tudo em dinheiro vivo apaga esse caminho e é um sinal de alerta para a fiscalização." },
+    { "id": "tribunal_contas", "termo": "Tribunal de Contas", "definicao": "Órgão que fiscaliza como o dinheiro público é gasto: confere contratos, preços e obras, e pode mandar devolver o que foi desviado." },
+    { "id": "controle_social", "termo": "Controle social", "definicao": "Participação da população no acompanhamento dos gastos públicos, por meio do Portal da Transparência, audiências públicas, conselhos e ouvidorias." }
+  ]
+}

@@ -50,6 +50,14 @@ function acusarCom(suspeito: string, provas: [string, string]): void {
   clicar('emitir-auto')
 }
 
+/** Emite o mesmo auto errado até acabarem as vidas (o caso então termina). */
+function errarAteOFim(suspeito: string, provas: [string, string]): void {
+  for (let i = 0; i < 3 && titulo() !== 'Auto anulado' && titulo() !== 'Acusação injusta'; i++) {
+    acusarCom(suspeito, provas)
+    if (titulo() === 'Auto devolvido') clicar('voltar-mapa')
+  }
+}
+
 beforeEach(() => {
   document.body.innerHTML = '<div id="app"></div>'
   raiz = document.querySelector<HTMLElement>('#app')!
@@ -158,16 +166,51 @@ describe('os 4 resultados na tela', () => {
   it('auto anulado mostra o valor que continua faltando', () => {
     visitar('operadora_cartao')
     visitar('ex_funcionario')
-    acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
+    errarAteOFim('ricardo', ['operadora_cartao', 'ex_funcionario'])
     expect(titulo()).toBe('Auto anulado')
     expect(texto()).toContain('Continua faltando para o hospital')
+    expect(texto()).toContain('a Dona Helena devolveu 2 autos')
   })
 
   it('acusação injusta', () => {
     visitar('operadora_cartao')
     visitar('ex_funcionario')
-    acusarCom('marta', ['operadora_cartao', 'ex_funcionario'])
+    errarAteOFim('marta', ['operadora_cartao', 'ex_funcionario'])
     expect(titulo()).toBe('Acusação injusta')
+  })
+
+  it('auto errado volta: perde 1 vida, não revela o culpado e dá para corrigir', () => {
+    visitar('operadora_cartao')
+    visitar('ex_funcionario')
+    expect(raiz.querySelectorAll('.vidas .coracao:not(.perdido)')).toHaveLength(3)
+    acusarCom('marta', ['operadora_cartao', 'ex_funcionario'])
+    expect(titulo()).toBe('Auto devolvido')
+    expect(texto()).toContain('acusar um inocente')
+    expect(texto()).toContain('Você ainda tem 2 vidas')
+    expect(texto()).not.toContain('Quem tinha todos os indícios')
+    expect(raiz.querySelectorAll('.vidas .coracao.perdido')).toHaveLength(1)
+    clicar('voltar-mapa')
+    visitar('cartorio_detran')
+    clicar('ir-acusacao')
+    expect(raiz.querySelector('input[name="acusado"]:checked')).toBeNull()
+    expect(texto()).toContain('restam 2')
+    marcar('acusado', 'ricardo')
+    marcar('prova', 'operadora_cartao')
+    marcar('prova', 'cartorio_detran')
+    clicar('emitir-auto')
+    expect(titulo()).toBe('Caso resolvido')
+    expect(texto()).toContain('a Dona Helena devolveu 1 auto')
+  })
+
+  it('na última vida, a tela do auto avisa', () => {
+    visitar('operadora_cartao')
+    visitar('ex_funcionario')
+    for (let i = 0; i < 2; i++) {
+      acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
+      clicar('voltar-mapa')
+    }
+    clicar('ir-acusacao')
+    expect(texto()).toContain('Última vida')
   })
 
   it('prazo encerrado depois de gastar os 4 dias', () => {
@@ -314,7 +357,7 @@ describe('lore', () => {
     clicar('comecar')
     visitar('operadora_cartao')
     visitar('ex_funcionario')
-    acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
+    errarAteOFim('ricardo', ['operadora_cartao', 'ex_funcionario'])
     expect(raiz.querySelector('.gancho')).toBeNull()
   })
 })
@@ -458,7 +501,7 @@ describe('teste rápido, tutorial, explicação e som', () => {
     expect(raiz.querySelector('.tutorial')).toBeNull()
     visitar('operadora_cartao')
     visitar('ex_funcionario')
-    acusarCom('ricardo', ['operadora_cartao', 'ex_funcionario'])
+    errarAteOFim('ricardo', ['operadora_cartao', 'ex_funcionario'])
     expect(texto()).toContain('Onde a acusação falhou')
     expect(texto()).toContain('Marta também tem')
     expect(raiz.querySelector('.cartao-quiz')).toBeNull()
@@ -476,7 +519,7 @@ describe('teste rápido, tutorial, explicação e som', () => {
     irDiretoAoMapa()
     visitar('cartorio_detran')
     visitar('praca')
-    acusarCom('marta', ['cartorio_detran', 'praca'])
+    errarAteOFim('marta', ['cartorio_detran', 'praca'])
     expect(texto()).toContain('Quem tinha todos os indícios do caso era Ricardo')
   })
 
@@ -579,12 +622,12 @@ describe('campanha: arquivo de casos, escolhas, moradores e imprevistos', () => 
 
   afterEach(() => localStorage.clear())
 
-  it('o arquivo mostra os 4 casos; só o primeiro começa aberto', () => {
+  it('o arquivo mostra os 7 casos; só o primeiro começa aberto', () => {
     iniciarCampanha()
     expect(titulo()).toBe('Rota Fantasma')
     const botoes = [...raiz.querySelectorAll<HTMLButtonElement>('[data-acao="abrir-caso"]')]
-    expect(botoes).toHaveLength(4)
-    expect(botoes.map((b) => b.disabled)).toEqual([false, true, true, true])
+    expect(botoes).toHaveLength(7)
+    expect(botoes.map((b) => b.disabled)).toEqual([false, true, true, true, true, true, true])
     expect(texto()).toContain('Resolva o caso 001 para abrir')
   })
 
@@ -605,7 +648,7 @@ describe('campanha: arquivo de casos, escolhas, moradores e imprevistos', () => 
     iniciarApp((document.body.innerHTML = '<div id="app7"></div>', document.querySelector<HTMLElement>('#app7')!), casos, { animacoes: false, ...SEM_EXTRAS })
     raiz = document.querySelector<HTMLElement>('#app7')!
     const botoes = [...raiz.querySelectorAll<HTMLButtonElement>('[data-acao="abrir-caso"]')]
-    expect(botoes.map((b) => b.disabled)).toEqual([false, false, true, true])
+    expect(botoes.map((b) => b.disabled)).toEqual([false, false, true, true, true, true, true])
   })
 
   it('caso 002: a casa do sócio aparece no mapa depois da Junta Comercial', () => {
@@ -622,6 +665,31 @@ describe('campanha: arquivo de casos, escolhas, moradores e imprevistos', () => 
     clicar('guardar-pista')
     expect(raiz.querySelector('button.casa[data-id="casa_socio"]')).not.toBeNull()
     expect(texto()).toContain('Novo endereço no mapa: Casa do sócio da Horizonte')
+  })
+
+  it('caso 007: 4 dias, 5 suspeitos e um auto com 3 provas', () => {
+    iniciarCampanha()
+    const anteriores = ['caso-001', 'caso-002', 'caso-003', 'caso-004', 'caso-005', 'caso-006']
+    localStorage.setItem('rota-fantasma:progresso', JSON.stringify({ estrelas: {}, resolvidos: anteriores }))
+    iniciarApp((document.body.innerHTML = '<div id="app9"></div>', document.querySelector<HTMLElement>('#app9')!), casos, { animacoes: false, aleatorio: () => 0, ...SEM_EXTRAS })
+    raiz = document.querySelector<HTMLElement>('#app9')!
+    clicar('abrir-caso', 'caso-007')
+    expect(texto()).toContain('3 provas')
+    clicar('comecar')
+    const c007 = casos[6]
+    for (const id of ['vistoria', 'sindicato', 'tribunal']) {
+      clicar('visitar', id)
+      clicar('escolher', c007.locais.find((l) => l.id === id)!.acoes!.find((a) => a.revela)!.id)
+      clicar('guardar-pista')
+    }
+    clicar('ir-acusacao')
+    expect(texto()).toContain('Escolha 3 provas')
+    expect(raiz.querySelectorAll('input[name="acusado"]')).toHaveLength(5)
+    marcar('acusado', 'vanessa')
+    for (const id of ['vistoria', 'sindicato', 'tribunal']) marcar('prova', id)
+    clicar('emitir-auto')
+    expect(titulo()).toBe('Caso resolvido')
+    expect(texto()).toContain('Fim da segunda temporada')
   })
 
   it('a abordagem errada gasta o dia e não rende prova', () => {
