@@ -28,6 +28,10 @@ import {
   fechadoHoje,
   diaAtual,
   sortearImprevistos,
+  podeProrrogar,
+  gerarDica,
+  pedirProrrogacao,
+  diasTotais,
 } from './rules.ts'
 import { casos } from './caso.ts'
 import type { Caso } from './types.ts'
@@ -502,6 +506,101 @@ describe('vidas: auto errado volta para corrigir', () => {
     estado = acusar(caso, estado, 'marta', ['operadora_cartao', 'cartorio_detran'])
     expect(podeAcusar(caso, estado)).toBe(true)
     expect(acusar(caso, estado, 'ricardo', ['operadora_cartao', 'cartorio_detran']).resultado?.tipo).toBe('resolvido')
+  })
+})
+
+describe('dicas graduais da Dona Helena', () => {
+  const dica = (estado: EstadoJogo, nivel: number) => gerarDica(caso, estado, nivel).texto
+
+  it('no começo: sem indício, não dá para riscar, e aponta um indício e um lugar', () => {
+    const estado = criarEstadoInicial(caso)
+    expect(dica(estado, 1)).toContain('nenhum indício')
+    expect(dica(estado, 2)).toContain('não dá para riscar')
+    const n3 = dica(estado, 3)
+    expect(n3).toMatch(/Um lugar para procurá-lo: (Operadora de cartão|Cartório)/)
+  })
+
+  it('nível 1 lista os indícios e avisa da abordagem que não rendeu prova', () => {
+    let estado = visitarLocal(caso, criarEstadoInicial(caso), 'cartorio_detran').estado
+    estado = escolherAcao(caso, estado, 'cartorio_detran', 'fofoca')
+    estado = visitar(estado, 'operadora_cartao')
+    const n1 = dica(estado, 1)
+    expect(n1).toContain('Vendas no cartão sem nota')
+    expect(n1).toContain('a abordagem escolhida não rendeu prova')
+  })
+
+  it('nível 2 diz quem dá para riscar e avisa de quem foi riscado sem motivo', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario')
+    expect(dica(estado, 2)).toContain('dá para riscar Aurélio e Célia')
+    expect(dica(estado, 2)).toContain('sobram 2 pessoas')
+    estado = alternarDescarte(caso, estado, 'marta')
+    expect(dica(estado, 2)).toContain('Cuidado: você riscou Marta')
+  })
+
+  it('nível 3 aponta o indício que resolve, e depois diz que já dá para emitir o auto', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'operadora_cartao', 'ex_funcionario')
+    const n3 = dica(estado, 3)
+    expect(n3).toContain('Patrimônio incompatível com a renda')
+    expect(n3).toContain('Cartório') // prefere o documento ao testemunho
+    estado = visitar(estado, 'cartorio_detran')
+    expect(dica(estado, 3)).toContain('Você já tem o que precisa')
+  })
+
+  it('em nenhum caso, nem no modo desafio, a dica diz o nome do culpado', () => {
+    for (const base of casos) {
+      for (const r of [0, 0.5, 0.99]) {
+        const c = sortearCaso(base, () => r)
+        const culpado = c.suspeitos.find((s) => s.id === c.culpadoId)!
+        const estados = [criarEstadoInicial(c)]
+        for (const l of c.locais.filter((x) => !x.liberadoPor)) {
+          const e = visitarLocal(c, criarEstadoInicial(c), l.id).estado
+          estados.push(escolherAcao(c, e, l.id, l.acoes!.find((a) => a.revela)!.id))
+        }
+        for (const e of estados) {
+          for (const nivel of [1, 2, 3]) expect(gerarDica(c, e, nivel).texto).not.toContain(culpado.nome)
+        }
+      }
+    }
+  })
+
+  it('pedir dica tira a estrela do caderno', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'cartorio_detran', 'ex_funcionario')
+    for (const id of ['aurelio', 'celia', 'marta']) estado = alternarDescarte(caso, estado, id)
+    const final = acusar(caso, estado, 'ricardo', ['cartorio_detran', 'ex_funcionario'])
+    expect(avaliarDesempenho(caso, final).estrelas).toBe(3)
+    expect(avaliarDesempenho(caso, { ...final, dicasUsadas: 1 }).estrelas).toBe(2)
+  })
+})
+
+describe('prorrogação: mais 1 dia em troca de 1 vida', () => {
+  it('só com os dias zerados, e nunca na última vida', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'praca', 'junta_comercial')
+    expect(podeProrrogar(caso, estado)).toBe(false) // ainda tem dia
+    expect(() => pedirProrrogacao(caso, estado)).toThrow(RegraError)
+    estado = visitar(estado, 'operadora_cartao')
+    expect(estado.diasRestantes).toBe(0)
+    expect(podeProrrogar(caso, estado)).toBe(true)
+    expect(podeProrrogar(caso, naUltimaVida(estado))).toBe(false)
+  })
+
+  it('ganha 1 dia, perde 1 vida, e dá para visitar mais um local e resolver', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'praca', 'junta_comercial', 'operadora_cartao')
+    estado = pedirProrrogacao(caso, estado)
+    expect(estado.diasRestantes).toBe(1)
+    expect(estado.vidasRestantes).toBe(2)
+    expect(diasTotais(caso, estado)).toBe(caso.diasIniciais + 1)
+    expect(diaAtual(caso, estado)).toBe(caso.diasIniciais + 1)
+    estado = visitar(estado, 'cartorio_detran')
+    expect(acusar(caso, estado, 'ricardo', ['operadora_cartao', 'cartorio_detran']).resultado?.tipo).toBe('resolvido')
+  })
+
+  it('com duas prorrogações, sobra só a última vida e não há terceira', () => {
+    let estado = visitar(criarEstadoInicial(caso), 'praca', 'junta_comercial', 'operadora_cartao')
+    estado = visitar(pedirProrrogacao(caso, estado), 'ex_funcionario')
+    estado = pedirProrrogacao(caso, estado)
+    expect(estado.vidasRestantes).toBe(1)
+    estado = visitar(estado, 'concessionaria')
+    expect(podeProrrogar(caso, estado)).toBe(false)
   })
 })
 

@@ -150,6 +150,8 @@ provas que só batam com uma pessoa.
 | **Caderno de suspeitos** | Tabela suspeitos × indícios. Cada coluna começa oculta ("?") e se revela quando o indício é encontrado. **O jogador risca quem descartou; o jogo não elimina ninguém sozinho** |
 | **Auto de infração** | O jogador escolhe 1 suspeito e 2 provas coletadas (3 no caso 007). **Acusar não gasta dia** |
 | **Vidas** | Cada caso tem **3 vidas**. Um auto errado (acusação injusta ou provas que não diferenciam) é **devolvido pela Dona Helena**, que explica onde ele falhou sem revelar o culpado. O jogador perde 1 vida e volta à investigação no mesmo dia, com as pistas que já tem. Só o erro na última vida encerra o caso |
+| **Dicas da Dona Helena** | O botão **Pedir dica** abre três níveis, do geral ao específico, calculados para o momento da partida: (1) que indícios o jogador já tem e onde a abordagem não rendeu prova; (2) quem já dá para riscar no caderno e quem foi riscado sem motivo; (3) que indício falta e um lugar onde procurá-lo, ou o aviso de que as provas já bastam. **Nenhuma dica diz o nome do culpado.** Pedir dica tira a estrela do caderno |
+| **Prorrogação** | Quando os dias acabam, a Dona Helena pode conseguir **mais 1 dia em troca de 1 vida**. Não existe na última vida, para que o caso sempre possa terminar |
 
 ### 9.1 Regras numéricas
 
@@ -214,7 +216,7 @@ para ser corrigido.
 | Suspeito certo e duas provas válidas | **Caso resolvido:** o valor recuperado volta ao serviço público | Função social do tributo |
 | Suspeito certo, mas provas que não o diferenciam | **Auto anulado** por falta de fundamentação | Fiscalização precisa de prova, não de suspeita |
 | Suspeito errado | **Acusação injusta:** um inocente é prejudicado e o sonegador segue impune | Responsabilidade de quem fiscaliza |
-| Dias esgotados sem acusação | **Prazo encerrado** | Fiscalização tem custo e prazo |
+| Dias esgotados sem acusação (e sem prorrogação) | **Prazo encerrado** | Fiscalização tem custo e prazo |
 
 **Estrelas** (só no caso resolvido):
 
@@ -222,7 +224,7 @@ para ser corrigido.
 |:-:|---|
 | ★ | Resolver com provas válidas |
 | ★ | Sobrar pelo menos 1 dia (priorização) |
-| ★ | Caderno em ordem: todos os inocentes riscados e o culpado não (raciocínio por eliminação) |
+| ★ | Caderno em ordem: todos os inocentes riscados e o culpado não (raciocínio por eliminação), sem pedir dica |
 
 ## 11. Feedback ao jogador
 
@@ -525,7 +527,7 @@ Trabalho **individual**. Todas as decisões, testes e entregas são de responsab
 | `src/ui/app.ts` | Telas e eventos (arquivo de casos, mapa, card, caderno, acusação, resultado) |
 | `src/ui/mapa.ts` | Geometria do mapa: ruas, colisão, ajuda na curva, caminho mais curto, rotas dos moradores |
 | `src/ui/animacao.ts`, `src/ui/som.ts`, `src/ui/arte.ts` | Animações, efeitos sonoros e desenhos SVG |
-| `src/**/*.test.ts` | 134 testes automáticos |
+| `src/**/*.test.ts` | 145 testes automáticos |
 | `scripts/gerar-fichas.mjs` | Gera as fichas de solução a partir dos JSON |
 | `.github/workflows/deploy.yml` | Testa, gera o build e publica a cada envio |
 
@@ -538,8 +540,8 @@ inicial e o GDD até a campanha com 7 casos.
 |---|---|
 | **Ferramentas** | **Claude (Anthropic)**: no chat do claude.ai, na ideação inicial; e no **Claude Code** (extensão do VS Code, modelo Claude Opus 5.5), no desenvolvimento |
 | **Finalidade** | Ideação do design; programação em TypeScript, HTML, CSS e SVG; testes automáticos; redação dos textos dos casos, do glossário e das perguntas; documentação (GDD, lore, fichas, roteiro); configuração da publicação |
-| **O que foi decisão da autora** | Tema (educação fiscal) e gênero (investigação estilo Carmen Sandiego); visual de bonecos de blocos para aproximar o público jovem; pedido de lore; boneco controlado pelo jogador ("só com clique não parece jogo digital"); entre as alternativas propostas, a escolha de "clique e ele anda", card sobre o tabuleiro, dia e noite e porta que abre; pedido de mais casos e mais opções de visita, escolhendo 3 casos novos, desbloqueio em sequência, escolhas dentro da casa, moradores, imprevistos e mais locais; pedido de revisão dos casos 002 a 004 e escolha de manter a praça apagada explicando a COSIP; pedido de implementar os casos 005 a 007 propostos na seção 17.2; pedido de 3 vidas por caso e escolha de que o auto errado custe 1 vida e o jogador continue investigando; aceite de sugestões como 3 dias, Portal grátis e teste rápido |
-| **Como foi validado** | (1) **134 testes automáticos**, que conferem as regras, as telas, o mapa e o conteúdo (todo caso tem solução, nenhuma pista cita o nome do culpado, os boatos falsos continuam falsos no modo desafio); (2) **validação automática dos casos** ao carregar o JSON; (3) **jogo testado no navegador** (Edge) com capturas de tela a cada etapa, o que revelou e corrigiu falhas (ex.: animações desligadas pelo Windows, o morador fugindo antes da conversa); (4) **revisão da autora:** **[descrever: o que jogou, o que leu, o que pediu para mudar]** |
+| **O que foi decisão da autora** | Tema (educação fiscal) e gênero (investigação estilo Carmen Sandiego); visual de bonecos de blocos para aproximar o público jovem; pedido de lore; boneco controlado pelo jogador ("só com clique não parece jogo digital"); entre as alternativas propostas, a escolha de "clique e ele anda", card sobre o tabuleiro, dia e noite e porta que abre; pedido de mais casos e mais opções de visita, escolhendo 3 casos novos, desbloqueio em sequência, escolhas dentro da casa, moradores, imprevistos e mais locais; pedido de revisão dos casos 002 a 004 e escolha de manter a praça apagada explicando a COSIP; pedido de implementar os casos 005 a 007 propostos na seção 17.2; pedido de 3 vidas por caso e escolha de que o auto errado custe 1 vida e o jogador continue investigando; ao testar, percebeu que ficava sem saída quando os dias acabavam e escolheu a prorrogação de 1 dia por 1 vida; pedido de dicas graduais da Dona Helena, que custam a estrela do caderno; aceite de sugestões como 3 dias, Portal grátis e teste rápido |
+| **Como foi validado** | (1) **145 testes automáticos**, que conferem as regras, as telas, o mapa e o conteúdo (todo caso tem solução, nenhuma pista cita o nome do culpado, os boatos falsos continuam falsos no modo desafio); (2) **validação automática dos casos** ao carregar o JSON; (3) **jogo testado no navegador** (Edge) com capturas de tela a cada etapa, o que revelou e corrigiu falhas (ex.: animações desligadas pelo Windows, o morador fugindo antes da conversa); (4) **revisão da autora:** **[descrever: o que jogou, o que leu, o que pediu para mudar]** |
 | **Limites e responsabilidade** | O conteúdo fiscal gerado com IA foi simplificado de propósito (seção 15.1) e deve ser revisado com o NAF. A autora é responsável pela entrega e deve saber explicar as regras (`rules.ts`), os casos em JSON e o movimento do boneco (`mapa.ts`) |
 
 **Assets e bibliotecas de terceiros:**

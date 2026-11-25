@@ -213,6 +213,37 @@ describe('os 4 resultados na tela', () => {
     expect(texto()).toContain('Última vida')
   })
 
+  it('Pedir dica: do geral ao específico, e Esc fecha', () => {
+    visitar('operadora_cartao')
+    clicar('pedir-dica')
+    const dialogo = () => raiz.querySelector('.dica[role="dialog"]')
+    expect(dialogo()?.textContent).toContain('dica 1 de 3')
+    expect(dialogo()?.textContent).toContain('Vendas no cartão sem nota')
+    expect(dialogo()?.textContent).toContain('tira a estrela do caderno')
+    clicar('dica-mais')
+    expect(dialogo()?.textContent).toContain('dica 2 de 3')
+    clicar('dica-mais')
+    expect(dialogo()?.textContent).toContain('dica 3 de 3')
+    expect(dialogo()?.textContent).toContain('Um lugar para procurá-lo')
+    expect(raiz.querySelector('[data-acao="dica-mais"]')).toBeNull()
+    raiz.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(dialogo()).toBeNull()
+  })
+
+  it('sem dias, dá para pedir prorrogação: +1 dia por 1 vida', () => {
+    for (const id of ['junta_comercial', 'praca', 'operadora_cartao']) visitar(id)
+    expect(texto()).toContain('Os dias acabaram')
+    expect(texto()).toContain('custa 1 vida')
+    clicar('prorrogar')
+    expect(texto()).not.toContain('Os dias acabaram')
+    expect(raiz.querySelectorAll('.vidas .coracao.perdido')).toHaveLength(1)
+    expect(raiz.querySelector('.hud')?.textContent).toContain(`de ${caso.diasIniciais + 1}`)
+    visitar('cartorio_detran')
+    acusarCom('ricardo', ['operadora_cartao', 'cartorio_detran'])
+    expect(titulo()).toBe('Caso resolvido')
+    expect(texto()).toContain('1 dia de prorrogação')
+  })
+
   it('prazo encerrado depois de gastar os 4 dias', () => {
     for (const id of ['junta_comercial', 'portal_transparencia', 'praca', 'operadora_cartao']) visitar(id)
     expect(texto()).toContain('Os dias acabaram')

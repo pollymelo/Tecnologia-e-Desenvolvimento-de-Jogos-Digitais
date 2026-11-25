@@ -11,6 +11,12 @@ import {
   visitarLocal,
   custoDoLocal,
   sortearCaso,
+  gerarDica,
+  NIVEIS_DICA,
+  diasTotais,
+  vidasIniciais,
+  podeProrrogar,
+  pedirProrrogacao,
   preencherTexto,
   avaliarDesempenho,
   sortearPistas,
@@ -143,6 +149,8 @@ interface Ui {
   respostas: (number | null)[]
   /** Passo do tutorial da Dona Helena (null = fechado). */
   tutorialPasso: number | null
+  /** Nível da dica da Dona Helena aberta (1 a 3), ou null. */
+  dicaNivel: number | null
   /** Morador cuja fala está aberta no mapa (null = nenhum). */
   falaAberta: number | null
   /** Moradores que já falaram com o jogador nesta partida (índices). */
@@ -220,6 +228,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       focoAntesDoGlossario: null,
       respostas: [],
       tutorialPasso: null,
+      dicaNivel: null,
       falaAberta: null,
       boatos: [],
     }
@@ -274,7 +283,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
 
   /** Corações das vidas: autos errados que ainda dá para emitir. */
   function vidasHud(): string {
-    const total = ui.estado.vidasRestantes + ui.estado.autosRecusados.length
+    const total = vidasIniciais(caso)
     const restam = ui.estado.vidasRestantes
     const coracoes = Array.from({ length: total }, (_, i) =>
       `<span class="coracao ${i < restam ? '' : 'perdido'}" aria-hidden="true">${i < restam ? '♥' : '♡'}</span>`,
@@ -284,7 +293,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
 
   function hud(): string {
     const { diasRestantes } = ui.estado
-    const pips = Array.from({ length: caso.diasIniciais }, (_, i) => {
+    const pips = Array.from({ length: diasTotais(caso, ui.estado) }, (_, i) => {
       const disponivel = i < diasRestantes
       const recemGasto = ui.diaAcabouDeGastar && i === diasRestantes
       const classe = disponivel ? 'pip' : recemGasto ? 'pip gasto recem-gasto' : 'pip gasto'
@@ -303,14 +312,15 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
           <span class="pips">${pips}</span>
           <span><strong>${diasRestantes}</strong> ${diasRestantes === 1 ? 'dia restante' : 'dias restantes'}</span>
         </div>
-        <div class="hud-info">Dia <strong>${diaAtual(caso, ui.estado)}</strong> de ${caso.diasIniciais}</div>
+        <div class="hud-info">Dia <strong>${diaAtual(caso, ui.estado)}</strong> de ${diasTotais(caso, ui.estado)}</div>
         <div class="hud-info">Pistas: <strong>${ui.estado.locaisVisitados.length}</strong></div>
         <div class="hud-info">Riscados: <strong>${riscados}/${caso.suspeitos.length}</strong></div>
         ${vidasHud()}
         ${modo === 'desafio' ? '<span class="tag tag-desafio">Modo desafio</span>' : ''}
         <div class="hud-botoes">
           ${botaoSom()}
-          ${ui.tela === 'mapa' ? '<button type="button" class="secundario" data-acao="tutorial-abrir" aria-haspopup="dialog">Dicas</button>' : ''}
+          ${ui.estado.resultado === null ? '<button type="button" class="secundario" data-acao="pedir-dica" aria-haspopup="dialog">Pedir dica</button>' : ''}
+          ${ui.tela === 'mapa' ? '<button type="button" class="secundario" data-acao="tutorial-abrir" aria-haspopup="dialog">Como jogar</button>' : ''}
           <button type="button" class="secundario" data-acao="termo" data-id="todos" aria-haspopup="dialog">Glossário</button>
           <button type="button" class="secundario" data-acao="abrir-caderno">Caderno ${badge}</button>
         </div>
@@ -368,7 +378,8 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
             <li>Na rua, <strong>moradores</strong> contam dicas de graça, mas <strong>boato não é prova</strong>. Fique de olho nos <strong>imprevistos</strong>: um local pode estar fechado no dia.</li>
             <li>No <strong>caderno</strong>, veja quais comerciantes têm cada ${termo('indicio', 'indício')} e <strong>risque</strong> quem você descartou.</li>
             <li>Emita o ${termo('auto', '<strong>auto de infração</strong>')}: escolha o suspeito e <strong>${caso.provasExigidas} ${termo('prova', 'provas')}</strong> que o diferenciem dos outros. Você tem <strong>${ui.estado.vidasRestantes} vidas</strong>: um auto errado volta para você corrigir, mas custa uma vida.</li>
-            <li>Ganhe até <strong>3 estrelas</strong>: resolva o caso, termine com tempo sobrando e deixe o caderno certo.</li>
+            <li>Ganhe até <strong>3 estrelas</strong>: resolva o caso, termine com tempo sobrando e deixe o caderno certo sem pedir dica.</li>
+            <li>Travou? Use <strong>Pedir dica</strong>: a Dona Helena ajuda, do geral ao específico.</li>
           </ol>
         </div>
         <div class="acoes acoes-centro">
@@ -429,7 +440,12 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const aviso = semDias
       ? `<div class="aviso" role="alert">
            <strong>Os dias acabaram.</strong>
-           ${podeAcusar(caso, ui.estado) ? 'Emita o auto de infração agora ou encerre o caso sem acusar.' : 'Não há pistas suficientes para emitir o auto.'}
+           ${
+             podeProrrogar(caso, ui.estado)
+               ? 'A Dona Helena consegue mais 1 dia de prazo, mas isso custa 1 vida. Ou então emita o auto com o que você tem, ou encerre sem acusar.'
+               : `Sem vidas para pedir prorrogação. ${podeAcusar(caso, ui.estado) ? 'Emita o auto agora ou encerre o caso sem acusar.' : 'Não há pistas suficientes para emitir o auto.'}`
+           }
+           ${podeProrrogar(caso, ui.estado) ? '<p><button type="button" data-acao="prorrogar">Pedir prorrogação: +1 dia (custa 1 ♥)</button></p>' : ''}
          </div>`
       : ''
 
@@ -900,7 +916,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       },
       {
         alvo: '.hud [data-acao="abrir-caderno"]',
-        texto: 'Cada pista vai para o caderno. Lá você vê quem tem cada indício e risca quem não tem.',
+        texto: 'Cada pista vai para o caderno. Lá você vê quem tem cada indício e risca quem não tem. Se travar, use "Pedir dica": eu ajudo, do geral ao específico.',
       },
       {
         alvo: '[data-acao="ir-acusacao"]',
@@ -926,6 +942,38 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
           </div>
         </div>
       </div>`
+  }
+
+  /** Dica da Dona Helena: do geral ao específico, calculada para o momento da partida. */
+  function balaoDica(): string {
+    if (ui.dicaNivel === null) return ''
+    const dica = gerarDica(caso, ui.estado, ui.dicaNivel)
+    const ultimo = dica.nivel >= NIVEIS_DICA
+    return `
+      <div class="tutorial dica" role="dialog" aria-modal="true" aria-labelledby="titulo-dica" aria-describedby="texto-dica" tabindex="-1">
+        <div class="tutorial-personagem">${boneco(DONA_HELENA, { expressao: 'feliz', rotulo: 'Dona Helena' })}</div>
+        <div class="tutorial-balao">
+          <p class="rotulo" id="titulo-dica">Dona Helena · dica ${dica.nivel} de ${NIVEIS_DICA} · ${esc(dica.titulo)}</p>
+          <p id="texto-dica">${esc(dica.texto)}</p>
+          <p class="nota">Pedir dica tira a estrela do caderno neste caso.</p>
+          <div class="acoes">
+            ${ultimo ? '' : '<button type="button" data-acao="dica-mais">Dica mais específica</button>'}
+            <button type="button" class="${ultimo ? '' : 'secundario'}" data-acao="dica-fechar">Entendi</button>
+          </div>
+        </div>
+      </div>`
+  }
+
+  function mostrarDica(nivel: number): void {
+    ui = { ...ui, dicaNivel: nivel, estado: { ...ui.estado, dicasUsadas: ui.estado.dicasUsadas + 1 } }
+    render(false)
+    raiz.querySelector<HTMLElement>('.dica')?.focus()
+  }
+
+  function fecharDica(): void {
+    ui = { ...ui, dicaNivel: null }
+    render(false)
+    raiz.querySelector<HTMLElement>('[data-acao="pedir-dica"]')?.focus()
   }
 
   function abrirTutorial(): void {
@@ -1028,7 +1076,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     if (!hoje.length && !novos.length) return ''
     return `
       <div class="imprevistos" role="status">
-        <span class="rotulo">Dia ${diaAtual(caso, ui.estado)} de ${caso.diasIniciais}</span>
+        <span class="rotulo">Dia ${diaAtual(caso, ui.estado)} de ${diasTotais(caso, ui.estado)}</span>
         ${hoje.map(({ l, f }) => `<p><strong>Imprevisto:</strong> ${esc(l.nome)} ${esc(f!.motivo)}. Amanhã reabre.</p>`).join('')}
         ${novos.map((l) => `<p><strong>Novo endereço no mapa:</strong> ${esc(l.nome)}.</p>`).join('')}
       </div>`
@@ -1135,7 +1183,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const p = ui.posicaoPeao
     const distancia = (q: Ponto) => Math.hypot(p.x - q.x, p.y - q.y)
     if (ui.falaAberta !== null && falaPonto && distancia(falaPonto) > 40) fecharFala()
-    if (ui.cardAberto !== null || ui.tutorialPasso !== null || ui.termoAberto !== null) return
+    if (ui.cardAberto !== null || ui.tutorialPasso !== null || ui.dicaNivel !== null || ui.termoAberto !== null) return
     caso.moradores.forEach((_, i) => {
       if (ui.falaAberta !== i && distancia(posMorador(i)) < 14) abrirFala(i)
     })
@@ -1179,7 +1227,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
       const agora = performance.now()
       const dt = Math.min(0.1, Math.max(0, (agora - ultimo) / 1000))
       ultimo = agora
-      if (ui.cardAberto === null && ui.termoAberto === null && ui.tutorialPasso === null) {
+      if (ui.cardAberto === null && ui.termoAberto === null && ui.tutorialPasso === null && ui.dicaNivel === null) {
         ;(caso.moradores ?? []).forEach((_, i) => {
           if (ui.falaAberta !== i && moradorChamado !== i) temposMoradores[i] = (temposMoradores[i] ?? 0) + dt
         })
@@ -1231,6 +1279,9 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     const devolvidos = ui.estado.autosRecusados.length - (errouNoFim ? 1 : 0)
     if (devolvidos > 0) {
       acusacao += `<p class="resumo-acusacao">Antes disso, a Dona Helena devolveu ${devolvidos === 1 ? '1 auto' : `${devolvidos} autos`}.</p>`
+    }
+    if (ui.estado.diasExtras > 0) {
+      acusacao += `<p class="resumo-acusacao">Você pediu ${ui.estado.diasExtras === 1 ? '1 dia' : `${ui.estado.diasExtras} dias`} de prorrogação.</p>`
     }
 
     const valor = sucesso
@@ -1346,8 +1397,8 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
 
   function render(focar = true): void {
     raiz.classList.toggle('movimento-suave', movimento === 'suave')
-    const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null || ui.tutorialPasso !== null
-    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${tutorial()}${glossario()}`
+    const bloqueado = ui.termoAberto !== null || ui.cardAberto !== null || ui.tutorialPasso !== null || ui.dicaNivel !== null
+    raiz.innerHTML = `<main class="app tela-${ui.tela}" ${bloqueado ? 'inert' : ''}>${telas[ui.tela]()}</main>${cardPista()}${tutorial()}${balaoDica()}${glossario()}`
     ultimoAviso = ui.tela === 'mapa' ? avisoPorta() : ''
     posicionarAviso()
     if (ui.tela === 'mapa') animarMoradores()
@@ -1468,6 +1519,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     ui.cardAberto === null &&
     ui.termoAberto === null &&
     ui.tutorialPasso === null &&
+    ui.dicaNivel === null &&
     ui.estado.resultado === null
 
   function direcaoSegurada(): { dx: number; dy: number } {
@@ -1786,6 +1838,15 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
           raiz.querySelector<HTMLElement>('.tutorial')?.focus()
         }
         break
+      case 'pedir-dica':
+        mostrarDica(1)
+        break
+      case 'dica-mais':
+        mostrarDica(Math.min(NIVEIS_DICA, (ui.dicaNivel ?? 0) + 1))
+        break
+      case 'dica-fechar':
+        fecharDica()
+        break
       case 'tutorial-fechar':
         fecharTutorial()
         break
@@ -1841,6 +1902,11 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
         registrarProgresso()
         irPara('resultado')
         somDoResultado()
+        break
+      case 'prorrogar':
+        ui = { ...ui, estado: pedirProrrogacao(caso, ui.estado) }
+        som.tocar('dia')
+        render()
         break
       case 'encerrar-prazo':
         ui = { ...ui, estado: encerrarPrazo(caso, ui.estado) }
@@ -1909,6 +1975,7 @@ export function iniciarApp(raiz: HTMLElement, casosDoJogo: Caso | Caso[], opcoes
     if (evento.key !== 'Escape') return
     if (ui.termoAberto !== null) fecharTermo()
     else if (ui.tutorialPasso !== null) fecharTutorial()
+    else if (ui.dicaNivel !== null) fecharDica()
   })
 
   render(false)

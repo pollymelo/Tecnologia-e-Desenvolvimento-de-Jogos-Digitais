@@ -30,6 +30,10 @@ export interface EstadoJogo {
   vidasRestantes: number
   /** Autos devolvidos pela chefia, na ordem. O último é o que o jogador acabou de ver. */
   autosRecusados: AutoRecusado[]
+  /** Dias extras ganhos com prorrogação (cada um custou uma vida). */
+  diasExtras: number
+  /** Quantas dicas da Dona Helena o jogador pediu (cada nível conta uma). */
+  dicasUsadas: number
   /** null enquanto a partida está em andamento. */
   resultado: Resultado | null
 }
@@ -44,6 +48,8 @@ export function criarEstadoInicial(caso: Caso, fechados: Record<LocalId, Fechame
     descartados: [],
     vidasRestantes: caso.vidas ?? VIDAS_PADRAO,
     autosRecusados: [],
+    diasExtras: 0,
+    dicasUsadas: 0,
     resultado: null,
   }
 }

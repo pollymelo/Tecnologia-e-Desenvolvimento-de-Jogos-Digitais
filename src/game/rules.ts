@@ -9,7 +9,7 @@ import type {
   SuspeitoId,
   TipoResultado,
 } from './types.ts'
-import type { EstadoJogo, Fechamento } from './state.ts'
+import { VIDAS_PADRAO, type EstadoJogo, type Fechamento } from './state.ts'
 
 /** Ação inválida para o estado atual. A interface deve impedir que isso aconteça. */
 export class RegraError extends Error {
@@ -69,9 +69,38 @@ export function precisaEscolher(caso: Caso, estado: EstadoJogo, localId: LocalId
   return Boolean(local.acoes?.length) && estado.locaisVisitados.includes(localId) && !estado.escolhas[localId]
 }
 
+/** Total de dias da partida: os do caso mais os ganhos com prorrogação. */
+export function diasTotais(caso: Caso, estado: EstadoJogo): number {
+  return caso.diasIniciais + estado.diasExtras
+}
+
 /** Dia da investigação (1 = primeiro dia). Local grátis não faz o dia passar. */
 export function diaAtual(caso: Caso, estado: EstadoJogo): number {
-  return Math.min(caso.diasIniciais, caso.diasIniciais - estado.diasRestantes + 1)
+  const total = diasTotais(caso, estado)
+  return Math.min(total, total - estado.diasRestantes + 1)
+}
+
+/** Vidas com que o caso começa. */
+export function vidasIniciais(caso: Caso): number {
+  return caso.vidas ?? VIDAS_PADRAO
+}
+
+/**
+ * Prorrogação: com os dias zerados, a chefia concede mais 1 dia em troca de 1 vida.
+ * Não existe na última vida, para o caso sempre poder terminar.
+ */
+export function podeProrrogar(_caso: Caso, estado: EstadoJogo): boolean {
+  return estado.resultado === null && estado.diasRestantes === 0 && estado.vidasRestantes > 1
+}
+
+export function pedirProrrogacao(caso: Caso, estado: EstadoJogo): EstadoJogo {
+  if (!podeProrrogar(caso, estado)) throw new RegraError('Não é possível pedir prorrogação agora.')
+  return {
+    ...estado,
+    diasRestantes: estado.diasRestantes + caso.custoVisitaDias,
+    diasExtras: estado.diasExtras + caso.custoVisitaDias,
+    vidasRestantes: estado.vidasRestantes - 1,
+  }
 }
 
 /** Imprevisto de hoje no local, se houver. */
@@ -421,7 +450,7 @@ export interface Desempenho {
  * Até 3 estrelas, uma por critério. Só um caso resolvido pontua.
  * - Resolver o caso com provas válidas.
  * - Terminar com pelo menos 1 dia sobrando (investigar com eficiência).
- * - Caderno em ordem: todos os inocentes riscados e o culpado não riscado.
+ * - Caderno em ordem: todos os inocentes riscados e o culpado não riscado, sem pedir dica.
  */
 export function avaliarDesempenho(caso: Caso, estado: EstadoJogo): Desempenho {
   const resolvido = estado.resultado?.tipo === 'resolvido'
@@ -433,7 +462,10 @@ export function avaliarDesempenho(caso: Caso, estado: EstadoJogo): Desempenho {
   const criterios: Criterio[] = [
     { texto: 'Caso resolvido com provas válidas', cumprido: resolvido },
     { texto: 'Sobrou pelo menos 1 dia', cumprido: resolvido && estado.diasRestantes >= 1 },
-    { texto: 'Caderno em ordem: só os inocentes riscados', cumprido: resolvido && cadernoEmOrdem },
+    {
+      texto: 'Caderno em ordem, sem pedir dica',
+      cumprido: resolvido && cadernoEmOrdem && estado.dicasUsadas === 0,
+    },
   ]
   return { estrelas: criterios.filter((c) => c.cumprido).length, criterios }
 }
@@ -536,4 +568,157 @@ export function explicarAcusacao(
 /** Quantas respostas estão certas. Resposta ausente ou null conta como errada. */
 export function pontuarQuiz(quiz: PerguntaQuiz[], respostas: (number | null)[]): number {
   return quiz.filter((q, i) => respostas[i] === q.correta).length
+}
+
+
+// ---------- Dicas graduais da Dona Helena ----------
+
+/** Quantos níveis de dica existem: do geral ao específico. */
+export const NIVEIS_DICA = 3
+
+export interface Dica {
+  nivel: number
+  titulo: string
+  texto: string
+}
+
+/** Indícios que o jogador realmente obteve (abordagem certa), sem repetição, na ordem da visita. */
+export function indiciosEncontrados(caso: Caso, estado: EstadoJogo): IndicioId[] {
+  const ids = estado.locaisVisitados.map((id) => indicioObtido(caso, estado, id)).filter((i): i is IndicioId => i !== null)
+  return [...new Set(ids)]
+}
+
+/** Suspeitos que têm todos os indícios encontrados até agora (ainda não dá para descartar). */
+export function suspeitosPossiveis(caso: Caso, estado: EstadoJogo): Suspeito[] {
+  const encontrados = indiciosEncontrados(caso, estado)
+  return caso.suspeitos.filter((s) => encontrados.every((i) => s.indicios.includes(i)))
+}
+
+/**
+ * Algum grupo de até `provasExigidas` indícios (tirados de `indicios`) fundamenta o auto?
+ * Mesma regra de provasValidas: todos do culpado e, juntos, descartam os outros.
+ */
+function indiciosBastam(caso: Caso, indicios: IndicioId[]): boolean {
+  const culpado = buscarSuspeito(caso, caso.culpadoId)
+  const validos = indicios.filter((i) => culpado.indicios.includes(i))
+  const descartaTodos = (grupo: IndicioId[]) =>
+    caso.suspeitos.filter((s) => s.id !== culpado.id).every((s) => grupo.some((i) => !s.indicios.includes(i)))
+  const testar = (inicio: number, grupo: IndicioId[]): boolean => {
+    if (grupo.length > 0 && descartaTodos(grupo)) return true
+    if (grupo.length === caso.provasExigidas) return false
+    for (let k = inicio; k < validos.length; k++) if (testar(k + 1, [...grupo, validos[k]])) return true
+    return false
+  }
+  return testar(0, [])
+}
+
+/** Já existe, entre as pistas coletadas, um grupo de provas que resolve o caso? */
+export function temProvasSuficientes(caso: Caso, estado: EstadoJogo): boolean {
+  const ids = estado.locaisVisitados.filter((id) => indicioObtido(caso, estado, id) !== null)
+  const testar = (inicio: number, grupo: LocalId[]): boolean => {
+    if (grupo.length === caso.provasExigidas) return provasValidas(caso, grupo, estado)
+    for (let k = inicio; k < ids.length; k++) if (testar(k + 1, [...grupo, ids[k]])) return true
+    return false
+  }
+  return testar(0, [])
+}
+
+const lista = (itens: string[]) =>
+  itens.length <= 1 ? (itens[0] ?? '') : `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}`
+
+/**
+ * Dica da Dona Helena para o momento da partida, do geral (nível 1) ao específico (nível 3).
+ * Nenhum nível diz quem é o culpado: o nível 2 só usa o que o caderno já mostra, e o
+ * nível 3 aponta um indício que falta e um lugar onde procurá-lo.
+ */
+export function gerarDica(caso: Caso, estado: EstadoJogo, nivel: number): Dica {
+  const nome = (id: IndicioId) => caso.indicios.find((i) => i.id === id)?.nome ?? id
+  const encontrados = indiciosEncontrados(caso, estado)
+  const possiveis = suspeitosPossiveis(caso, estado)
+  const provas = caso.provasExigidas === 1 ? '1 prova' : `${caso.provasExigidas} provas`
+  const semProva = estado.locaisVisitados.filter((id) => buscarLocal(caso, id).indicio !== null && indicioObtido(caso, estado, id) === null)
+
+  if (nivel <= 1) {
+    const partes: string[] = []
+    if (encontrados.length === 0) {
+      partes.push('Você ainda não encontrou nenhum indício.')
+      partes.push('Prefira lugares com documento oficial ou com quem viu de perto. Lá dentro, pense no que vira prova: documento, medição ou testemunho direto, e não palpite, pressão ou fofoca.')
+    } else {
+      partes.push(`Você já tem ${encontrados.length === 1 ? 'um indício' : `${encontrados.length} indícios`}: ${lista(encontrados.map((i) => `"${nome(i)}"`))}.`)
+      partes.push(`Para o auto, você precisa de ${provas} que, juntas, só batam com uma pessoa.`)
+    }
+    if (semProva.length > 0) {
+      const locais = semProva.map((id) => buscarLocal(caso, id).nome)
+      partes.push(`Em ${lista(locais)}, a abordagem escolhida não rendeu prova.`)
+    }
+    return { nivel: 1, titulo: 'O que você já tem?', texto: partes.join(' ') }
+  }
+
+  if (nivel === 2) {
+    if (encontrados.length === 0) {
+      return {
+        nivel: 2,
+        titulo: 'Quem ainda não foi riscado?',
+        texto: 'Sem nenhum indício, ainda não dá para riscar ninguém com segurança. Encontre o primeiro indício e volte ao caderno.',
+      }
+    }
+    const partes: string[] = []
+    const podeRiscar = caso.suspeitos.filter((s) => !possiveis.includes(s) && !estado.descartados.includes(s.id))
+    const riscouErrado = possiveis.filter((s) => estado.descartados.includes(s.id))
+    if (podeRiscar.length > 0) {
+      partes.push(`Pelos indícios que você tem, dá para riscar ${lista(podeRiscar.map((s) => s.nome))}: ${podeRiscar.length === 1 ? 'essa pessoa não tem' : 'essas pessoas não têm'} pelo menos um deles.`)
+    } else {
+      partes.push('O seu caderno está em dia com os indícios encontrados.')
+    }
+    if (riscouErrado.length > 0) {
+      partes.push(`Cuidado: você riscou ${lista(riscouErrado.map((s) => s.nome))}, mas ${riscouErrado.length === 1 ? 'essa pessoa tem' : 'essas pessoas têm'} todos os indícios encontrados até agora.`)
+    }
+    partes.push(
+      possiveis.length === 1
+        ? 'Só sobra uma pessoa com todos os indícios.'
+        : `Ainda sobram ${possiveis.length} pessoas com todos os indícios: falta um indício que as separe.`,
+    )
+    return { nivel: 2, titulo: 'Quem ainda não foi riscado?', texto: partes.join(' ') }
+  }
+
+  // Nível 3: o que procurar
+  if (temProvasSuficientes(caso, estado)) {
+    return {
+      nivel: 3,
+      titulo: 'O que falta procurar?',
+      texto: `Você já tem o que precisa. No auto, escolha ${provas} que, juntas, descartem todos os outros suspeitos. O caderno mostra quem cada indício deixa de fora.`,
+    }
+  }
+  // Locais ainda úteis: não visitados e não fechados hoje (um local escondido conta, com o aviso de onde ele aparece).
+  const aindaDa = (l: Local) => !estado.locaisVisitados.includes(l.id) && fechadoHoje(caso, estado, l.id) === null
+  const faltam = caso.indicios.map((i) => i.id).filter((i) => !encontrados.includes(i))
+  const opcoes = faltam
+    .map((i) => {
+      const locais = caso.locais.filter((l) => l.indicio === i && aindaDa(l))
+      const separa = possiveis.filter((s) => !s.indicios.includes(i)).length
+      const resolve = indiciosBastam(caso, [...encontrados, i])
+      return { i, locais, nota: (resolve ? 100 : 0) + separa }
+    })
+    .filter((o) => o.locais.length > 0)
+    .sort((a, b) => b.nota - a.nota)
+  const melhor = opcoes[0]
+  if (!melhor) {
+    return {
+      nivel: 3,
+      titulo: 'O que falta procurar?',
+      texto: 'Não sobrou nenhum lugar onde encontrar um indício novo. Emita o auto com as melhores provas que você tem, ou encerre o caso e tente de novo com outro caminho.',
+    }
+  }
+  // Prefere documento (forte), e um local que já esteja no mapa.
+  const local = [...melhor.locais].sort(
+    (a, b) => Number(localTrancado(caso, estado, a.id)) - Number(localTrancado(caso, estado, b.id)) || Number(a.forca === 'fraca') - Number(b.forca === 'fraca'),
+  )[0]
+  const escondido = localTrancado(caso, estado, local.id)
+    ? ` Ele aparece no mapa depois que você visitar ${buscarLocal(caso, local.liberadoPor!).nome}.`
+    : ''
+  return {
+    nivel: 3,
+    titulo: 'O que falta procurar?',
+    texto: `O indício "${nome(melhor.i)}" ajudaria a separar quem sobrou. Um lugar para procurá-lo: ${local.nome}.${escondido} Lá dentro, escolha o caminho legal.`,
+  }
 }
